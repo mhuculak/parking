@@ -1,0 +1,8 @@
+ java -Djava.library.path=../../opencv/build/java/x64 -jar signtool/build/libs/signtool.jar
+
+
+You should not need to connect to the 74.116.186.192 as that is the public IP address that you receive. To configure your modem, you should go to http://192.168.1.1/ 
+
+The username is: admin
+The password is: eboxadmin
+

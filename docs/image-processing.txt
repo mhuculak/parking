@@ -1,0 +1,30 @@
+1. sign borders
+
+- edge detector
+- estimate corners
+
+2. adjust for scale and orientation
+
+- scale the image to align with template size
+- adjust aspect ratio to match template
+- adjust for perspective
+- estimate yaw and apply counter rotation
+
+3. cropping
+
+- remove the background so the sign takes up the entire image
+
+4. binary
+
+- convert image to grey scale
+- generate histogram
+- select threshold
+
+5. subtract
+
+- for each available template:
+	* compute the total difference between the image and template
+
+- select the template with the lowest difference
+
+
