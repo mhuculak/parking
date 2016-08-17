@@ -16,20 +16,20 @@ public class DatabaseSetup {
 			user = args[0];
 		}
 		if (args.length > 1) {
-			password = args[1];
-		}
-		if (args.length > 2) {
 			db = args[1];
 		}
+		if (args.length > 2) {
+			password = args[1];
+		}
 		if (user == null) {
-			System.out.println("db-setup user <password> <db>");
+			System.out.println("db-setup user <db> <password>");
 			System.exit(1);
 		}
 		password = password == null ? defaultPassword : password;
 		db = db == null ? defaultDB : db;
 
 		System.out.println("init DB for user: "+user+" db = "+db);
-		MongoInterface mongo = MongoInterface.getInstance(db);
+		MongoInterface mongo = MongoInterface.getInstance(db, null);
 		mongo.getUserDB().addUser(user);	
 		mongo.getUserDB().setPassword(user, password);
 

@@ -21,6 +21,34 @@ public class LinePair {
 			coverage2 = getCoverage(line2, line1);
 		}
 	}
+	//
+	//  convert angle from range (-pi, pi) into range (0, pi/2)
+	//
+	public double getAngleDeviation() {		
+		double abs = Math.abs(angle);
+		if (abs > Math.PI) {
+			System.out.println("ERROR: expecting angle from "+(-Math.PI)+" to "+Math.PI);
+			abs -= Math.PI;
+		}
+		if (abs > Math.PI/2) {
+			abs = Math.PI - abs;
+		}
+		return Math.abs(abs);
+	}
+
+	public double getMaxDeviationFrom(LinePair pair, double refAngle) {
+		double[] theta = new double[4];
+		theta[0] = (new LinePair( line1, pair.line1)).getAngleDeviation();
+		theta[1] = (new LinePair( line1, pair.line2)).getAngleDeviation();
+		theta[2] = (new LinePair( line2, pair.line1)).getAngleDeviation();
+		theta[3] = (new LinePair( line2, pair.line2)).getAngleDeviation();
+		double maxDev = 0;
+		for ( int i=0 ; i<4 ; i++) {
+			double dev = Math.abs( refAngle - theta[i] );
+			maxDev = maxDev < dev ? dev : maxDev;
+		}
+		return maxDev;
+	}
 
 	public static double getAngle(Line l1, Line l2) {
 		Vector v1 = new Vector(l1);

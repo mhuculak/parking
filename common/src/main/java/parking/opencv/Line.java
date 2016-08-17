@@ -28,35 +28,44 @@ public class Line implements Clusterable {
 	public Line(Point p1, Point p2) {
 		this.p1 = p1;
 		this.p2 = p2;
-		getLengthAngle();
+		computeProperties();
 	}
 
 	public Line(Point p, Vector v) {
 		p1 = p;
 		p2 = Vector.add(p, v);
-		getLengthAngle();
+		computeProperties();
 	}
 
-	public Line(double[][] points, double[] scores, double[] thresholds) {
+//	public Line(double[][] points, double[] scores, double[] thresholds) {
+	public Line(double[][] points, boolean xdir, double[] scores) { 
 		SimpleRegression simpleRegression = new SimpleRegression(true);
 		simpleRegression.addData(points);
-		double minX = points[0][0];
-		double maxX = points[0][0];
+		double min = points[0][0];
+		double max = points[0][0];
 		for ( int i = 1 ; i<points.length ; i++) {
-			minX = points[i][0] < minX ? points[i][0] : minX;
-			maxX = points[i][0] > maxX ? points[i][0] : maxX;
-		}	
-		p1 = new Point(minX, simpleRegression.predict(minX));
-		p2 = new Point(maxX, simpleRegression.predict(maxX));
-		getLengthAngle();
+			min = Math.min(points[i][0], min); 
+			max = Math.max(points[i][0], max);
+		}
+		if (xdir) {	
+			p1 = new Point(min, simpleRegression.predict(min));
+			p2 = new Point(max, simpleRegression.predict(max));
+		}
+		else {
+			p1 = new Point(simpleRegression.predict(min), min);
+			p2 = new Point(simpleRegression.predict(max), max);
+		}
+		computeProperties();
 		cluster = 7;
 		if (scores != null && scores.length > 0) {
 			double scoreSum = 0.0;
 			for ( int k=0 ; k<scores.length ; k++ ) {
 				scoreSum += scores[k];
 			}
-			score = scoreSum / scores.length;
+			score = scoreSum;
+//			score = scoreSum / scores.length;
 		}
+/*		
 		if (thresholds != null && thresholds.length > 0) {
 			double thresholdSum = 0.0;
 			for ( int k=0 ; k<thresholds.length ; k++ ) {
@@ -64,21 +73,26 @@ public class Line implements Clusterable {
 			}
 			threshold = thresholdSum / thresholds.length;
 		}
+*/		
 	}
 
-	private void getLengthAngle() {
+	private void computeProperties() {
 		double dx = p2.x - p1.x;
 		double dy = p2.y - p1.y;
 		length = Math.sqrt(dx*dx + dy*dy);
 		angle = Math.atan2(dy, dx);
 	}
 
+	
 	public double[] getPoint() { // needed to implement Clusterable
 		double[] arr = new double[1];
 		arr[0]= angle;
 		return arr; 
 	}
 
+	public double diagonal() {
+		return Math.abs(Math.abs(angle) - Math.PI/4);
+	}
 	//
 	// find a point on the line
 	//
@@ -108,6 +122,9 @@ public class Line implements Clusterable {
 		return proj;
 	}
 
+	public Line project(Line l) {
+		return new Line( project(l.p1), project(l.p2) );
+	}
 	//
 	// project a point onto a line, return scalar position of point
 	// i.e 0 < ret < 1 is on the line
@@ -179,7 +196,7 @@ public class Line implements Clusterable {
 		}
 		return verifiedLines;
 	}
-
+/*
 	public static List<Line> mergeLines(List<Line> lines) {
 		final double errorThresh = 10.0;
 		List<Line> mergedLines = new ArrayList<Line>();
@@ -277,13 +294,14 @@ public class Line implements Clusterable {
 		}
 
 	}
-
+*/
 	private static double sumError2(Line line, Line l) {		
 		double d1 = getDistance(line, l.p1);
 		double d2 = getDistance(line, l.p2);
 		return d1*d1 + d2*d2;
 	}
 
+/*
 	private static Line doMerge(Line line, List<Line> mergeList) {
 		
 		if (mergeList != null && mergeList.size() > 0) {
@@ -303,14 +321,13 @@ public class Line implements Clusterable {
 				scores[++k] = l.score; 
 				thresholds[k] = l.threshold;
 				i = i + 2;
-			}
-				
+			}				
 			return new Line(points, scores, thresholds);
 		}
 //		System.out.println("no merges for line " + line.toString());
 		return line; // no merges so line does not change
 	}
-
+*/
 	private static void addPoints(Line line, double[][] points, int index) {
 		points[index][0] = line.p1.x;
 		points[index][1] = line.p1.y;
@@ -329,6 +346,11 @@ public class Line implements Clusterable {
 		double cosTheta = Vector.dot(u, v) / ( u.getLength()*v.getLength());
 		double theta = Math.acos(cosTheta);
 		return Math.abs(u.getLength()*Math.sin(theta));
+	}
+
+	public static double getArea(Line line, Point p) {
+		double d = getDistance(line, p);
+		return line.length * d / 2;
 	}
 
 	//
@@ -351,10 +373,22 @@ public class Line implements Clusterable {
 		return new Point(x,y);
 	}
 
-	//
-	// find intersection of line segments of finite length
-	//
 	public static Point getIntersection2(Line line1, Line line2) {
+		Point inter = getIntersection(line1, line2);
+		if (inter == null) {
+			return null;
+		}
+		double z1 = line1.projectScalar(inter);
+		double z2 = line2.projectScalar(inter);
+		if (0 <= z1 && z1 <= 1.0 && 0 <= z2 && z2 <= 1.0) {
+			return inter;
+		}
+		return null;
+	}
+	//
+	// find intersection of line segments of finite length FIXME: does not work
+	//
+	public static Point getIntersection3(Line line1, Line line2) {
 		Vector t = new Vector(line1);
 //		System.out.println(" t = " + t);
 		Vector e = new Vector(line2);
@@ -445,6 +479,10 @@ public class Line implements Clusterable {
 		Point p1 = Vector.add(l.p1, t);
 		Point p2 = Vector.add(l.p2, t);
 		return new Line(p1, p2);
+	}
+
+	public static Line scale(Line l, double factor) {
+		return new Line ( new Point(factor*l.p1.x, factor*l.p1.y), new Point(factor*l.p2.x, factor*l.p2.y) );
 	}
 
 	public String toString() {

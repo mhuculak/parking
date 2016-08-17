@@ -1,7 +1,10 @@
 package parking.map;
 
+import parking.util.Logger;
+import parking.util.LoggingTag;
+
 import com.google.maps.model.AddressComponent;
-import com.google.maps.model.AddressComponentType;
+import com.google.maps.model.AddressComponentType; 
 
 // 150 Avenue de Mount Vernon, Lachine, QC H8R 1K1, Canada
 
@@ -15,8 +18,10 @@ public class Address {
 	private String stateProv;
 	private String postalCodeZip;
 	private String country;
+	private Logger m_logger;
 
-	public Address(AddressComponent[] addressComponents) {
+	public Address(AddressComponent[] addressComponents, Logger plogger) {
+		m_logger = new Logger( plogger, this, LoggingTag.Map);
 		for ( int i=0 ; i<addressComponents.length ; i++) {
 			AddressComponent ac = addressComponents[i];
 			AddressComponentType type = ac.types[0];
@@ -52,7 +57,7 @@ public class Address {
 				case PARKING:
 				
 				default:
-					System.out.println("Ignoring " + type + " = " + value);
+					m_logger.log("Ignoring " + type + " = " + value);
 
 			}
 		}
@@ -117,6 +122,10 @@ public class Address {
 
 	public String getCountry() {
 		return country;
+	}
+
+	public String displayText() {
+		return streetNumber+" "+streetName+"<br>";
 	}
 
 	public String toString() {

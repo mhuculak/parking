@@ -302,7 +302,7 @@ public class Ellipse {
 	}
 
 	private static ConvergeStatus getConvergeStatus(Vector delta, Vector prevDelta, Curve curve, int minPoints) {
-		if (curve.size() < minPoints) {
+		if (curve == null || curve.size() < minPoints) {
 //			System.out.println("Failed to find ellipse because only "+curve.size()+" points were found min points = "+minPoints);
 			return ConvergeStatus.FAIL;
 		}
@@ -318,7 +318,10 @@ public class Ellipse {
 	}
 
 	// Note: if vertAxis is specified, keep the center of the ellipse on the axis
-	private static Vector getDelta( Extrema extrema, Point pos, Line vertAxis) {		
+	private static Vector getDelta( Extrema extrema, Point pos, Line vertAxis) {
+		if (extrema == null || extrema.max == null) {
+			return null;
+		}		
 		Vector delta = new Vector( Math.cos(extrema.max.theta), Math.sin(extrema.max.theta));		
 		delta = Vector.scale(delta, (extrema.max.r-extrema.opp.r)/2);
 //		System.out.println("extrema = "+extrema+" delta = "+ delta);
@@ -330,7 +333,10 @@ public class Ellipse {
 		return delta;
 	}
 
-	private static Extrema getExtrema(Curve curve) {		
+	private static Extrema getExtrema(Curve curve) {
+		if (curve == null || curve.size() == 0) {
+			return null;
+		}	
 		Polar max = curve.get(0).val;
 		Polar min = max;
 		for ( PolarDeriv pd : curve.getPoints() ) {
@@ -484,25 +490,16 @@ public class Ellipse {
 		//
 		//  Select the best (largest) after merging
 		//
-		Curve best = merges.get(0);
-		for ( Curve c : merges) {
-			if (c.size() > best.size()) {
-				best = c;
+		if (merges.size() > 0) {
+			Curve best = merges.get(0);
+			for ( Curve c : merges) {
+				if (c.size() > best.size()) {
+					best = c;
+				}
 			}
+			return best;
 		}
-//		System.out.println("Best curve is "+best);
-		return best;
-/*
-		double[] angle = new double[size];
-		double[] rad = new double[size];
-		for ( i=0 ; i<size ; i++) {
-			
-			angle[i] = pValues.get(i).theta;
-			rad[i] = pValues.get(i).r;
-		}
-		MyGraph grph = new MyGraph( angle, rad, angle, deriv);
-		graph = grph.getGraph();
-*/		
+		return null;
 	}
 
 	private static List<Polar> convertAnulusToPolar(BufferedImage image, Point origin, double height, double maxRadius, double minRadius) {
@@ -512,8 +509,9 @@ public class Ellipse {
 		for ( double x=origin.x-maxRadius ; x<=origin.x+maxRadius ; x++) {
 			int ix = round(x);
 			for ( double y=origin.y-maxRadius-height/2 ; y<=origin.y+maxRadius+height/2 ; y++) {
-				if ( x>=0 && y>=0 && x<image.getWidth() && y<image.getHeight()) {				
-					int iy = round(y);
+				int iy = round(y);
+				if ( ix>=0 && iy>=0 && ix<image.getWidth() && iy<image.getHeight()) {				
+					
 					int value = image.getRGB(ix,iy);
 					if (value == WHITE) {
 						Vector v = new Vector(origin, new Point(x,y));

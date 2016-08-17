@@ -33,7 +33,9 @@ public class SimpleTime {
 		minute = Integer.parseInt(data[1]);
 	}
 	
-	public SimpleTime(String hr, String min) {		
+	public SimpleTime(String hr, String min) {
+		hr.replaceAll("[^0-9]","");
+		hr.replaceAll("[^0-9]","");		
 		hour = hr == null ? 0 : Integer.parseInt(hr);
 		minute = min == null ? 0 : Integer.parseInt(min);
 	}
@@ -41,6 +43,11 @@ public class SimpleTime {
 	public SimpleTime(int hour) {
 		this.hour = hour;
 		minute = 0;
+	}
+
+	public SimpleTime(int hour, int min) {
+		this.hour = hour;
+		this.minute = min;
 	}
 
 	public int getHour() {
@@ -59,7 +66,9 @@ public class SimpleTime {
 		return minute < 10 ? "0"+Integer.toString(minute) : Integer.toString(minute);
 	}
 
-	
+	public String displayText() {
+		return getHourString()+":"+getMinuteString();
+	}
 
 	public String toString() {
 		return getHourString()+":"+getMinuteString();

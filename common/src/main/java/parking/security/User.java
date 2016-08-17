@@ -1,6 +1,10 @@
 package parking.security;
 
+import parking.util.Logger;
+import parking.util.LoggingTag;
+
 public class User {
+
 	private String userName;
 	private char[] password;
 	private Permission permission;
@@ -51,12 +55,13 @@ public class User {
 	}
 
 	public static boolean grantPermission(Permission userPermission, Permission requiredPermission) {
+		Logger logger = new Logger(LoggingTag.Security, "User", "grantPermission");
 		if (userPermission.compareTo(requiredPermission) >= 0) {
-			System.out.println("Permission is granted for " + userPermission + " required is " + requiredPermission);
+			logger.log("Permission required is " + requiredPermission);
 			return true;
 		}
 		else {
-			System.out.println("Permission is not granted for " + userPermission + " required is " + requiredPermission);
+			logger.log("Permission is not granted for " + userPermission + " required is " + requiredPermission);
 			return false;
 		}
 	}

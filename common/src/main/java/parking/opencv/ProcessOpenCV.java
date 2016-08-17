@@ -23,8 +23,6 @@ public class ProcessOpenCV {
 
 	public static void initOpenCV() {
 		try {
-//			String javaLibPath = System.getProperty("java.library.path");
-//			System.out.println("load opencv core lib using path: "+javaLibPath);
 			if (openCVinit == false) {
 				System.loadLibrary( Core.NATIVE_LIBRARY_NAME );
 				openCVinit = true;

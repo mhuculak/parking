@@ -24,6 +24,10 @@ public class TimeRange {
 		return end;
 	}
 
+	public String displayText() {
+		return start.displayText() + " to " + end.displayText();
+	}
+	
 	public String toString() {
 		return start+","+end;
 	}	

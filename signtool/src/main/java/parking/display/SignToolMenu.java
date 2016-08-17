@@ -16,10 +16,22 @@ class SignToolMenu {
 	private JMenu imageMenu;
 	private JMenu lineMenu;
 	private JMenuItem fileLoadImage;
-	private JMenuItem viewZoom;
-	private JMenuItem viewZoom10;
-	private JMenuItem viewZoom25;
-	private JMenuItem viewSlider;
+	private JMenuItem fileLoadImage4;
+	private JMenuItem fileReadSign;
+	private JMenuItem viewWorking;
+	private JMenuItem viewLines;
+	private JMenuItem viewEdges;
+	private JMenuItem viewRectangles;
+	private JMenuItem viewClusterBoundaries;
+	private JMenuItem viewResized;
+	private JMenuItem viewCannyOrig;
+	private JMenuItem viewCannyRaw;
+	private JMenuItem viewTransCanny;
+	private JMenuItem viewResizedCanny;
+	private JMenuItem viewBinary;
+	private JMenuItem viewShape;
+	private JMenuItem viewTextSegments;
+	private JMenuItem viewTextSegments2;
 	private JMenuItem imageAll;
 	private JMenuItem imageReadSign;
 	private JMenuItem imageCanny;
@@ -27,6 +39,9 @@ class SignToolMenu {
 	private JMenuItem imageRect;
 	private JMenuItem imageBorder;
 	private JMenuItem imageHistogram;
+	private JMenuItem imageColorSegment;
+//	private JMenuItem imageColorMerge;
+	private JMenuItem imageHideBackground;
 	private JMenuItem lineAll;
 	private JMenuItem lineVerified;
 	private JMenuItem lineMerged;
@@ -63,21 +78,88 @@ class SignToolMenu {
 		fileLoadImage.addActionListener(fileMenuListener);
 		fileMenu.add(fileLoadImage);
 
+		fileLoadImage4 = new JMenuItem("Load Image 0.25");
+		fileLoadImage4.setActionCommand("Load4");
+		fileLoadImage4.addActionListener(fileMenuListener);
+		fileMenu.add(fileLoadImage4);
 
-		viewZoom10 = new JMenuItem("Zoom 10%");
-		viewZoom10.setActionCommand("10");
-		viewZoom10.addActionListener(viewMenuListener);
-		viewMenu.add(viewZoom10);
+		fileReadSign = new JMenuItem("Read Sign");
+		fileReadSign.setActionCommand("Read Sign");
+		fileReadSign.addActionListener(fileMenuListener);
+		fileMenu.add(fileReadSign);
 
-		viewZoom25 = new JMenuItem("Zoom 25%");
-		viewZoom25.setActionCommand("25");
-		viewZoom25.addActionListener(viewMenuListener);
-		viewMenu.add(viewZoom25);
 
-		viewSlider = new JMenuItem("Slider");
-		viewSlider.setActionCommand("Slider");
-		viewSlider.addActionListener(viewMenuListener);
-		viewMenu.add(viewSlider);
+		viewWorking = new JMenuItem("Working");
+		viewWorking.setActionCommand("Working");
+		viewWorking.addActionListener(viewMenuListener);
+		viewMenu.add(viewWorking);
+
+		viewLines = new JMenuItem("Lines");
+		viewLines.setActionCommand("Lines");
+		viewLines.addActionListener(viewMenuListener);
+		viewMenu.add(viewLines);
+
+		viewEdges = new JMenuItem("Edges");
+		viewEdges.setActionCommand("Edges");
+		viewEdges.addActionListener(viewMenuListener);
+		viewMenu.add(viewEdges);
+
+		viewRectangles = new JMenuItem("Rectangles");
+		viewRectangles.setActionCommand("Rectangles");
+		viewRectangles.addActionListener(viewMenuListener);
+		viewMenu.add(viewRectangles);
+
+		viewClusterBoundaries = new JMenuItem("ClusterBoundaries");
+		viewClusterBoundaries.setActionCommand("ClusterBoundaries");
+		viewClusterBoundaries.addActionListener(viewMenuListener);
+		viewMenu.add(viewClusterBoundaries);
+
+		
+
+		viewResized = new JMenuItem("Resized");
+		viewResized.setActionCommand("Resized");
+		viewResized.addActionListener(viewMenuListener);
+		viewMenu.add(viewResized);
+
+		viewCannyOrig = new JMenuItem("CannyOrig");
+		viewCannyOrig.setActionCommand("CannyOrig");
+		viewCannyOrig.addActionListener(viewMenuListener);
+		viewMenu.add(viewCannyOrig);
+
+		viewCannyRaw = new JMenuItem("CannyRaw");
+		viewCannyRaw.setActionCommand("CannyRaw");
+		viewCannyRaw.addActionListener(viewMenuListener);
+		viewMenu.add(viewCannyRaw);
+
+		viewTransCanny = new JMenuItem("TransCanny");
+		viewTransCanny.setActionCommand("TransCanny");
+		viewTransCanny.addActionListener(viewMenuListener);
+		viewMenu.add(viewTransCanny);
+
+		viewResizedCanny = new JMenuItem("ResizedCanny");
+		viewResizedCanny.setActionCommand("ResizedCanny");
+		viewResizedCanny.addActionListener(viewMenuListener);
+		viewMenu.add(viewResizedCanny);
+
+		viewBinary = new JMenuItem("Binary");
+		viewBinary.setActionCommand("Binary");
+		viewBinary.addActionListener(viewMenuListener);
+		viewMenu.add(viewBinary);
+
+		viewShape = new JMenuItem("Shape");
+		viewShape.setActionCommand("Shape");
+		viewShape.addActionListener(viewMenuListener);
+		viewMenu.add(viewShape);
+
+		viewTextSegments = new JMenuItem("TextSegments");
+		viewTextSegments.setActionCommand("TextSegments");
+		viewTextSegments.addActionListener(viewMenuListener);
+		viewMenu.add(viewTextSegments);
+
+		viewTextSegments2 = new JMenuItem("TextSegments2");
+		viewTextSegments2.setActionCommand("TextSegments2");
+		viewTextSegments2.addActionListener(viewMenuListener);
+		viewMenu.add(viewTextSegments2);
 
 		imageReadSign = new JMenuItem("Read Sign");
 		imageReadSign.setActionCommand("Read Sign");
@@ -108,6 +190,22 @@ class SignToolMenu {
 		imageHistogram.setActionCommand("Histogram");
 		imageHistogram.addActionListener(imageMenuListener);
 		imageMenu.add(imageHistogram);
+		
+		imageColorSegment = new JMenuItem("ColorSegment");
+		imageColorSegment.setActionCommand("ColorSegment");
+		imageColorSegment.addActionListener(imageMenuListener);
+		imageMenu.add(imageColorSegment);
+/*
+		imageColorMerge = new JMenuItem("ColorMerge");
+		imageColorMerge.setActionCommand("ColorMerge");
+		imageColorMerge.addActionListener(imageMenuListener);
+		imageMenu.add(imageColorMerge);
+*/
+
+		imageHideBackground = new JMenuItem("HideBackground");
+		imageHideBackground.setActionCommand("HideBackground");
+		imageHideBackground.addActionListener(imageMenuListener);
+		imageMenu.add(imageHideBackground);
 
 		imageBorder = new JMenuItem("Border");
 		imageBorder.setActionCommand("Border");
@@ -136,20 +234,60 @@ class SignToolMenu {
 			if (cmd.equals("Load")){
          		signTool.loadImage();
          	}
+         	else if (cmd.equals("Load4")) {
+         		signTool.loadImage4();
+         	}
+         	else if(cmd.equals("Read Sign")) {
+         		signTool.readSign();
+         	}
          }
 	}
 
 	class ViewMenuListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
 			String cmd = e.getActionCommand();
-			if (cmd.equals("10")){
-         		signTool.zoom(0.1);
+			SignBuilder builder = signTool.getBuilder();
+			if (cmd.equals("Working")){
+       			signTool.show(cmd, builder.getWorkingImage());
          	}
-         	else if (cmd.equals("25")){
-         		signTool.zoom(0.25);
+         	else if (cmd.equals("Lines")){
+       			signTool.show(cmd, builder.getLineImage());
          	}
-         	else if (cmd.equals("Slider")) {
-         		signTool.toggleSlider();
+         	else if (cmd.equals("Edges")){
+       			signTool.show(cmd, builder.getEdgeImage());
+         	}
+         	else if (cmd.equals("Rectangles")){
+       			signTool.show(cmd, builder.getRectangleImage());
+         	}
+         	else if (cmd.equals("ClusterBoundaries")){
+       			signTool.show(cmd, builder.showClusterBoundaries());
+         	}         	
+         	else if (cmd.equals("Resized")){
+       			signTool.show(cmd, builder.getResizedImage());
+         	}
+         	else if (cmd.equals("CannyOrig")){
+         		signTool.show(cmd, builder.getCannyOrig());
+         	}
+         	else if (cmd.equals("CannyRaw")) {
+         		signTool.show(cmd, builder.getRawCanny());
+         	}
+         	else if (cmd.equals("TransCanny")) {
+         		signTool.show(cmd, builder.getTransCanny());
+         	}
+         	else if (cmd.equals("ResizedCanny")) {
+         		signTool.show(cmd, builder.getResizedCanny());
+         	}
+         	else if (cmd.equals("Binary")) {
+         		signTool.show(cmd, builder.getBinaryImage());
+         	}
+         	else if (cmd.equals("Shape")) {
+         		signTool.show(cmd, builder.getShapeImage());
+         	}
+         	else if (cmd.equals("TextSegments")) {
+         		signTool.show(cmd, builder.getTextSegmentImage(1.0));
+         	}
+         	else if (cmd.equals("TextSegments2")) {
+         		signTool.show(cmd, builder.getTextSegmentImage(2.0));
          	}
          }
 	}
@@ -158,7 +296,7 @@ class SignToolMenu {
 		public void actionPerformed(ActionEvent e) {
 			String cmd = e.getActionCommand();
 			if (cmd.equals("Read Sign")) {
-				signTool.readSign();
+				signTool.readSignFromLoadedImage();
 			}
 			else if (cmd.equals("All")) {
 				signTool.doAll();
@@ -177,6 +315,17 @@ class SignToolMenu {
          	}
          	else if (cmd.equals("Histogram")) {
          		signTool.getHistogram();
+         	}
+         	else if (cmd.equals("ColorSegment")) {
+         		signTool.doColorSegment();
+         	}
+/*
+         	else if (cmd.equals("ColorMerge")) {
+         		signTool.doColorMerge();
+         	}
+*/         	
+         	else if (cmd.equals("HideBackground")) {
+         		signTool.doHideBackground();
          	}
          }
 	}

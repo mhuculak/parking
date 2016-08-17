@@ -8,6 +8,9 @@ import parking.security.User.Permission;
 import parking.map.Sign;
 import parking.schedule.ParkingSchedule;
 
+import parking.util.Logger;
+import parking.util.LoggingTag;
+
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -38,19 +41,20 @@ public class MapServlet extends HttpServlet {
 
 	private MongoInterface mongo;
 
-	private String getForm(String processUri, String verifyUri, int port) {
+	private String getForm(String processUri, String verifyUri, int port, String userName) {
 		String formHTML = "<form action=\"" + processUri + "\" method=\"POST\" enctype=\"multipart/form-data\">" +
 				"Sign Picture: <input type=\"file\" id=\"pic\" name=\"pic\" accept=\"image/*\" /><br>" +
 				"<input type=\"text\" name=\"lat\" id=\"lat\" readonly=\"yes\"><br>" +
 				"<input type=\"text\" name=\"lng\" id=\"lng\" readonly=\"yes\"><br>" +
 				"<input type=\"hidden\" name=\"verify\" value=\""+verifyUri+"\"><br>" +	
-				"<input type=\"hidden\" name=\"port\" id=\"port\" value=\""+port+"\"><br>" +						
+				"<input type=\"hidden\" name=\"port\" id=\"port\" value=\""+port+"\"><br>" +
+				"<input type=\"hidden\" name=\"user\" id=\"user\" value=\""+userName+"\"><br>" +						
 				"<input type=\"submit\" name=\"submit\" value=\"Upload\" />" +
 				"</form>";
 		return formHTML;
 	}
 
-	private void showGoogleMap(PrintWriter out, String processUri, String verifyUri, int port) {
+	private void showGoogleMap(PrintWriter out, String processUri, String verifyUri, int port, String userName) {
 		out.println("<!DOCTYPE html>");
 		out.println("<html>");
 		out.println("<head>");
@@ -58,11 +62,12 @@ public class MapServlet extends HttpServlet {
 		out.println("<script type=\"text/javascript\" src=\"https://maps.googleapis.com/maps/api/js?key=AIzaSyDni-ZQemF7eA1P-A76acHMF2tREyFM3HI\"></script>");
 		
 		out.println("<body>");
-		out.println("<h1>Upload a picture of a sign to the database</h1>");
+		out.println("<h1>Upload a picture of a sign to the database OR click on a sign on the map to edit it</h1>");
+		out.println("<div id=\"editForm\"></div>");
 		out.println("<div id=\"map\"></div>");
 		out.println("<h2>Step 1 - click the location of the sign on the map</h2>");	
 		out.println("<h2>Step 2 - choose the image file to upload</h2>");
-		out.println(getForm(processUri, verifyUri, port));			
+		out.println(getForm(processUri, verifyUri, port, userName));			
 		out.println("<h2>Important Note: be a as precise as possible selecting the sign location on the map. Zoom in if necessary</h2>");	
 		out.println("<script type=\"text/javascript\" src=\"js/map.js\"></script>");
 		out.println("<div id=\"verificationForm\"></div>");
@@ -71,6 +76,7 @@ public class MapServlet extends HttpServlet {
 	}
 
 	public void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		Logger logger = new Logger(request.getSession(), LoggingTag.Servlet, this, "service");
 		String method = request.getMethod();
 		int port = request.getServerPort();
 		Map<String,String> postData = null;
@@ -81,34 +87,45 @@ public class MapServlet extends HttpServlet {
 		PrintWriter out = response.getWriter();
 		WebLogin login = null;
 		if (postData == null) {
+			logger.log( "Authenticating...");
 			login =  WebLogin.Authenticate(request, response, Permission.user);
 		}
 		else {
 			 login = WebLogin.Authenticate(request, response, Permission.user, postData);
 		}
+		logger.log("Got login session "+login);
 		String db = request.getParameter("db");
-		mongo = MongoInterface.getInstance(db, request.getServerPort());
+		if (login.isLoggedIn() == false) {
+			out.println("<!DOCTYPE html>");
+			out.println("<html>");
+			out.println("<body>");
+			out.println(login.getLoginForm());
+			out.println("</body>");
+			out.println("</html>");
+			return;
+		}
+		mongo = MongoInterface.getInstance(db, request.getServerPort(), logger);
 		if (postData != null) {
-			System.out.println("MapServer processing post data...");
-			String tag = postData.get("tag");
-			if (tag != null) {
-				Sign sign = mongo.getSignDB().getSignFromTag(tag);
+			String signID = postData.get("signID");
+			logger.log("processing post data for sign "+signID);
+			if (signID != null) {
+				Sign sign = mongo.getSignDB().getSign(signID);
 				if (sign != null) {
-					ParkingSchedule verifiedSchedule = new ParkingSchedule(postData);
+					ParkingSchedule verifiedSchedule = new ParkingSchedule(postData, logger);
 					sign.setParkingSchedule(verifiedSchedule);
-					mongo.getSignDB().updateSign(sign);
-					System.out.println(verifiedSchedule);
+					mongo.getSignDB().updateSign(sign, login.getUserName());
+					logger.log(verifiedSchedule.toString());
 				}
 				else {
-					System.out.println("ERROR: could not find sign with tag "+tag);
+					logger.error("could not find sign with signID "+signID);
 				}
 			}
 			else {
-				System.out.println("ERROR: no tag found in post");
+				logger.error("no signID found in post");
 			}
 		}
-		System.out.println("MapServer displaying map...");
+		logger.log("MapServer displaying map...");
 		String uploadSignUri = request.getRequestURI() + "/upload";		
-		showGoogleMap(out, uploadSignUri, request.getRequestURI(), port);
+		showGoogleMap(out, uploadSignUri, request.getRequestURI(), port, login.getUserName());
 	}
 }

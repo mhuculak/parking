@@ -15,7 +15,7 @@ import java.io.IOException;
 public class Exif {
 	
 	public static void readExif(File file) {
-		System.out.println("Reading exif header of file" + file.getAbsolutePath());
+//		System.out.println("Reading exif header of file" + file.getAbsolutePath());
 		try {
 			Metadata metadata = ImageMetadataReader.readMetadata(file);
 			print(metadata);
@@ -29,6 +29,7 @@ public class Exif {
 	}
 
 	public static Position getPosition(File file) {
+        Logger logger = new Logger(LoggingTag.Image, "Exif", "getPosition");
 		Position p = new Position();
 		try {
 			Metadata metadata = ImageMetadataReader.readMetadata(file);
@@ -55,8 +56,11 @@ public class Exif {
 		} catch (IOException ex) {
             System.out.println(ex);
         }
-        System.out.println("got position " + p.toString());
-        return p;
+        if ( p.isValid() ) {
+        	logger.log("got position " + p.toString());
+        	return p;
+        }
+        return null;
 	}
 
 	private static void print(Metadata metadata)

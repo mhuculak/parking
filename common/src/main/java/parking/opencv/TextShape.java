@@ -1,5 +1,8 @@
 package parking.opencv;
 
+import parking.util.Logger;
+import parking.util.LoggingTag;
+
 import org.opencv.core.Point;
 
 import java.awt.image.BufferedImage;
@@ -26,32 +29,6 @@ class Vec {
 
 	public static Pos add(Pos p, Vec v) {
 		return new Pos( p.x + v.dx, p.y + v.dy);
-	}
-}
-
-class Pos {
-	public int x;
-	public int y;
-
-	public Pos( int x, int y) {
-		this.x = x;
-		this.y = y;
-	}
-
-	public boolean equals(Pos p) {
-		if (p.x == x && p.y == y) {
-			return true;
-		}
-		return false;
-	}
-	public String toString() {
-		return x+","+y;
-	}
-
-	public static double getDist(Pos p1, Pos p2) {
-		int dx = p1.x - p2.x;
-		int dy = p1.y - p2.y;
-		return Math.sqrt(dx*dx + dy*dy);
 	}
 }
 
@@ -197,6 +174,7 @@ public class TextShape {
 	private boolean closed;
 	private int minX;
 	private TextShapeClassifier classifier;
+	private Logger m_logger;
 
 	private static final int WHITE = 0xffffffff;
 	private static final int BLACK = 0xff000000;
@@ -220,12 +198,13 @@ public class TextShape {
 	private static final Color[] colors = new Color[] { Color.red, Color.green, Color.orange, Color.cyan, Color.pink, 
 		Color.yellow, Color.magenta,  Color.blue};
 
-	public TextShape(int[][] data, BufferedImage display, int id) {
+	public TextShape(int[][] data, BufferedImage display, int id, Logger logger) {
+		m_logger = new Logger(logger, this, LoggingTag.Shape);
 		this.data = data;
 		this.display = display;
 		this.id = id;
 		color = colors[id % 8];
-		classifier = TextShapeClassifier.getInstance();
+		classifier = TextShapeClassifier.getInstance(m_logger);
 	}
 
 	public void add(Pos p, Graphics dg) {
@@ -884,7 +863,7 @@ public class TextShape {
 		return new LinePair( strokeCoverageLine, segCoverageLine);
 	}
 
-	public static List<TextShape> getShapes(BufferedImage input, ShapeGenMode mode) {
+	public static List<TextShape> getShapes(BufferedImage input, ShapeGenMode mode, Logger logger) {
 		int[][] working = imageToMatrix(input);
 		BufferedImage display = copyInput(input);
 		Graphics dg = display.createGraphics();	
@@ -900,21 +879,21 @@ public class TextShape {
 				case BINBORDER:
 					if (value == BLACK && prevValue == WHITE && y>0) {
 //						System.out.println("scan new shape at "+x+" "+y+" black is "+BLACK+" white is "+WHITE);
-						TextShape shape = getShape(working, display, x, y, id++, dg, mode);
+						TextShape shape = getShape(working, display, x, y, id++, dg, mode, logger);
 //						System.out.println("Add new shape "+shape);
 						shapes.add(shape);
 					}
 					break;				
 				case EDGESCAN:
 					if (value == WHITE) {
-						TextShape shape = getShape(working, display, x, y, id++, dg, mode);
+						TextShape shape = getShape(working, display, x, y, id++, dg, mode, logger);
 						shapes.add(shape);
 					}
 					break;
 				case BINREGION:
 				case BINREGIONRECURSIVE:
 					if (value == BLACK) {
-						TextShape shape = getShape(working, display, x, y, id++, dg, mode);
+						TextShape shape = getShape(working, display, x, y, id++, dg, mode, logger);
 						shapes.add(shape);
 					}
 					break;
@@ -929,15 +908,15 @@ public class TextShape {
 	}
 
 	private static TextShape getShape(int[][] working, BufferedImage display, int startx, int starty, 
-					int id, Graphics dg, ShapeGenMode mode) {
+					int id, Graphics dg, ShapeGenMode mode, Logger logger) {
 		switch(mode) {
 			case BINREGION:
-				return getShapeRegion(working, display, startx, starty, id, dg);
+				return getShapeRegion(working, display, startx, starty, id, dg, logger);
 			case BINREGIONRECURSIVE:
-				return getShapeRegionRecursive(working, display, startx, starty, id, dg);
+				return getShapeRegionRecursive(working, display, startx, starty, id, dg, logger);
 			case BINBORDER:
 			case EDGESCAN:
-				return getShapeBorder(working, display, startx, starty, id, dg, mode);
+				return getShapeBorder(working, display, startx, starty, id, dg, mode, logger);
 			default:
 				System.out.println("ERROR: unsupported mode"+mode);
 		}
@@ -945,9 +924,9 @@ public class TextShape {
 	}
 
 	private static TextShape getShapeRegion(int[][] working, BufferedImage display, int startx, int starty, 
-					int id, Graphics dg) {
+					int id, Graphics dg, Logger logger) {
 		List<Pos> open = new ArrayList<Pos>();
-		TextShape shape = new TextShape(working, display, id);
+		TextShape shape = new TextShape(working, display, id, logger);
 		Pos start = new Pos(startx, starty);
 		open.add(start);
 //		int itr = 0;
@@ -973,9 +952,9 @@ public class TextShape {
 	}
 
 	private static TextShape getShapeRegionRecursive(int[][] working, BufferedImage display, int startx, int starty, 
-					int id, Graphics dg) {
+					int id, Graphics dg, Logger logger) {
 
-		TextShape shape = new TextShape(working, display, id);
+		TextShape shape = new TextShape(working, display, id, logger);
 		Pos start = new Pos(startx, starty);
 		GrowShapeRegion(working, shape, start, dg);
 		shape.computeProperties();
@@ -994,8 +973,8 @@ public class TextShape {
 	}
 
 	private static TextShape getShapeBorder(int[][] working, BufferedImage display, int startx, int starty, 
-					int id, Graphics dg, ShapeGenMode mode) {
-		TextShape shape = new TextShape(working, display, id);
+					int id, Graphics dg, ShapeGenMode mode, Logger logger) {
+		TextShape shape = new TextShape(working, display, id, logger);
 		Pos orig = new Pos( startx, starty);
 		Pos curr = orig;
 		Pos prev = mode == ShapeGenMode.BINBORDER ? new Pos(curr.x, curr.y-1) : null;

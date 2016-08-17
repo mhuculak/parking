@@ -45,6 +45,7 @@ public class TestServlet extends HttpServlet {
 		
 		out.println("<body>");
 		out.println("<h1>Test Google Maps</h1>");
+		out.println("<div id=\"form\"></div>");
 		out.println("<div id=\"map\"></div>");
 		out.println("<script type=\"text/javascript\" src=\"js/testmap.js\"></script>");
 		out.println("</body>");

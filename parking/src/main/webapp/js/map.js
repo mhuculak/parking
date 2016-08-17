@@ -4,11 +4,45 @@
 var map; 
 var marker = false;
 var server = "parking.allowed.org";
-var port = "8080";   
+var port = "8080";
+var user = null;
+var chris = "chris";
+var carol = "carol";
+var centerLat = null;
+var centerLng = null;
+var signNum = null;
+var selectedId = null;
+var bounds = null;
 
 function initMap() {
 
-    var centerOfMap = new google.maps.LatLng(45.43371388888889, -73.69053611111111);
+    var lachine = new google.maps.LatLng(45.43371388888889, -73.69053611111111);
+    var ndg = new google.maps.LatLng(45.472376, -73.615374);
+    var westmount = new google.maps.LatLng(45.479080, -73.597492);
+    port = document.getElementById('port').value;
+    user = document.getElementById('user').value;
+    if (document.getElementById('cenLat') != null) {
+        centerLat = document.getElementById('cenLat').value;
+    }
+    if (document.getElementById('cenLng') != null) {
+        centerLng = document.getElementById('cenLng').value;
+    }   
+    if (document.getElementById('signNum') != null) {
+        signNum = document.getElementById('signNum').value;
+    }
+
+    if (centerLat == null || centerLng == null) {   
+        centerOfMap = lachine;
+        if (user == carol) {
+            centerOfMap = ndg;
+        }
+        else if (user == chris)  {
+            centerOfMap = westmount;
+        }
+    }
+    else {
+        centerOfMap = new google.maps.LatLng(centerLat, centerLng);
+    }
 
     var options = {
       center: centerOfMap, //Set center.
@@ -16,9 +50,26 @@ function initMap() {
     };
 
     map = new google.maps.Map(document.getElementById('map'), options);
-    port = document.getElementById('port').value;
-    console.log("query db using port "+port);
-    httpGetAsync("http://"+server+":"+port+"/parking/main/signs", processSigns);
+    var infoWindow = new google.maps.InfoWindow({map: map});
+
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+            var pos = {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude
+            };
+
+            infoWindow.setPosition(pos);
+            infoWindow.setContent('Location found.');
+            map.setCenter(pos);
+        }, function() {
+//            handleLocationError(true, infoWindow, map.getCenter());
+        });
+    } 
+
+    if (signNum != null) {
+        httpGetAsync("http://"+server+":"+port+"/parking/main/signs?signNum="+signNum, processSigns);
+    }
 
     google.maps.event.addListener(map, 'click', function(event) {        
         var clickedLocation = event.latLng;
@@ -36,7 +87,33 @@ function initMap() {
             marker.setPosition(clickedLocation);
         }
         markerLocation();
+    });
+
+//    google.maps.event.addListener(map, 'zoom_changed', function() {
+//        refreshSigns();    
+//    });
+
+//    google.maps.event.addListener(map, 'center_changed', function() {
+//        refreshSigns();
+//    });
+
+    google.maps.event.addListener(map, 'bounds_changed', function() {
+        refreshSigns();
     });   
+}
+
+function refreshSigns() {    
+    if (signNum == null) {
+        bounds = map.getBounds();
+ //       console.log("bounds = "+bounds.toString());
+        var ne = bounds.getNorthEast();
+ //       console.log("ne = "+ne.toString());
+        var sw = bounds.getSouthWest();
+ //       console.log("ne = "+sw.toString());
+        var fetchUrl = "http://"+server+":"+port+"/parking/main/signs?nela="+ne.lat()+"&nelg="+ne.lng()+"&swla="+sw.lat()+"&swlg="+sw.lng();
+ //       console.log("fetch signs using url "+fetchUrl);
+        httpGetAsync(fetchUrl, processSigns);
+    }
 }
 
 function markerLocation(){
@@ -48,28 +125,43 @@ function markerLocation(){
 
 function updateSignPosition(sign) {
     selectedMarker = sign.marker;
+    selectedId = sign.id;
     var loc = sign.marker.getPosition();
     console.log("marker " + sign.id + " moved to " + loc.lat() + " " + loc.lng());
-    var params = "id="+sign.id+"&lat="+loc.lat()+"&lng="+loc.lng();
+    var params = "id="+sign.id+"&lat="+loc.lat()+"&lng="+loc.lng()+"&user="+user;
     httpPost("http://"+server+":"+port+"/parking/main/signs", params);
 }
 
 function getSignDetails(sign) {
     selectedMarker = sign.marker;
+    selectedId = sign.id;
     console.log("get details for " + sign.id);
     httpGetAsync("http://"+server+":"+port+"/parking/main/signs?id="+sign.id, displayDetails);
 }
 
 function displayDetails(data) {
-    //    console.log("response from dbase is " + data);
-//    var sign = JSON.parse(data);
-//    var details = sign.pictureTag;                   
-    var details = data;
+    var infoContent=document.createElement('div'); 
+    infoContent.innerHTML="<p>"+data+"<br>click this text to edit/delete this sign</p>"; 
+    infoContent.onclick=editSign;                    
     var infowindow = new google.maps.InfoWindow({
-        content: details
+        content: infoContent
     });
 
     infowindow.open(map, selectedMarker);
+}
+
+function editSign() {
+    var editUrl = "http://"+server+":"+port+"/parking/main/edit";
+    var returnUrl = "http://"+server+":"+port+"/parking/main";
+    console.log("edit url "+editUrl+" ret url "+returnUrl);
+    console.log("marker id = "+selectedId);
+    var faction = "<form action=\"" + editUrl + "\" method=\"POST\">";
+    var fedit = "<input type=\"radio\" name=\"action\" value=\"edit\" checked>Edit Sign<br>";
+    var fdelete = "<input type=\"radio\" name=\"action\" value=\"delete\">Delete Sign<br>";
+    var fid = "<input type=\"hidden\" name=\"id\" value=\""+selectedId+"\">";
+    var furl = "<input type=\"hidden\" name=\"returnUrl\" value=\""+returnUrl+"\">";
+    var fsub = "<input type=\"submit\" value=\"Submit\"></form>";
+    document.getElementById('editForm').innerHTML =  faction + fedit + fdelete + fid + furl + fsub;
 }
 
 function processSigns(data) {
@@ -88,7 +180,7 @@ function addMarker(sign) {
     sign.marker = new google.maps.Marker({
                 position: signLatLng,
                 map: map,
-                icon: 'images/no-parking16.png',
+                icon: "http://"+server+":"+port+"/parking/images/no-parking16.png",
                 draggable: true //make it draggable
     });
 
@@ -131,6 +223,13 @@ function httpGetAsync(theUrl, callback)
     }
     xmlHttp.open("GET", theUrl, true); // true for asynchronous 
     xmlHttp.send(null);
+}
+
+function handleLocationError(browserHasGeolocation, infoWindow, pos) {
+    infoWindow.setPosition(pos);
+    infoWindow.setContent(browserHasGeolocation ?
+                              'Error: The Geolocation service failed.' :
+                              'Error: Your browser doesn\'t support geolocation.');
 }
 
 var gsigns = new Array();

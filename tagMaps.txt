@@ -1,0 +1,16 @@
+Binary false
+Border true
+Score true
+BorderScore false
+Circle false
+Database false
+Image true
+Map false
+PictureDB false
+Schedule false
+Servlet  true
+Security false
+Shape true
+Sign false
+SignDB  true
+UserDB false

@@ -1,5 +1,9 @@
 package parking.database;
 
+
+import parking.util.Logger;
+import parking.util.LoggingTag;
+
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.BasicDBObject;
@@ -17,49 +21,62 @@ public class PictureDB {
 
 	private MongoInterface m_mongo;
 	private GridFS m_pictures;
+	private Logger m_logger;
 
 	public PictureDB(MongoInterface mongo) {
 		m_mongo = mongo;
 		m_pictures = new GridFS(m_mongo.getDB(), "pictures");
+		m_logger = new Logger(m_mongo.getLogger(), this, LoggingTag.PictureDB);
 	}
 
+
 	public void addPicture(String name, String imageFileName) {
-		System.out.println("addPicture " + name + " file " + imageFileName);
+		m_logger.log("addPicture " + name + " file " + imageFileName);
 		try {
 			File imageFile = new File(imageFileName);
 			System.out.println("addPicture FILE is |" + imageFile.getAbsolutePath());
 			GridFSInputFile gfsFile = m_pictures.createFile(imageFile);
-			System.out.println("set name to " + name);
+			m_logger.log("set name to " + name);
 			gfsFile.setFilename(name);
-			System.out.println("saving...");
+			m_logger.log("saving...");
 			gfsFile.save();
-			System.out.println("Saved Image " + gfsFile.getFilename());
+			m_logger.log("Saved Image " + gfsFile.getFilename());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
 	// FIXME: adding the same name creates multiple entries
-	public void addPicture(String name, File imageFile) {
+	public String addPicture(String signID, File imageFile) {
+		String path = imageFile.getAbsolutePath();
+		String name = signID;
+		int i = path.lastIndexOf('.');
+		String extension = null;
+		if (i > 0) {
+    		extension = path.substring(i+1);
+    		name = name + "." + extension;
+		}
+	
 		try {
-			System.out.println("addPicture FILE is |" + imageFile.getAbsolutePath());
+			m_logger.log("addPicture FILE is " + path);
 			GridFSInputFile gfsFile = m_pictures.createFile(imageFile);
-			System.out.println("set name to " + name);
+			m_logger.log("set name to " + name);
 			gfsFile.setFilename(name);
-			System.out.println("saving...");
+			m_logger.log("saving...");
 			gfsFile.save();
-			System.out.println("Saved Image " + gfsFile.getFilename());
+			m_logger.log("Saved Image " + gfsFile.getFilename());			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		return name;
 	}
 
 	public GridFSDBFile getPicture(String name) {
 		GridFSDBFile image = m_pictures.findOne(name);
 		if (image == null) {
-			System.out.println("No image found for name " + name);
+			m_logger.log("No image found for name " + name);
 		}
-		System.out.println("Found image for name " + name);
+		m_logger.log("Found image for name " + name);
 		return image;
 	}
 

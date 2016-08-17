@@ -1,10 +1,15 @@
 package parking.database;
 
 import parking.map.Position;
+import parking.map.MapBounds;
 import parking.map.Sign;
 import parking.map.SignMarker;
 import parking.map.Address;
 import parking.schedule.ParkingSchedule;
+import parking.security.User;
+
+import parking.util.Logger;
+import parking.util.LoggingTag;
 
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -44,79 +49,69 @@ public class SignDB {
 
 	private MongoInterface m_mongo;
 	private DBCollection m_signs;
+	private Logger m_logger;
 
 	public SignDB(MongoInterface mongo) {
 		m_mongo = mongo;
 		m_signs = m_mongo.getDB().getCollection("signs");
+		m_logger = new Logger(m_mongo.getLogger(), this, LoggingTag.SignDB);
 	}
 	//
 	// FIXME: what if the sign is updated !!!
 	//
-	public SignMarker addSign(Sign sign, File file) {
+	public Sign addSign(Sign sign, File file, String user) {
 
-		m_mongo.getPictureDB().addPicture(sign.getPictureTag(), file);
-		BasicDBObject searchQuery = new BasicDBObject();
-		searchQuery.put("name", sign.getPictureTag());		
-		DBCursor cursor = m_signs.find(searchQuery);
-		if (cursor.count() == 0) {
-			Date tstamp = new Date();
-			BasicDBObject document = new BasicDBObject();
-			Object id = m_mongo.getNextID();
-			document.append("_id", id);
-			document.append("tstamp", tstamp.getTime());
-			document.append("name", sign.getPictureTag());
-			doAddSign(sign, document);
-			m_signs.insert(document);
-			return new SignMarker(id.toString(), sign.getPosition());
-		}
-		else {
-			System.out.println("ERROR: record " + sign.getPictureTag() + " already exists");
-		}
-		return null;
+		Date tstamp = new Date();
+		BasicDBObject document = new BasicDBObject();
+		Object id = m_mongo.getNextID();
+		document.append("_id", id);
+		String imageName = m_mongo.getPictureDB().addPicture(id.toString(), file);
+		document.append("im", imageName);
+		document.append("t", tstamp.getTime());
+		document.append("u", user);
+		doAddSign(sign, document);
+		m_signs.insert(document);
+		
+		return getSign(document);
+
 	}
 
-	public void updateSign(Sign sign) {
-		BasicDBObject searchQuery = new BasicDBObject();
-		searchQuery.put("name", sign.getPictureTag());		
+	public void updateSign(Sign sign, String user) {
+		String id = sign.getID();
+		BasicDBObject searchQuery = new BasicDBObject("_id", Integer.parseInt(id));
 		DBCursor cursor = m_signs.find(searchQuery);
 		if (cursor.count() == 1) {
 			BasicDBObject updateQuery =  new BasicDBObject();
 	    	BasicDBObject newFields = new BasicDBObject();
 	    	doAddSign(sign, newFields);
+	    	newFields.append("u", user);
 	    	updateQuery.append( "$set", newFields);
 	    	m_signs.update(searchQuery, updateQuery);
 		}
+		else {
+			m_logger.error("found " + cursor.count() + " entries for sign id " + id);
+		}
 	}
 
-	private void doAddSign(Sign sign, BasicDBObject document) {			
-			document.append("position", sign.getPosition().toString());
-			Address address = sign.getAddress();
-			if (address != null) {
-				document.append("address", address.toString());				
-			}
-//			if (sign.getDirection() != null) {
-//				document.append("d1", sign.getDirection().getP1().toString());
-//				document.append("d2", sign.getDirection().getP2().toString());
-//			}
-			if (sign.getParkingSchedule() != null) {
-				document.append("schedule", sign.getParkingSchedule().toString());
-			}
-			if (sign.getAutoSchedule() != null) {
-				document.append("autoSchedule", sign.getAutoSchedule().toString());
-			}
+	private void doAddSign(Sign sign, BasicDBObject document) {
+		addPosition(sign.getPosition(), document);
+		if (sign.getParkingSchedule() != null) {
+			document.append("s", sign.getParkingSchedule().toString());
+		}
+		if (sign.getAutoSchedule() != null) {
+			document.append("auto", sign.getAutoSchedule().toString());
+		}
+	}
+
+	private void addPosition(Position p, BasicDBObject document) {
+		if (p != null && p.isValid()) {
+			document.append("lat", p.getLatitude());
+			document.append("lng", p.getLongitude());
+		}
 	}
 
 	public List<SignMarker> getSignMarkers(int max) {
-		DBCursor cursor = m_signs.find();
-		List<SignMarker> signMarkers = new ArrayList<SignMarker>();
-		int n = 0;
-		while (cursor.hasNext()) {
-	    	DBObject document = cursor.next();
-	    	Position p = new Position(document.get("position").toString());
-	    	Object idobj = document.get("_id");
-	    	SignMarker signMarker = new SignMarker(idobj.toString(), p);
-	    	signMarkers.add(signMarker);
-		}
+		List<SignMarker> signMarkers = getAllSignMarkers();
 		SignMarkerComparator comparator = new SignMarkerComparator();
 		Collections.sort(signMarkers, comparator);
 
@@ -127,17 +122,65 @@ public class SignDB {
 		return latest;
 	}
 
+	public List<SignMarker> getSignMarkers(MapBounds bounds) {
+		List<SignMarker> signMarkers = getAllSignMarkers();
+		List<SignMarker> inBounds = new ArrayList<SignMarker>();
+		for ( SignMarker marker : signMarkers) {
+			if (bounds.inside(marker.getPosition())) {
+				inBounds.add(marker);
+			}
+			else {
+			}
+		}
+		return inBounds;
+	}
+
+	private List<SignMarker> getAllSignMarkers() {
+		DBCursor cursor = m_signs.find();
+		List<SignMarker> signMarkers = new ArrayList<SignMarker>();
+		int n = 0;
+		while (cursor.hasNext()) {
+	    	DBObject document = cursor.next();
+	    	Position p = getPosition(document);
+	    	if ( p != null) {
+	    		Object idobj = document.get("_id");
+	    		SignMarker signMarker = new SignMarker(idobj.toString(), p);
+	    		signMarkers.add(signMarker);
+	    	}
+		}
+		return signMarkers;
+	}
+
+	private Position getPosition(DBObject document) {
+		Object latObj = document.get("lat");
+		Object lngObj = document.get("lng");
+		if (latObj != null && lngObj != null) {
+			return new Position( (Double)latObj, (Double)lngObj );
+		}
+		return null;
+	}		
+
+	public SignMarker getSignMarker(String id) {
+		Sign sign = getSign(id);
+		return new SignMarker(id, sign.getPosition());
+	}
+
 	public Sign getSign(DBObject document) {
-		Position p = new Position(document.get("position").toString());
-		Address a = new Address(document.get("address").toString());
-		String tag = document.get("name").toString(); 
-		Sign sign = new Sign(p, tag, a);
-		if (document.get("schedule") != null) {
-			ParkingSchedule sched = new ParkingSchedule(document.get("schedule").toString());
+		Position p = getPosition(document);
+		
+		Object idobj = document.get("_id");
+		Object imageObj = document.get("im");
+		String imageName = imageObj == null ? null : imageObj.toString();
+	
+//		Sign sign = new Sign(idobj.toString(), p, a, m_logger);
+		Sign sign = new Sign(idobj.toString(), p, imageName, m_logger);
+
+		if (document.get("s") != null) {
+			ParkingSchedule sched = new ParkingSchedule(document.get("s").toString(), m_logger);
 			sign.setParkingSchedule(sched);
 		}
-		if (document.get("autoSchedule") != null) {
-			ParkingSchedule autoSched = new ParkingSchedule(document.get("autoSchedule").toString());
+		if (document.get("auto") != null) {
+			ParkingSchedule autoSched = new ParkingSchedule(document.get("auto").toString(), m_logger);
 			sign.setAutoSchedule(autoSched);
 		}
 		return sign;
@@ -152,43 +195,40 @@ public class SignDB {
 			return sign;
 		}
 		else {
-			System.out.println("ERROR: found " + cursor.count() + " entries for sign id " + id);
+			m_logger.error("found " + cursor.count() + " entries for sign id " + id);
 		}
 		return null;
 	}
 
-	public Sign getSignFromTag(String tag) {
-		BasicDBObject searchQuery = new BasicDBObject();
-		searchQuery.put("name", tag);		
-		DBCursor cursor = m_signs.find(searchQuery);
-		if (cursor.count()==1) {
-			DBObject document = cursor.next();
-			Sign sign = getSign(document);
-			return sign;
-		}
-		else {
-			System.out.println("ERROR: found " + cursor.count() + " entries for sign tag " + tag);
-		}
-		return null;
-	}
-
-	public boolean moveSign(String id, Position p) {
-		Address a = Sign.reverseGeocode(p);
+	public boolean moveSign(String id, Position p, String user) {
 		BasicDBObject searchQuery = new BasicDBObject("_id", Integer.parseInt(id));
 		DBCursor cursor = m_signs.find(searchQuery);
 		if (cursor.count()==1) {
 			BasicDBObject updateQuery = new BasicDBObject();
 	    	BasicDBObject newFields = new BasicDBObject();
-	    	newFields.append("position", p.toString());
-	    	newFields.append("address", a.toString());
+	    	addPosition(p, newFields);
+	    	newFields.append("u", user);
 	    	updateQuery.append( "$set", newFields);
 	    	m_signs.update(searchQuery, updateQuery);
 	    	return true;
 	    }
 		else {
-			System.out.println("ERROR: moveSign found " + cursor.count() + " signs for id" + id);
+			m_logger.error("moveSign found " + cursor.count() + " signs for id" + id);
 			return false;
 		}
+	}
+
+	public boolean removeSign(Sign sign) {
+		String id = sign.getID();
+		BasicDBObject searchQuery = new BasicDBObject("_id", Integer.parseInt(id));
+		DBCursor cursor = m_signs.find(searchQuery);
+		if (cursor.count() == 1) {
+			m_signs.remove(searchQuery);
+			m_logger.log("removed sign with id "+ id);
+			return true;
+		}		
+		m_logger.error("Cannot remove sign "+id+" because number found = "+cursor.count());
+		return false;
 	}
 
 }

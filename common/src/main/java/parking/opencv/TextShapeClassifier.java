@@ -1,5 +1,8 @@
 package parking.opencv;
 
+import parking.util.Logger;
+import parking.util.LoggingTag;
+
 import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
@@ -9,6 +12,8 @@ import java.util.Comparator;
 
 public class TextShapeClassifier {
 	
+	private static TextShapeClassifier m_instance;
+	private static Logger m_logger;
 	private static final Map<String, char[]> classifier;
 	private static final Map<String, TextProperties> properties;
 	static {
@@ -16,15 +21,15 @@ public class TextShapeClassifier {
 		properties = new HashMap<String, TextProperties>();
 	}
 
-	private static class Loader  {
-        private static final TextShapeClassifier INSTANCE = new TextShapeClassifier();
+    public static TextShapeClassifier getInstance(Logger logger) {
+        if (m_instance == null) {
+        	m_instance = new TextShapeClassifier(logger);
+        }
+        return m_instance;
     }
 
-    public static TextShapeClassifier getInstance() {
-        return Loader.INSTANCE;
-    }
-
-	private TextShapeClassifier()  {
+	private TextShapeClassifier(Logger logger)  {
+		m_logger = new Logger(logger, this, LoggingTag.Shape);
 		buildClassifier();
 		buildProperties();
 	}
@@ -105,7 +110,7 @@ public class TextShapeClassifier {
 		doAdd( "1:2 1",  "cftF".toCharArray() );
 		doAdd("1:2 1:2:1:2:1", "C".toCharArray() );
 
-		doAdd("1 1:2:1", "1".toCharArray() );
+		doAdd("1 1:2:1", "1hJ".toCharArray() );
 
 		doAdd( "1 1:2",  "hn".toCharArray() );
 		doAdd("1 1:2:1:2", "h".toCharArray() );
@@ -118,8 +123,12 @@ public class TextShapeClassifier {
 
 		doAdd("1 3", "m".toCharArray() );
 		
-		doAdd( "2:1 1:2:1",  "9".toCharArray() );
-		doAdd( "2:3:1 1:2:1:2:1",  "9a".toCharArray() );
+		doAdd( "2:1 1:2:1",  "9D".toCharArray() );
+		doAdd( "2:3:1 1:2:1:2:1",  "89a".toCharArray() );
+		doAdd( "1:3:2:1 1:2:1", "9".toCharArray() );
+		doAdd( "1:2:3:1 1:2:1:2:1", "9".toCharArray() );
+		doAdd( "1:3:1 1:2:1:2:1", "9".toCharArray() );
+		doAdd( "2:3:1 1:2:1:2:1:2:1", "9".toCharArray() );
 		
 		doAdd( "1:2:1 1:2:1",  "049bopDOP".toCharArray() );
 
@@ -130,6 +139,7 @@ public class TextShapeClassifier {
 		doAdd( "2:3:1:2 1:2:1:2:1", "8".toCharArray() );		
 		doAdd( "2:3:2 1:2:1:2:1", "358sS".toCharArray() );
 		doAdd( "2:3 1:2:1", "5s".toCharArray() );
+		doAdd( "3 1:2:1:2:1", "S".toCharArray() );
 
 		doAdd( "2:3:1 1:2:1:2",  "a".toCharArray() );
 		doAdd( "2:3:1 1:2:1",  "a".toCharArray() );
@@ -140,6 +150,7 @@ public class TextShapeClassifier {
 		doAdd( "2:3 1",  "3".toCharArray() );
 		doAdd( "1:2:1 1:2",  "bd".toCharArray() );
 		doAdd( "1:2 1:2:1", "0CD".toCharArray() );
+		doAdd( "1:2 1:2", "C".toCharArray() );
 
 		doAdd( "1:3:2 2:1",  "e".toCharArray() );		
 		doAdd( "1:3:2 1:2:1",  "e".toCharArray() );
@@ -148,9 +159,13 @@ public class TextShapeClassifier {
 
 		doAdd( "1:3 1", "E".toCharArray() );
 		doAdd( "1:3:2 1", "E".toCharArray() );
+		doAdd( "1:3:1 1:2:1", "E".toCharArray() );
+		doAdd( "1:3:1 1", "E".toCharArray() );
+		doAdd( "3 1", "E".toCharArray() );
 		
 		
 		doAdd( "1:2:1 1:2:1:2",  "A".toCharArray() );
+		doAdd( "2:1 1:2:1:2",  "A".toCharArray() );
 		doAdd( "1:2:1 1",  "7".toCharArray() );
 		doAdd( "2:1 1",  "7".toCharArray() );
 
@@ -160,6 +175,8 @@ public class TextShapeClassifier {
 
 		doAdd( "1:2 1:2:1:2", "CR".toCharArray() );
 		doAdd( "1 2:3:2", "wN".toCharArray() );
+		doAdd( "1:2:1 2:3:2", "N".toCharArray() );
+		doAdd( "1:2:1:2:1 2:3:2", "N".toCharArray() );
 		
 		doAdd( "1:3:2 2:1:2:1", "B".toCharArray() );
 		
@@ -167,15 +184,18 @@ public class TextShapeClassifier {
 		
 		doAdd( "1:2:3:2:3:2:1 1:2:3:2:3:2:1", "Q".toCharArray() );
 		doAdd("2:1:2 2:1:2", "Xx".toCharArray() );
+
+		doAdd("1:2:1 2:1", "U".toCharArray() );
 	}
 
 	private void doAdd(String topology, char[] vals)   {
+		Logger logger = new Logger(m_logger, "doAdd");
 		char[] curr = classifier.get(topology);
 		if (curr == null) {
 			classifier.put( topology, vals);
 		}
 		else {
-			System.out.println("ERROR: duplicate key in classifier "+topology+" already exists");
+			logger.error("duplicate key in classifier "+topology+" already exists");
 		}
 	}
 

@@ -1,5 +1,8 @@
 package parking.database;
 
+import parking.util.Logger;
+import parking.util.LoggingTag;
+
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.io.PrintWriter;
@@ -25,12 +28,20 @@ public class MongoInterface {
     private SignDB m_signDB;
     private PictureDB m_pictureDB;
 
+    private Logger logger;
+
     private static final String defaultDB = "parking";
     private static final String demoDB = "demo";
     private static final String testDB = "test";
 
-    private MongoInterface(String db) { // private to share connections via getIntance()
-    	System.out.println("opening mongo db " + db);
+    private MongoInterface(String db, Logger parentLogger) { // private to share connections via getIntance()
+    	if (parentLogger == null) {
+    		logger = new Logger(LoggingTag.Database, "MongoInterface", "ctor");
+    	}
+    	else {
+    		logger = new Logger(parentLogger, this, LoggingTag.Database);
+    	}
+    	logger.log("opening mongo db " + db);
 		try {
 	    	m_client = new MongoClient("localhost", 27017);
 	    	m_db = m_client.getDB(db);
@@ -44,11 +55,11 @@ public class MongoInterface {
         }   
     }
 
-    public static MongoInterface getInstance() {
-		return  getInstance(null);
+    public static MongoInterface getInstance(Logger parentLogger) {
+		return  getInstance(null, parentLogger);
     }
     
-    public static MongoInterface getInstance(int port) {
+    public static MongoInterface getInstance(int port, Logger parentLogger) {
 		String db;
 		if (port == 8080) {
 	    	db = defaultDB;
@@ -59,10 +70,10 @@ public class MongoInterface {
 		else {
 			db = testDB;
 		}
-		return  getInstance(db);
+		return  getInstance(db, parentLogger);
     }
     
-    public static MongoInterface getInstance(String db, int port) {
+    public static MongoInterface getInstance(String db, int port, Logger parentLogger) {
 		if (db == null) {
 	    	if (port == 8080) {
 				db = defaultDB;  // default database
@@ -74,10 +85,10 @@ public class MongoInterface {
 				db = testDB; 
 	    	}
 		}
-		return getInstance(db);
+		return getInstance(db, parentLogger);
     }
     
-    public static MongoInterface getInstance(String db) { 
+    public static MongoInterface getInstance(String db,  Logger parentLogger) {
 		if (db == null) {
 	    	db = defaultDB;  // default database
 		}	
@@ -85,8 +96,8 @@ public class MongoInterface {
 	    	m_instance = new HashMap<String, MongoInterface>();
 		}	
 		if (m_instance.get(db) == null) {
-	    	System.out.println("create Mongo DB connection to db = " + db);
-	    	MongoInterface db_if = new MongoInterface(db);
+	    	parentLogger.log("create Mongo DB connection to db = " + db);
+	    	MongoInterface db_if = new MongoInterface(db, parentLogger);
 	    	m_instance.put(db, db_if);
 		}
 		return m_instance.get(db);
@@ -122,5 +133,9 @@ public class MongoInterface {
 
     public PictureDB getPictureDB() {
     	return m_pictureDB;
+    }
+
+    public Logger getLogger() {
+    	return logger;
     }
 }

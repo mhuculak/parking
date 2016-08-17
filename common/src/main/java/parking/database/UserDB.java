@@ -4,6 +4,9 @@ import parking.security.User;
 import parking.security.User.Permission;
 import parking.security.Password;
 
+import parking.util.Logger;
+import parking.util.LoggingTag;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
@@ -24,14 +27,17 @@ public class UserDB {
 
 	private MongoInterface m_mongo;
 	private DBCollection m_users;
+	private Logger m_logger;
 	private final String defaultPassword = "password";
 
 	public UserDB(MongoInterface mongo) {
-		m_mongo = mongo;
+		m_mongo = mongo;		
 		m_users = m_mongo.getDB().getCollection("users");
+		m_logger = new Logger(m_mongo.getLogger(), this, LoggingTag.UserDB);
 	}
 
 	public void addUser(String name) {
+		Logger logger = new Logger(m_logger, "addUser");
 		BasicDBObject searchQuery = new BasicDBObject();
 		searchQuery.put("name", name);		
 		DBCursor cursor = m_users.find(searchQuery);
@@ -47,7 +53,7 @@ public class UserDB {
 			m_users.insert(document);
 		}
 		else {
-			System.out.println("User " + name + " already exists");
+			logger.log("User " + name + " already exists");
 		}		
 	}
 
@@ -80,7 +86,7 @@ public class UserDB {
 	    	String encodedSalt = Base64.getEncoder().encodeToString(salt);
 	    	newFields.append("salt", encodedSalt);
 	    	updateQuery.append( "$set", newFields);
-	    	System.out.println("Storing password in DB as " + encryptedPassword + " with salt " + encodedSalt);
+//	    	System.out.println("Storing password in DB as " + encryptedPassword + " with salt " + encodedSalt);
 	    	m_users.update(searchQuery, updateQuery);
 		}
 	}
@@ -96,7 +102,7 @@ public class UserDB {
 	    	byte[] inputKey = Password.createKey(password, salt);
 	    	String encryptedPassword = (String)document.get("password");
 	    	byte[] correctKey = Base64.getDecoder().decode(encryptedPassword);	    	
-	    	System.out.println("Comparing encrypted input password " + inputKey.toString() + " with correct key " + correctKey.toString() + " using salt " + salt.toString());
+//	    	System.out.println("Comparing encrypted input password " + inputKey.toString() + " with correct key " + correctKey.toString() + " using salt " + salt.toString());
 	    	for ( int i=0 ; i<correctKey.length ; i++) {	    		
 	    		if (correctKey[i] != inputKey[i]) {
 	    			return false;
@@ -124,16 +130,17 @@ public class UserDB {
 		searchQuery.put("name", name);		
 		DBCursor cursor = m_users.find(searchQuery);
 		if (cursor.count() == 1) {			
-			System.out.println("Found user " + name);
+//			System.out.println("Found user " + name);
 			return true;
 		}
 		else {
-			System.out.println("Found " + cursor.count() + " users");
+//			System.out.println("Found " + cursor.count() + " users");
 			return false;
 		}
 	}
 
 	public void changeUserName(String oldName, String newName) {
+		Logger logger = new Logger(m_logger, "changeUserName");
 		BasicDBObject searchQuery = new BasicDBObject();
 		searchQuery.put("name", oldName);		
 		DBCursor cursor = m_users.find(searchQuery);
@@ -145,11 +152,12 @@ public class UserDB {
 	    	m_users.update(searchQuery, updateQuery);
 		}
 		else {
-			System.out.println("ERROR: changeUserName found " + cursor.count() + " users");
+			logger.error("found " + cursor.count() + " users");
 		}
 	}
 
 	public void uploadAvatar(String name, String avatarFile) {
+		Logger logger = new Logger(m_logger, "uploadAvatar");
 		BasicDBObject searchQuery = new BasicDBObject();
 		searchQuery.put("name", name);		
 		DBCursor cursor = m_users.find(searchQuery);
@@ -161,15 +169,16 @@ public class UserDB {
 	    	newFields.append("avatar", avatarFileName);
 	    	updateQuery.append( "$set", newFields);
 	    	m_users.update(searchQuery, updateQuery);
-	    	System.out.println("Adding avatar name " + avatarFileName + " file " + avatarFile);
+	    	logger.log("Adding avatar name " + avatarFileName + " file " + avatarFile);
 	    	m_mongo.getPictureDB().addPicture(avatarFileName, avatarFile);
 		}
 		else {
-			System.out.println("ERROR: uploadAvatar found " + cursor.count() + " users");
+			logger.error("found " + cursor.count() + " users");
 		}				
 	}
 
 	public String getAvatarName(String name) {
+		Logger logger = new Logger(m_logger, "getAvatarName");
 		BasicDBObject searchQuery = new BasicDBObject();
 		searchQuery.put("name", name);		
 		DBCursor cursor = m_users.find(searchQuery);
@@ -178,15 +187,15 @@ public class UserDB {
 			Object avatarObj = document.get("avatar");
 			if (avatarObj != null) {				
 				String avatarName = avatarObj.toString();
-				System.out.println("Found avatar " + avatarName);
+				logger.log("Found avatar " + avatarName);
 				return avatarName;
 			}
 			else {
-				System.out.println("Avatar not found for " + name);
+				logger.error("Avatar not found for " + name);
 			}
 		}
 		else {
-			System.out.println("No record found for " + name);
+			logger.error("No record found for " + name);
 		}
 		return null;
 	}

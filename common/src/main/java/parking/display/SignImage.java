@@ -13,8 +13,11 @@ import parking.opencv.TextShape;
 import parking.opencv.TextGroup;
 import parking.opencv.TextSegment;
 import parking.opencv.StraightSegment;
+import parking.opencv.ColorSegmenter;
 
 import parking.schedule.ParkingSignType;
+import parking.util.Logger;
+import parking.util.LoggingTag;
 
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 
@@ -32,6 +35,8 @@ import java.awt.Color;
 import java.awt.geom.Line2D;
 import java.awt.Polygon;
 import java.awt.geom.AffineTransform;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -42,18 +47,133 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.TreeSet;
+import java.util.SortedSet;
 
-class SignComparator implements Comparator<SignImage> {
+class ColorComparator implements Comparator<SignImage> {
 	@Override
 	public int compare(SignImage s1, SignImage s2) {
-		if (s1.getScore() > s2.getScore()) {
+		if (s1.getColorScore() > s2.getColorScore()) {
 			return -1;
 		}
-		else if (s1.getScore() < s2.getScore()) {
+		else if (s1.getColorScore() < s2.getColorScore()) {
 			return 1;
 		}
 		else {
 			return 0;
+		}
+	}
+}
+
+class ShapeComparator implements Comparator<SignImage> {
+	@Override
+	public int compare(SignImage s1, SignImage s2) {
+		if (s1.getShapeScore() > s2.getShapeScore()) {
+			return -1;
+		}
+		else if (s1.getShapeScore() < s2.getShapeScore()) {
+			return 1;
+		}
+		else {
+			return 0;
+		}
+	}
+}
+
+class EdgeComparator implements Comparator<SignImage> {
+	@Override
+	public int compare(SignImage s1, SignImage s2) {
+		if (s1.getEdgeScore() > s2.getEdgeScore()) {
+			return -1;
+		}
+		else if (s1.getEdgeScore() < s2.getEdgeScore()) {
+			return 1;
+		}
+		else {
+			return 0;
+		}
+	}
+}
+
+//
+//  FIXME: the 10% thresholds used to decide whether to sort based on
+//         color, shape and area need to be tuned => this means we need
+//         a tool to train the sign recognition. This applies to all sorts
+//         of other parameters...
+//
+class CombinedComparator implements Comparator<SignImage> {
+
+	private ColorComparator colorCompare = new ColorComparator();
+	private ShapeComparator shapeCompare = new ShapeComparator();
+	private EdgeComparator edgeCompare = new EdgeComparator();
+
+	@Override
+	public int compare(SignImage s1, SignImage s2) {
+		if (getDiff(s1.getColorScore(), s2.getColorScore()) < 0.1) {
+			if (getDiff(s1.getShapeScore(), s2.getShapeScore()) < 0.1) {
+				if (getDiff(s1.getEdgeScore(), s2.getEdgeScore()) < 0.1) {
+					if (s1.getArea() > s2.getArea()) {
+						return -1;
+					}
+					else if (s1.getArea() < s2.getArea()) {
+						return 1;
+					}
+					else {
+						return 0;
+					}
+				}
+				else {
+					return edgeCompare.compare(s1,s2);
+				}
+			}
+			else {
+				return shapeCompare.compare(s1,s2);				
+			}
+		}
+		else {
+			return colorCompare.compare(s1,s2);
+		}
+	}
+
+	private double getDiff(double v1 , double v2) {
+		double diff = Math.abs( v1 - v2);
+		double max = Math.max( Math.abs(v1), Math.abs(v2));
+		double norm = max == 0.0 ? 0.0 : diff/max;
+		return norm;
+	}
+}
+
+class WinComparator implements Comparator<SignImage> {
+
+	private RankComparator rank = new RankComparator();
+	@Override
+	public int compare(SignImage s1, SignImage s2) {
+		if (s1.getWins() > s2.getWins()) {
+			return -1;
+		}
+		else if (s1.getWins() < s2.getWins()) {
+			return 1;
+		}
+		else {
+			return rank.compare(s1, s2);
+		}
+	}
+}
+
+class RankComparator implements Comparator<SignImage> {
+
+	private CombinedComparator combined = new CombinedComparator();
+
+	@Override
+	public int compare(SignImage s1, SignImage s2) {
+		if (s1.getRank() < s2.getRank()) {
+			return -1;
+		}
+		else if (s1.getRank() > s2.getRank()) {
+			return 1;
+		}
+		else {
+			return combined.compare(s1, s2);
 		}
 	}
 }
@@ -66,14 +186,23 @@ public class SignImage extends JComponent {
 	private List<Rectangle> rectangles;
 	private List<TextShape> letters;
 	private List<SignBorder> borders;
+	private List<Boundary> boundaries;
 	private Rectangle theBorder;  //  border in sign ref reframe
 	private Rectangle origBorder; // border in original ref frame
+	private double origScale;
 	private Ellipse outerEllipse;
 	private double score;
+	private double colorScore;
+	private double shapeScore;
+	private double edgeScore;
 	private String scoreDetails;
 	private double zoom;
+	private List<Integer> rank;
+	private int winCount;
+	private Integer totalRank;
+	private Logger m_logger;
 
-	private static final int maxSigns = 100;
+	private static final int maxSigns = 10000;
 
 	private final Color[] colors = new Color[] { Color.red, Color.green, Color.orange, Color.cyan, Color.pink, 
 		Color.yellow, Color.magenta,  Color.blue};
@@ -91,9 +220,22 @@ public class SignImage extends JComponent {
 	}
 
 	public SignImage(File imageFile) {
+		System.out.println("ERROR: no logger defined for SignImage");
 		try {    		
     		img = ImageIO.read(imageFile);
-    		System.out.println("Read new image "+ img);
+//    		logger.log("Read new image "+ img);
+    	} 
+    	catch (IOException e) {
+            e.printStackTrace();
+        }
+        zoom = 1.0;
+	}
+
+	public SignImage(File imageFile, Logger logger) {
+		m_logger = new Logger(logger, this, LoggingTag.Image);
+		try {    		
+    		img = ImageIO.read(imageFile);
+    		logger.log("Read new image "+ img);
     	} 
     	catch (IOException e) {
             e.printStackTrace();
@@ -121,7 +263,8 @@ public class SignImage extends JComponent {
 		g.dispose();
 	}
 
-	public SignImage(BufferedImage img) {
+	public SignImage(BufferedImage img, Logger logger) {
+		m_logger = new Logger(logger, this, LoggingTag.Image);
 		this.img = img;
 		zoom = 1.0;
 	}
@@ -139,8 +282,28 @@ public class SignImage extends JComponent {
 		return img.getWidth();
 	}
 
+	public double getArea() {
+		return theBorder.getArea();
+	}
+
+	public int getMinDim() {
+		return getWidth() < getHeight() ? getWidth() : getHeight();
+	}
+
 	public double getScore() {
 		return score;
+	}
+
+	public double getColorScore() {
+		return colorScore;
+	}
+
+	public double getShapeScore() {
+		return shapeScore;
+	}
+
+	public double getEdgeScore() {
+		return edgeScore;
 	}
 
 	public String getScoreDetails() {
@@ -159,6 +322,11 @@ public class SignImage extends JComponent {
 		return origBorder;
 	}
 
+	public double getOrigScale() {
+		return origScale;
+	}
+
+
 	public SignImage scale(double factor) {
 		int width = (int)(img.getWidth() * factor + 0.5);
 		int height = (int)(img.getHeight() * factor + 0.5);
@@ -167,10 +335,11 @@ public class SignImage extends JComponent {
 		g.drawImage(img, 0, 0, width, height, null);
 		g.dispose();
 		
-		return new SignImage(scaledImage);
+		return new SignImage(scaledImage, m_logger);
 
 	}
 
+	
 	public void setLetters(List<TextShape> letters) {
 		this.letters = letters;
 	}
@@ -187,6 +356,10 @@ public class SignImage extends JComponent {
 		this.circles = circles;
 	}
 
+	public void setBoundaries(List<Boundary> boundaries) {
+		this.boundaries = boundaries;
+	}
+
 	public void setSignBorders(List<SignBorder> borders) {
 		this.borders = borders;
 	}
@@ -199,19 +372,75 @@ public class SignImage extends JComponent {
 		origBorder = rect;
 	}
 
+	public void setOrigScale(double origScale) {
+		this.origScale = origScale;
+	}
+
 	public void setOuterEllipse(Ellipse ellipse) {
 		this.outerEllipse = ellipse;
 	}
 
-	//
-	//  FIXME: we multiply the score by the perimeter to favor larger borders over smaller
-	//         but we dont want to simply pick the largest border...so we need a better
-	//         way of balancing the quality of the borders and the size...needs further investigation
-	//
-	private void computeScore() {
+	private void computeScore(ColorSegmenter colorSegmenter) {
+		shapeScore = theBorder.getScore();
+		Line[] edges = origBorder.getSides();
+		edgeScore = 0.0;
+		for ( int i=0 ; i<4 ; i++) {
+			edgeScore += edges[i].score;
+		}
+		score = shapeScore;
+		colorScore = 0.0;
+		if (colorSegmenter != null) {
+			colorScore = colorSegmenter.scoreSign(origBorder);
+			score = colorScore;
+		}
+		StringBuilder sb = new StringBuilder(100);
+		sb.append(score+" ");
+		sb.append(" Color: "+colorScore);
+		sb.append(" Shape: "+shapeScore);
+		sb.append(" Edge: "+edgeScore);
+		sb.append(" Area: "+getArea());
+		sb.append(" "+theBorder.getScoreDetails());
+		scoreDetails = sb.toString();
+	}
+
+	public void addRank(int r) {
+		if (rank == null) {
+			rank = new ArrayList<Integer>();
+		}
+		rank.add(r);
+	}
+
+	private int getRankSum() {
+		int sum = 0;
+		for (int r : rank) {
+			sum += r;
+		}
+		return sum;
+	}
+
+	public int getRank() {
+		if (totalRank == null) {
+			totalRank = getRankSum();
+		}
+		return totalRank;
+	}
+
+	public void won() {
+		winCount++;
+	}
+
+	public int getWins() {
+		return winCount;
+	}
+/*
+	private void computeScore(ColorSegmenter colorSegmenter) {
 		
 		double[] borderScore = theBorder.getScoreVector();
 		double ellipseScore = 0.0;
+		double colorScore = 0.0;
+		if (colorSegmenter != null) {
+			colorScore = colorSegmenter.scoreSign(origBorder);
+		}
 		if (outerEllipse != null) {
 			double err = theBorder.getDisplacmentFromVerticalAxis(outerEllipse.getCenter());
 			double maxError = theBorder.getWidth()/2;
@@ -219,10 +448,12 @@ public class SignImage extends JComponent {
 			ellipseScore = Math.sqrt(1 - err*err);
 		}
 		double scoreSum = ellipseScore;
+		scoreSum += colorScore;
 		for ( int i=0 ; i<borderScore.length ; i++) {
 			scoreSum += borderScore[i];
 		}
-		score = scoreSum/(borderScore.length+1)*theBorder.getPerimeter();
+//		score = scoreSum/(borderScore.length+1)*theBorder.getPerimeter();
+		score = scoreSum;
 		StringBuilder sb = new StringBuilder(100);
 		sb.append(score+" ");
 		for ( int i=0 ; i<4 ; i++) {
@@ -231,27 +462,44 @@ public class SignImage extends JComponent {
 		sb.append("Asp:"+borderScore[4]+" ");
 		sb.append("Cov:"+borderScore[5]+" ");
 		sb.append("Eli:"+ellipseScore+" ");
+		sb.append("Col:"+colorScore+" ");
 		sb.append("Tot:"+scoreSum+" ");
 		sb.append("Per:"+theBorder.getPerimeter()+" ");
 		scoreDetails = sb.toString();
 	}
+*/
+	//
+	//  FIXME: canny & lines are in rewf frame of orig image where as text groups are in the current frame
+	//
 
-	
-
-	public ParkingSignType getSignType(SignImage canny, List<Line> lines, List<TextGroup> textGroups) {
-		List<Line> vertAxisList = estimateVertAxisFromTextGroups(textGroups);
-//		System.out.println("border center is "+origBorder.getCentroid());
+	public ParkingSignType getSignType(SignImage canny, List<Line> lines, Rectangle cannyBorder, List<TextGroup> textGroups) {
+		System.out.println("border = "+theBorder.toString());		
+		System.out.println(theBorder.getTransform().toString());
+		System.out.println(" vert axis = "+theBorder.getVertAxis());
+		System.out.println("orig border = "+cannyBorder.toString());
+		System.out.println("orig vert axis = "+cannyBorder.getVertAxis());
+		List<Line> vertAxisList = estimateVertAxisFromTextGroups(textGroups, cannyBorder);
+//		canny.setLines(vertAxisList);
+		System.out.println("border center is "+cannyBorder.getCentroid()+" vert axis list has size = "+vertAxisList.size());
+		List<Line> extended = new ArrayList<Line>();
 		for ( Line vertAxis : vertAxisList ) {
-			vertAxis = origBorder.extendVertAxis(vertAxis);	
-			Ellipse ellipse = Ellipse.getEllipse(canny.getImage(), origBorder, vertAxis);
+			Line extendedAxis = cannyBorder.extendVertAxis(vertAxis);	
+//			System.out.println("Vert axis = "+extendedAxis);
+			extended.add(extendedAxis);
+			Ellipse ellipse = Ellipse.getEllipse(canny.getImage(), cannyBorder, extendedAxis);
 			if (ellipse == null) {
-				ellipse = Ellipse.getEllipse(canny.getImage(), origBorder, null);
+				ellipse = Ellipse.getEllipse(canny.getImage(), cannyBorder, null);			}
+			
+			if (ellipse != null) {
+				canny.setOuterEllipse(ellipse);
 			}
-			boolean signIsRestriction = findRestrictionBar(lines, origBorder, vertAxis, ellipse);											
+			boolean signIsRestriction = findRestrictionBar(lines, cannyBorder, extendedAxis, ellipse);											
 			if (signIsRestriction) {
+				canny.setLines(extended);
 				return ParkingSignType.NOPARKING;
 			}			
 		}
+		canny.setLines(extended);
 		return ParkingSignType.PARKING;
 	}
 
@@ -263,7 +511,7 @@ public class SignImage extends JComponent {
 		final double maxBarWidthFactor = 0.1;
 		Point loc = border.getCirclePos(vertAxis);		
 		if (ellipse != null) {
-//			System.out.println("Found ellipse at "+ellipse.getCenter());
+			System.out.println("Found ellipse at "+ellipse.getCenter());
 			loc = ellipse.getCenter();
 		}
 		double expectedBarAngle = vertAxis.angle - Math.PI/4;
@@ -300,10 +548,16 @@ public class SignImage extends JComponent {
 		return devPlus - Math.PI;
 	}
 
-	private List<Line> estimateVertAxisFromTextGroups( List<TextGroup> textGroups) {
+	private List<Line> estimateVertAxisFromTextGroups( List<TextGroup> textGroups, Rectangle border) {
 		final int minGroupSize = 4;
+		Transformation transform = theBorder.getTransform();
+		if (transform == null ) {
+			m_logger.error("not transformation found");
+			return null;
+		}
+		double revScale = 1.0 / transform.getScale();
 		int size = textGroups.size();	
-		Vector v = new Vector( Math.cos( theBorder.getVertAxis().angle ), Math.sin( theBorder.getVertAxis().angle ) );
+		Vector v = new Vector( Math.cos( border.getVertAxis().angle ), Math.sin( border.getVertAxis().angle ) );
 		List<Line> vertAxisList = new ArrayList<Line>();
 		double avgX = 0.0;
 		double avgY = 0.0;
@@ -312,9 +566,8 @@ public class SignImage extends JComponent {
 			if (textGroups.get(i).size() >= minGroupSize) {
 				Line b = textGroups.get(i).getBaseline();
 //				System.out.println("got baseline "+b+" for group of size "+textGroups.get(i).size());
-				Point m = b.findPoint(0.5);
-//				System.out.println("Mid point "+m);
-				Line base = theBorder.getTransform().reverse(b);
+				Line bs = Line.scale(b, revScale);	
+				Line base = transform.reverse(bs);
 //				System.out.println("transformed baseline is"+base);
 				Point p = base.findPoint(0.5);
 //				System.out.println("Got transformed mid point "+p);
@@ -422,7 +675,6 @@ public class SignImage extends JComponent {
         g.drawImage(img, 0, 0, null);
         boolean didOne = false;
         int i;
-
         if (letters != null) {
         	i=0;
         	for (TextShape letter : letters) {
@@ -528,6 +780,15 @@ public class SignImage extends JComponent {
        			g.drawOval(round(outerEllipse.getCenter().x - outerEllipse.getMinor()), round(outerEllipse.getCenter().y - outerEllipse.getMajor()), round(2*outerEllipse.getMinor()), round(2*outerEllipse.getMajor()));
        		}
        	}
+       	if (boundaries != null) {
+       		i = 0;
+       		for (Boundary b : boundaries) {
+       			int k = i % 8;
+        		g.setColor(colors[k]);
+       			g.drawPolygon(b.getX(), b.getY(), b.size());
+       			i++;
+       		}
+       	}
     }
 
     private void drawRect(Rectangle rect, Graphics2D g2) {
@@ -539,16 +800,89 @@ public class SignImage extends JComponent {
         } 
     }
 
-    public static List<SignImage> getSigns(SignImage image, SignImage canny, List<Rectangle> rectangles, boolean findEllipse) {
+    public static List<SignImage> getSigns(SignImage image, SignImage canny, List<Rectangle> rectangles,
+    			 						ColorSegmenter colorSegmenter, boolean findEllipse, Logger logger) {
+    	Logger localLogger = new Logger(logger, LoggingTag.Score, "getSigns");
     	List<SignImage> signs = new ArrayList<SignImage>();    	
     	for ( int i=0 ; i<rectangles.size() && i<maxSigns; i++) {			
-    		SignImage sign = createSign(image, canny, rectangles.get(i), findEllipse);    		
+    		SignImage sign = createSign(image, canny, rectangles.get(i), colorSegmenter, findEllipse, logger);    		
     		signs.add(sign);
     	}
-    	SignComparator comparator = new SignComparator();
-		Collections.sort(signs, comparator);
-		List<SignImage> reduced = eliminateDuplicates(signs, 0.1);
-    	return reduced;
+
+    	List<SignImage> topChoices = rankSigns(signs, localLogger);
+		
+		for ( int i=0 ; i<topChoices.size() ; i++) {
+			SignImage si = topChoices.get(i);
+//			SignImage next = signImages.get(i+1);
+//			CompareResult comp = comparator.compareDebug( si, next);
+			localLogger.log("border: "+si.getOrigBorder().toString()+" wins = "+si.getWins()+" rank = "+si.getRank()+" score = "+si.getScore()+" "+si.getScoreDetails());			
+			for ( Line l : si.getOrigBorder().getOrigLines()) {
+				localLogger.log("  orig edge:" +l.toString()+" score = "+l.score);
+			}			
+		}
+		
+    	return topChoices;
+    }
+
+    private static List<SignImage> rankSigns(List<SignImage> signs, Logger logger) {
+
+    	List<SignImage> topChoices = new ArrayList<SignImage>();
+    	Map<String, Comparator> comparators = new HashMap<String, Comparator>();
+    	comparators.put( "combined", new CombinedComparator());
+    	comparators.put( "color", new ColorComparator());
+    	comparators.put( "shape", new ShapeComparator() );
+    	comparators.put( "edge", new EdgeComparator() );
+
+    	for (String comparison : comparators.keySet()) {
+    		try {
+    			Collections.sort(signs, comparators.get(comparison));
+    			logger.log(comparison+" winner: "+signs.get(0).getOrigBorder().toString());
+				addWinner(signs, topChoices);
+    		}
+    		catch (IllegalArgumentException ex) {
+    			logger.error("Skipped "+comparison+" because "+ex.toString());
+    		}
+    	}
+ /*   	
+		Collections.sort(signs, combined);
+		logger.log("combined winner: "+signs.get(0).getOrigBorder().toString());
+		addWinner(signs, topChoices);
+
+		ColorComparator color = new ColorComparator();
+		Collections.sort(signs, color);
+		logger.log("color winner: "+signs.get(0).getOrigBorder().toString());
+		addWinner(signs, topChoices);
+
+		ShapeComparator shape = new ShapeComparator();
+		Collections.sort(signs, shape);
+		logger.log("shape winner: "+signs.get(0).getOrigBorder().toString());
+		addWinner(signs, topChoices);
+
+		EdgeComparator edge = new EdgeComparator();
+		Collections.sort(signs, edge);
+		logger.log("edge winner: "+signs.get(0).getOrigBorder().toString());
+		addWinner(signs, topChoices);	
+*/		
+		WinComparator win = new WinComparator();
+		Collections.sort(topChoices, win);
+
+		return topChoices;
+
+    }
+
+    // 
+
+    private static void addWinner(List<SignImage> signs, List<SignImage> topChoices) {
+    	SignImage top = signs.get(0);
+    	top.won();
+    	topChoices.add(top);
+    	addRank(signs);
+    }
+
+    private static void addRank(List<SignImage> signs) {
+    	for (int r=0 ; r<signs.size() ; r++ ) {
+    		signs.get(r).addRank(r);
+    	}
     }
 
     private static List<SignImage> eliminateDuplicates(List<SignImage> full, double dupDistThresh) {
@@ -557,12 +891,12 @@ public class SignImage extends JComponent {
 		Map<SignImage, Boolean> eliminated = new HashMap<SignImage, Boolean>();
 		for ( int i=0 ; i<full.size() ; i++) {
 			SignImage sign = full.get(i);
-			Rectangle rect = sign.getTheBorder();
+			Rectangle rect = sign.getOrigBorder();
 			Boolean isEliminated = eliminated.get(sign);
 			if (isEliminated == null || isEliminated == false) {
 				// no need to go thru the entire list assuming it is sorted by score
 				for ( int j=i+1 ; j<full.size() && full.get(j).getScore() > sign.getScore() - scoreThresh ; j++) {
-					if (Rectangle.areDuplicate(rect, full.get(j).getTheBorder(), dupDistThresh)) {
+					if (Rectangle.areDuplicate(rect, full.get(j).getOrigBorder(), dupDistThresh)) {
 						eliminated.put(full.get(j), true);
 					}
 				}
@@ -573,8 +907,9 @@ public class SignImage extends JComponent {
 		return reduced;
 	}
 
-    public static SignImage createSign(SignImage image, SignImage canny, Rectangle rect, boolean findEllipse) {
-    	SignImage signImage = new SignImage(applyBorderTransform(image.getImage(), rect));
+    public static SignImage createSign(SignImage image, SignImage canny, Rectangle rect, 
+    									ColorSegmenter colorSegmenter, boolean findEllipse, Logger logger) {
+    	SignImage signImage = new SignImage(applyBorderTransform(image.getImage(), rect), logger);
     	Ellipse ellipse = null;
     	if (findEllipse) {
     	 	ellipse = Ellipse.getEllipse(canny.getImage(), rect, null);
@@ -594,9 +929,11 @@ public class SignImage extends JComponent {
         	Ellipse nEllipse = transformation.apply(ellipse);
         	signImage.setOuterEllipse(nEllipse);
         }
-        nBorder.setThreshold(rect.getThreshold());        
+        nBorder.setThreshold(rect.getThreshold());
+//        System.out.println("Set transformation = "+transformation);
+        nBorder.setTransform(transformation);      
         signImage.setTheBorder(nBorder);        
-        signImage.computeScore();     
+        signImage.computeScore(colorSegmenter);     
 		g2.dispose();
 		return signImage;
     }

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Collections;
 
 enum WeekDay {
 	Sunday,
@@ -12,7 +13,7 @@ enum WeekDay {
 	Wednesday,
 	Thursday,
 	Friday,
-	Saturday;
+	Saturday
 }
 
 public class WeekDaySet {
@@ -21,11 +22,28 @@ public class WeekDaySet {
 	private boolean isContiguous;
 
 	public static final List<String> allDays = new ArrayList<String>();
+	private static final Map<WeekDay, String> abbrev = new HashMap<WeekDay, String>();
+	private static final Map<String, WeekDay> revAbbrev = new HashMap<String, WeekDay>();
 
 	static {
 		for (WeekDay day : WeekDay.values()) {
 			allDays.add(day.toString());
 		}
+		abbrev.put(WeekDay.Sunday, "Su");
+		abbrev.put(WeekDay.Monday, "M");
+		abbrev.put(WeekDay.Tuesday, "Tu");
+		abbrev.put(WeekDay.Wednesday, "W");
+		abbrev.put(WeekDay.Thursday, "Th");
+		abbrev.put(WeekDay.Friday, "F");
+		abbrev.put(WeekDay.Saturday, "Sa");
+
+		revAbbrev.put("Su", WeekDay.Sunday);
+		revAbbrev.put("M", WeekDay.Monday);
+		revAbbrev.put("Tu", WeekDay.Tuesday);
+		revAbbrev.put( "W", WeekDay.Wednesday);
+		revAbbrev.put("Th", WeekDay.Thursday);
+		revAbbrev.put("F", WeekDay.Friday);
+		revAbbrev.put("Sa", WeekDay.Saturday);
 	}
 	
 	public WeekDaySet() {
@@ -33,40 +51,36 @@ public class WeekDaySet {
 	}
 
 	public WeekDaySet(String wkdSet) {
-		if (wkdSet.contains(" to ")) {
-			String[] days = wkdSet.split(" to ");
-			createWeekDaySet(days[0],days[1]);
+		if (wkdSet.contains(":")) {
+			String[] days = wkdSet.split(":");
+			createWeekDaySet(revAbbrev.get(days[0]),revAbbrev.get(days[1]));
 		}
 		else {
 			String[] days = wkdSet.split(",");
 			weekDaySet = new ArrayList<WeekDay>();
 			for ( int i=0 ; i<days.length ; i++) {
-				weekDaySet.add(WeekDay.valueOf(days[i]));
+				weekDaySet.add(revAbbrev.get(days[i]));
 			}
 			checkContinuity();
 		}
 	}
 
 	public WeekDaySet(String start, String end) {
-		createWeekDaySet(start,end);
+		if (start != null && end != null) {
+			WeekDay swd = WeekDay.valueOf(start);
+			WeekDay ewd = WeekDay.valueOf(end);
+			if (swd != null && ewd != null) {
+				createWeekDaySet(swd, ewd);
+			}
+		}
 	}
 
-	private void createWeekDaySet(String start, String end) {
-		WeekDay swd = start.length()>0 ? WeekDay.valueOf(start) : null;
-		WeekDay ewd = end.length()>0 ? WeekDay.valueOf(end) : null;
+	private void createWeekDaySet(WeekDay start, WeekDay end) {
 		weekDaySet = new ArrayList<WeekDay>();
-		if (swd != null && ewd != null) {
-			for ( int i=swd.ordinal() ; i<= ewd.ordinal() ; i++) {
-				weekDaySet.add(WeekDay.values()[i]);
-			}
-			isContiguous = true;
+		for ( int i=start.ordinal() ; i<= end.ordinal() ; i++) {
+			weekDaySet.add(WeekDay.values()[i]);
 		}
-		else if (swd != null) {
-			weekDaySet.add(swd);
-		}
-		else if (ewd != null) {
-			weekDaySet.add(ewd);
-		}
+		isContiguous = true;
 	}
 
 	public void add(WeekDay day) {
@@ -126,20 +140,28 @@ public class WeekDaySet {
 	}
 
 	private void checkContinuity() {
+		Collections.sort(weekDaySet);
+		int i,k;
+/*		
+		for ( k=0 ; k<weekDaySet.size() ; k++) {
+			System.out.println(k+" "+weekDaySet.get(k));
+		}
+*/		
 		WeekDay first = weekDaySet.get(0);
 		WeekDay last = weekDaySet.get(weekDaySet.size()-1);
 		isContiguous = true;
-		int i,k;
+		
+//		System.out.println("Check continuity from "+first+" "+first.ordinal()+" to "+last+" "+last.ordinal());
 		for ( k=0, i=first.ordinal() ; i<= last.ordinal() && k<weekDaySet.size() ; i++, k++ ) {
 			WeekDay next = WeekDay.values()[i];
+//			System.out.println(" day "+i+" is "+next+" should be "+weekDaySet.get(k));
 			if (next != weekDaySet.get(k)) {
 				isContiguous = false;
 			}
 		}
 	}
 
-	public String toString() {
-		
+	public String displayText() {
 		if (isContiguous && weekDaySet.size() > 1) {
 			return weekDaySet.get(0)+" to "+weekDaySet.get(weekDaySet.size()-1);
 		}
@@ -150,6 +172,23 @@ public class WeekDaySet {
 			StringBuilder sb = new StringBuilder(10);
 			for (WeekDay day : weekDaySet) {
 				sb.append(day+",");
+			}
+			return sb.toString();
+		}
+	}
+
+	public String toString() {
+		
+		if (isContiguous && weekDaySet.size() > 1) {
+			return abbrev.get(weekDaySet.get(0))+":"+abbrev.get(weekDaySet.get(weekDaySet.size()-1));
+		}
+		else {
+			if (weekDaySet == null) {
+				return "";
+			}
+			StringBuilder sb = new StringBuilder(10);
+			for (WeekDay day : weekDaySet) {
+				sb.append(abbrev.get(day)+",");
 			}
 			return sb.toString();
 		}

@@ -1,5 +1,8 @@
 package parking.opencv;
 
+import parking.util.Logger;
+import parking.util.LoggingTag;
+
 import org.opencv.core.Point;
 
 import java.util.Collections;
@@ -29,15 +32,18 @@ public class TextGroup {
 	private Line baseline;
 	private List<Point> baselinePoints;
 	private String rawText;
+	private Logger m_logger;
 
-	private static final double maxDist = 5.0;
+//	private static final double maxDist = 5.0;
+	private static final double maxDist = 10.0;	
 	private static final double minValidRatio = 0.5;
 
-	public TextGroup(TextShape shape) {
+	public TextGroup(TextShape shape, Logger logger) {
+		m_logger = new Logger(logger, this, LoggingTag.Shape);
 		shapes = new ArrayList<TextShape>();			
 		shapes.add(shape);
 		updateBaseline(shape.getBaseline());
-//		System.out.println("New group with "+shape);
+		m_logger.log("New group with "+shape);
 	}
 
 	public boolean add(TextShape shape) {		
@@ -45,7 +51,7 @@ public class TextGroup {
 		if (dist < maxDist) { 
 			shapes.add(shape);				
 			updateBaseline(shape.getBaseline());
-//			System.out.println("add "+shape+" to group size = "+size());
+			m_logger.log("add "+shape+" to group size = "+size());
 			return true;
 		}
 		return false;
@@ -102,7 +108,7 @@ public class TextGroup {
 				bpts[i][0] = baselinePoints.get(i).x;
 				bpts[i][1] = baselinePoints.get(i).y;
 			}	
-			baseline = new Line(bpts, null, null);
+			baseline = new Line(bpts, true, null);
 		}
 		else {
 			baseline = l;
@@ -116,7 +122,7 @@ public class TextGroup {
 		return Math.sqrt(d1*d1 + d2*d2);
 	}
 
-	public static List<TextGroup> getTextGroups(List<TextShape> shapes) {
+	public static List<TextGroup> getTextGroups(List<TextShape> shapes, Logger logger) {
 		List<TextGroup> textGroups = new ArrayList<TextGroup>();
 		for ( TextShape shape : shapes) {
 			if (shape.getTextMatches() != null  && shape.getTextMatches().size() > 0) {
@@ -129,11 +135,11 @@ public class TextGroup {
 					}
 				}
 				if (added == false) {
-					textGroups.add(new TextGroup(shape));
+					textGroups.add(new TextGroup(shape, logger));
 				}
 			}
 			else if (shape.getTopologyX() != null && shape.getTopologyY() != null) {
-				System.out.println("Dropping "+shape.getTopologyX()+" "+shape.getTopologyY()+" bounds = "+shape.getBound());
+				logger.log("Dropping "+shape.getTopologyX()+" "+shape.getTopologyY()+" bounds = "+shape.getBound());
 			}
 		}
 		

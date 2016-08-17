@@ -1,5 +1,8 @@
 package parking.schedule;
 
+import parking.util.Logger;
+import parking.util.LoggingTag;
+
 import java.util.Map;
 import java.util.List;
 
@@ -18,8 +21,10 @@ public class ParkingSchedule {
 	private double hourlyRateDollars;
 	private int timeLimitMinutes;
 	private String permitNumber;
+	private Logger m_logger;
 
-	public ParkingSchedule(ParkingSignType signType) {
+	public ParkingSchedule(ParkingSignType signType, Logger logger) {
+		m_logger = new Logger(logger, this, LoggingTag.Schedule);
 		switch (signType) {
 			case PARKINGMETER:
 			case PARKING:
@@ -30,13 +35,14 @@ public class ParkingSchedule {
 				isRestriction = true;
 				break;
 			default:
-				System.out.println("ERROR: unknown sign type "+signType);
+				m_logger.error("unknown sign type "+signType);
 		}
 	}
 
-	public ParkingSchedule(String sched) {
+	public ParkingSchedule(String sched, Logger logger) {
+		m_logger = new Logger(logger, this, LoggingTag.Schedule);
 		String[] data = sched.split(";");
-		if (data[0].equals("No Parking")) {
+		if (data[0].equals("NP")) {
 			isRestriction = true;
 		}
 		else {
@@ -45,9 +51,9 @@ public class ParkingSchedule {
 		for ( int i=1 ; i<data.length ; i++) {
 			String[] kv = data[i].split("=");
 			String key = kv[0];
-			String value = kv[1];
-			if (key.equals("TimeRange")) {
-				if (value.equals("any time")) {
+			String value = kv.length == 2 ? kv[1] : null;
+			if (key.equals("T")) {
+				if (value == null || value.equals("any")) {
 					allHours = true;
 				}
 				else {
@@ -55,8 +61,8 @@ public class ParkingSchedule {
 					timeRange = new TimeRange(value);
 				}
 			}
-			else if (key.equals("WeekDays")) {
-				if (value.equals("Sunday to Saturday")) {
+			else if (key.equals("W")) {
+				if (value == null || value.equals("any")) {
 					allWeekDays = true;
 				}
 				else {
@@ -65,8 +71,8 @@ public class ParkingSchedule {
 				}
 
 			}
-			else if (key.equals("DateRange")) {
-				if (value.equals("every day of the year")) {
+			else if (key.equals("D")) {
+				if (value == null || value.equals("any")) {
 					allDaysOfYear = true;
 				}
 				else {
@@ -74,24 +80,34 @@ public class ParkingSchedule {
 					dateRange = new DateRange(value);
 				}
 			}
+			else if(key.equals("L")) {
+				if (value != null) {
+					timeLimitMinutes = Integer.parseInt(value);
+				}
+			}
 
 		}
 		setFlags();
 	}
 
-	public ParkingSchedule(Map<String,String> postData) {
+	public ParkingSchedule(Map<String,String> postData, Logger logger) {
+		m_logger = new Logger(logger, this, LoggingTag.Schedule);
 		String restricted = postData.get("restricted");
 		isRestriction = restricted.equals("true") ? true : false;
 		if (isRestriction == false) {
 			String timePeriod = postData.get("timePeriod");
-			timeLimitMinutes = timePeriod != null ? Integer.parseInt(timePeriod) : 0;
+			if (timePeriod != null) {
+				timePeriod.replaceAll("[^0-9]","");
+				timeLimitMinutes = timePeriod.length() > 0 ? Integer.parseInt(timePeriod) : 0;
+				m_logger.log("Got timelimit "+timeLimitMinutes);
+			}
 		}
 		String startHour = postData.get("startHour");
 		String startMinute = postData.get("startMinute");
 		String endHour = postData.get("endHour");
 		String endMinute = postData.get("endMinute");
-		if (startHour != null && endHour != null) {
-			System.out.println("Got time range: "+startHour+" to "+endHour);
+		if (startHour != null && endHour != null) {			
+			m_logger.log("Got time range: "+startHour+" to "+endHour);
 			if (startHour.length() > 0 && endHour.length() > 0) {
 				timeRange = new TimeRange( new SimpleTime(startHour, startMinute), new SimpleTime(endHour, endMinute));
 			}
@@ -101,6 +117,7 @@ public class ParkingSchedule {
 		if (startWeekDay != null && endWeekDay != null) {
 			if (startWeekDay.length() > 0 || endWeekDay.length() > 0) {
 				weekDays = new WeekDaySet( startWeekDay, endWeekDay);
+				m_logger.log("Got week days "+weekDays.toString());
 			}
 		}
 		else {
@@ -110,6 +127,7 @@ public class ParkingSchedule {
                 String name = "day"+i;
                 String day = postData.get(name);
                 if (day != null) {
+                	m_logger.log("Add "+name+" = "+day);
                 	weekDays.add(day);
                 }
             }
@@ -124,7 +142,11 @@ public class ParkingSchedule {
 		String endMonth = postData.get("endMonth");
 		if (startMonthDay != null && startMonth != null && endMonthDay != null && endMonth != null) {
 			if (startMonthDay.length() > 0 && startMonth.length() > 0 && endMonthDay.length() > 0 && endMonth.length() > 0) {
+				startMonthDay.replaceAll("[^0-9]","");
+				endMonthDay.replaceAll("[^0-9]","");
+				m_logger.log("create Date Range with "+startMonthDay+" "+startMonth+" "+endMonthDay+" "+endMonth);
 				dateRange = new DateRange( new SimpleDate(startMonth, Integer.parseInt(startMonthDay)), new SimpleDate(endMonth, Integer.parseInt(endMonthDay)));
+				m_logger.log("Got dateRange "+dateRange.toString());
 			}
 		}
 		setFlags();
@@ -219,6 +241,9 @@ public class ParkingSchedule {
 		}
 		else {
 			sb.append("Parking Permitted<br>");
+			if (timeLimitMinutes > 0) {
+				sb.append("Time Limit: "+timeLimitMinutes+" minutes<br>");
+			}
 		}
 		if ( allHours) {
 			sb.append("any time<br>");
@@ -230,13 +255,13 @@ public class ParkingSchedule {
 			sb.append("any day of the week<br>");
 		}
 		else {
-			sb.append(weekDays+"<br>");
+			sb.append(weekDays.displayText()+"<br>");
 		}
 		if ( allDaysOfYear ) {
 			sb.append("every day of the year<br>");
 		}
 		else {
-			sb.append(dateRange+"<br>");
+			sb.append(dateRange.displayText()+"<br>");
 		}
 		return sb.toString();
 	}
@@ -244,28 +269,31 @@ public class ParkingSchedule {
 	public String toString() {
 		StringBuilder sb = new StringBuilder(10);
 		if (isRestriction) {
-			sb.append("No Parking");
+			sb.append("NP");
 		}
 		else {
-			sb.append("Parking Permitted");
+			sb.append("P");
+			if (timeLimitMinutes > 0) {
+				sb.append(";L="+timeLimitMinutes);
+			}
 		}
 		if ( allHours) {
-			sb.append(";TimeRange=any time");
+			sb.append(";T=any");
 		}
 		else {
-			sb.append(";TimeRange="+timeRange);
+			sb.append(";T="+timeRange);
 		}
 		if ( allWeekDays ) {
-			sb.append(";WeekDays=Sunday to Saturday");
+			sb.append(";W=any");
 		}
 		else {
-			sb.append(";WeekDays="+weekDays);
+			sb.append(";W="+weekDays);
 		}
 		if ( allDaysOfYear ) {
-			sb.append(";DateRange=every day of the year");
+			sb.append(";D=any");
 		}
 		else {
-			sb.append(";DateRange="+dateRange);
+			sb.append(";D="+dateRange);
 		}
 		return sb.toString();
 	}

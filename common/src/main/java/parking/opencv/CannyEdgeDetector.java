@@ -24,23 +24,23 @@ public class CannyEdgeDetector {
 	private int kernalSize = 3;
 
 	public CannyEdgeDetector(BufferedImage image) {
-		System.out.println("Convert to Mat");
+//		System.out.println("Convert to Mat");
 		sourceImage = OpenCVConvert.bufferedImageToMat(image);
-		System.out.println("image size " + sourceImage.width() + " x " + sourceImage.height());
-		System.out.println("image has " + sourceImage.channels() + " channels");
-		System.out.println("image has " + sourceImage.depth() + " depth");
-		System.out.println("Convert to greyscale");
+//		System.out.println("image size " + sourceImage.width() + " x " + sourceImage.height());
+//		System.out.println("image has " + sourceImage.channels() + " channels");
+//		System.out.println("image has " + sourceImage.depth() + " depth");
+//		System.out.println("Convert to greyscale");
         grayLevelImage = new Mat(sourceImage.height(),sourceImage.width(),CvType.CV_8UC1);
         Imgproc.cvtColor(sourceImage, grayLevelImage, Imgproc.COLOR_RGB2GRAY);
         filteredImage = new Mat(sourceImage.height(),sourceImage.width(),CvType.CV_8UC1);
 		Size size = new Size(3,3);
-		System.out.println("Filter to remove noise");
+//		System.out.println("Filter to remove noise");
 		Imgproc.blur(grayLevelImage, filteredImage, size);
 	}
 
 	public Mat doCannyThreshold(int lowThreshold) {
 		detectedEdges = new Mat(filteredImage.height(),filteredImage.width(),CvType.CV_8UC1);
-		System.out.println("Canny Edge Detector with low threashold " + lowThreshold);
+//		System.out.println("Canny Edge Detector with low threashold " + lowThreshold);
 		Imgproc.Canny( filteredImage, detectedEdges, lowThreshold,
 				lowThreshold*highLowRatio, kernalSize, false);
 /*		

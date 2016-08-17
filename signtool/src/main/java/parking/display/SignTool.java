@@ -15,11 +15,17 @@ import parking.opencv.TextSegment;
 import parking.opencv.TextGroup;
 import parking.opencv.SignSegmenter;
 import parking.opencv.BinarySegmenter;
+import parking.opencv.ColorSegmenter;
 import parking.opencv.ShapeGenMode;
+import parking.opencv.WindowCluster;
 
 import parking.schedule.ParkingSchedule;
 import parking.schedule.ParkingSign;
 import parking.schedule.ParkingSignType;
+
+import parking.util.Profiler;
+import parking.util.Logger;
+import parking.util.LoggingTag;
 
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
@@ -32,6 +38,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JLabel;
 import javax.swing.JFileChooser;
+import javax.swing.JScrollPane;
 
 import java.awt.Color;
 import java.awt.FlowLayout;
@@ -40,6 +47,8 @@ import java.awt.GridLayout;
 import java.awt.Graphics;
 import java.awt.Polygon;
 import java.awt.image.BufferedImage;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 import java.io.File;
 import java.util.List;
@@ -91,16 +100,33 @@ public class SignTool extends JFrame {
 	private List<SignBorder> borders;
 	private List<EdgeBorder> edges;
 	private List<TextShape> shapes;
+	private SignBuilder signBuilder;
+	private ColorSegmenter colorSegmenter;
+
+	private Logger logger;
 	
 	private final long tomsec = 1000000;
 	private final String imagePath = "C:\\Users\\mike\\java-dev\\parking\\sign-pics";
 
 	public SignTool() {
+		File tagMapsFile = new File("tagMaps.txt");
+		logger = new Logger( tagMapsFile, LoggingTag.Image, this);
 		setTitle("Sign Image Processing Tool");
 		setBackground( Color.gray );
 		setLayout(new GridLayout(1,1));
 		imagePanel = new JPanel();
 		imagePanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+
+		imagePanel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent me) {
+                super.mouseClicked(me);
+                System.out.println("Got mouse event " +  me.getX() + " " + me.getY());
+                if (colorSegmenter != null) {
+                	colorSegmenter.logWindow(me.getX(), me.getY(), logger);
+                }
+            }
+        });
 		
       	getContentPane().add(imagePanel);
 
@@ -173,16 +199,23 @@ public class SignTool extends JFrame {
 		signTool.setVisible(true);
 	}
 	
+	public void loadImage4() {		
+		JFileChooser c = new JFileChooser(imageDir);
+		int rVal = c.showOpenDialog(this);
+        if (rVal == JFileChooser.APPROVE_OPTION) {
+          	File file = c.getSelectedFile();
+        	origImage = new SignImage(file, logger);
+        	zoom(0.25);
+      	}
+	}
+
 	public void loadImage() {		
 		JFileChooser c = new JFileChooser(imageDir);
 		int rVal = c.showOpenDialog(this);
         if (rVal == JFileChooser.APPROVE_OPTION) {
           	File file = c.getSelectedFile();
-        	origImage = new SignImage(file);
-//        	imagePanel.add(origImage);
-        	zoom(0.25);
-//        	zoom(0.5);
-//        	zoom(1.0);
+        	origImage = new SignImage(file, logger);
+        	zoom(1.0);
       	}
 	}
 
@@ -206,7 +239,7 @@ public class SignTool extends JFrame {
 		}
 		System.out.println("Invoke with value " + value);
 		cannyMat = canny.doCannyThreshold(value);
-		cannyImage = new SignImage(OpenCVConvert.matToBufferedImage(cannyMat, null));
+		cannyImage = new SignImage(OpenCVConvert.matToBufferedImage(cannyMat, null), logger);
 		cannyFrame.getContentPane().add(cannyImage);
 		cannyFrame.setSize(cannyImage.getWidth(), cannyImage.getHeight());
 	}
@@ -228,7 +261,7 @@ public class SignTool extends JFrame {
 		getLines();
 //		getCircles();		
 		getSignEdges();
-		getRect();
+//		getRect();
 		signImages();
 //		segmentSign();
 		binarySign();
@@ -250,10 +283,10 @@ public class SignTool extends JFrame {
 //		sliderVisible = true;
 		int lowThresh = 50;
 		cannyMat = canny.doCannyThreshold(lowThresh);		 
-		cannyImage = new SignImage(OpenCVConvert.matToBufferedImage(cannyMat, null));
+		cannyImage = new SignImage(OpenCVConvert.matToBufferedImage(cannyMat, null), logger);
 		cannyFrame.getContentPane().add(cannyImage);
 		cannyFrame.setSize(cannyImage.getWidth(), cannyImage.getHeight());
-		cannyFrame.setVisible(true);
+//		cannyFrame.setVisible(true);
 		long endTime = System.nanoTime();
 		long duration = (endTime - startTime)/tomsec;
 		System.out.println("canny took "+ duration + " msec");
@@ -263,9 +296,9 @@ public class SignTool extends JFrame {
 		if (shapeImage != null) {
 			shapeFrame.getContentPane().remove(shapeImage);
 		}
-		List<TextShape> shapes = TextShape.getShapes(cannyImage.getImage(), ShapeGenMode.EDGESCAN);
+		List<TextShape> shapes = TextShape.getShapes(cannyImage.getImage(), ShapeGenMode.EDGESCAN, logger);
 		if (shapes.size() > 0) {
-			shapeImage = new SignImage(shapes.get(0).getImage());
+			shapeImage = new SignImage(shapes.get(0).getImage(), logger);
 			shapeFrame.getContentPane().add(shapeImage);
 			shapeFrame.setSize(cannyImage.getWidth(), cannyImage.getHeight());
 			shapeFrame.setVisible(true);
@@ -346,6 +379,7 @@ public class SignTool extends JFrame {
 		System.out.println("sign edges took "+ duration + " msec");
 	}
 
+
 	public void getRect() {
 		 
 		long startTime = System.nanoTime();
@@ -354,8 +388,9 @@ public class SignTool extends JFrame {
 		}
 		int minDim = cannyImage.getWidth() > cannyImage.getHeight() ? cannyImage.getHeight() : cannyImage.getWidth();
 		rectImage = new SignImage( cannyImage.getWidth(), cannyImage.getHeight() );
-		clusters = clusterLines(edgeLines);
 /*		
+		clusters = clusterLines(edgeLines);
+		
 		List<Line> mergedLines = Line.mergeLines(edgeLines);
 		System.out.println("Merged lines:");
 		for (Line line : mergedLines) {
@@ -363,9 +398,10 @@ public class SignTool extends JFrame {
 		}
 
 		clusters = clusterLines(mergedLines);
-*/
 
-		rectangles = Rectangle.getRectangles(clusters, minDim);
+
+		rectangles = Rectangle.getRectanglesFromClusters(clusters, minDim);
+*/		
 		rectImage.setRectangles(rectangles);
 		rectFrame.getContentPane().add(rectImage);
 		rectFrame.setSize(cannyImage.getWidth(), cannyImage.getHeight());
@@ -377,7 +413,7 @@ public class SignTool extends JFrame {
 //			System.out.println(rect+" "+rect.getScore()+" "+rect.getPerimeter());
 		}
 	}
-
+/*
 	public List<CentroidCluster<Line>> clusterLines(List<Line> lines) {
 		final int maxClusters = 6;
 		final int maxIterations = 100;
@@ -385,7 +421,7 @@ public class SignTool extends JFrame {
 		kmeans = new KMeansPlusPlusClusterer<Line>(nbClusters, maxIterations);
 		return kmeans.cluster(lines);
 	}
-/*
+
 	public void getBorder() {
 		long startTime = System.nanoTime();
 		if (borderImage != null) {
@@ -410,7 +446,7 @@ public class SignTool extends JFrame {
 			signFrame.getContentPane().remove(viewedImage);			
 		}
 
-		signImages = SignImage.getSigns(zoomImage, cannyImage, rectangles, true);
+		signImages = SignImage.getSigns(zoomImage, cannyImage, rectangles, null, true, logger);
 /*		
 		for ( int i=0 ; i<100 && i<signImages.size(); i++) {
 			System.out.println("score="+signImages.get(i).getScoreDetails());
@@ -458,7 +494,7 @@ public class SignTool extends JFrame {
 			System.out.println("Graph is null...exiting");
 			return;
 		}
-		graphImage = new SignImage(graph);
+		graphImage = new SignImage(graph, logger);
 		graphFrame.getContentPane().add(graphImage);
 		System.out.println("Got graph of " + graphImage.getWidth() + " " + graphImage.getHeight());
 		graphFrame.setSize(graphImage.getWidth(), graphImage.getHeight());
@@ -474,7 +510,7 @@ public class SignTool extends JFrame {
 		if (signImages.size() > 0) {
 			SignImage img = signImages.get(0);
 			BinarySegmenter segmenter = new BinarySegmenter(img.getImage(), cannyImage.getImage(), img.getTheBorder(), img.getOrigBorder());
-			binaryImage = new SignImage(segmenter.getBinary());
+			binaryImage = new SignImage(segmenter.getBinary(), logger);
 			binaryImage.setTheBorder(img.getTheBorder());
 			binaryFrame.getContentPane().add(binaryImage);
 			binaryFrame.setSize( binaryImage.getWidth(), binaryImage.getHeight());
@@ -484,6 +520,47 @@ public class SignTool extends JFrame {
 		long endTime = System.nanoTime();
 		long duration = (endTime - startTime)/tomsec;
 		System.out.println("binary image took "+ duration + " msec");
+	}
+
+	public void doColorSegment() {
+		canny();
+		int numWindows = 20;
+		int numWindowClusters = 20;
+		colorSegmenter = new ColorSegmenter(zoomImage.getImage(), numWindows);
+		SignImage colorImage = new SignImage(colorSegmenter.getImage(), logger);
+		double minColorDist = 0.1;
+		colorSegmenter.mergeWindows(minColorDist);
+		SignImage mergedImage = new SignImage( colorSegmenter.applyColorWindows(zoomImage.getImage()), logger );		
+		colorSegmenter.computeWindowStats(3);
+		List<WindowCluster> clusterList = colorSegmenter.clusterWindows(numWindowClusters);
+		List<Boundary> clusterBoundaryList = colorSegmenter.findClusterBoundaries(clusterList);
+		mergedImage.setBoundaries(clusterBoundaryList);
+		show("Color Segmentation", mergedImage);
+		colorSegmenter.labelClustersByProximity(clusterList);		
+		logger.log(colorSegmenter.clustersAsString());
+		for (WindowCluster cl : clusterList) {
+			logger.log(cl.toString());
+		}
+		List<String> clusterLabels = new ArrayList<String>();
+		for (WindowCluster cl :  clusterList) {
+			clusterLabels.add(cl.getLabel());
+		}
+		colorSegmenter.applyLabels(clusterLabels);
+		logger.log(colorSegmenter.clusterLabelAsString());
+		
+	}
+
+
+	public void doHideBackground() {
+		List<Color> foreground = new ArrayList<Color>();
+/*		
+		foreground.add(Color.black);
+		foreground.add(Color.white);
+		foreground.add(Color.red);
+		SignImage foregroundImage = new SignImage( colorSegmenter.hideBackground( zoomImage.getImage(), foreground ), logger );
+*/
+		SignImage foregroundImage = new SignImage( colorSegmenter.hideBackground( zoomImage.getImage()), logger );		
+		show("Foreground colors", foregroundImage);
 	}
 
 	public void testTextRecog() {
@@ -497,7 +574,7 @@ public class SignTool extends JFrame {
 		corner[3] = new Point(zoomImage.getWidth()-1,0);
 		Rectangle border = new Rectangle( corner, null );
 		BinarySegmenter segmenter = new BinarySegmenter(zoomImage.getImage(), cannyImage.getImage(), border, border);
-		binaryImage = new SignImage(segmenter.getBinary());
+		binaryImage = new SignImage(segmenter.getBinary(), logger);
 		binaryImage.setTheBorder(border);
 		binaryFrame.getContentPane().add(binaryImage);
 		binaryFrame.setSize( binaryImage.getWidth(), binaryImage.getHeight());
@@ -513,9 +590,9 @@ public class SignTool extends JFrame {
 			textSegmentFrame.getContentPane().remove(textSegmentImage);
 		}
 
-		List<TextShape> shapes = TextShape.getShapes(binaryImage.getImage(),  ShapeGenMode.BINREGION);
+		List<TextShape> shapes = TextShape.getShapes(binaryImage.getImage(),  ShapeGenMode.BINREGION, logger);
 		if (shapes.size() > 0) {
-			shapeImage = new SignImage(shapes.get(0).getImage());			
+			shapeImage = new SignImage(shapes.get(0).getImage(), logger);			
 			shapeFrame.getContentPane().add(shapeImage);			
 			shapeFrame.setSize(binaryImage.getWidth(), binaryImage.getHeight());
 			shapeFrame.setVisible(true);
@@ -525,7 +602,7 @@ public class SignTool extends JFrame {
 //				System.out.println(shapes.get(i));
 			}
 			shapeImage.setRectangles(bounds);			
-			List<TextGroup> textGroups = TextGroup.getTextGroups(shapes);
+			List<TextGroup> textGroups = TextGroup.getTextGroups(shapes, logger);
 			List<Line> groupsBase = new ArrayList<Line>();
 			for (TextGroup group : textGroups) {
 				groupsBase.add(group.getBaseline());
@@ -546,6 +623,10 @@ public class SignTool extends JFrame {
 					}
 				}
 			}
+			SignImage img = signImages.get(0);
+			ParkingSignType signType = img.getSignType(cannyImage, allLines, img.getOrigBorder(), textGroups);
+			ParkingSchedule schedule = ParkingSign.readSchedule(signType, textGroups, logger);
+			logger.log(schedule.toString());
 			binaryImage.setLines(groupsBase);
 			double zoom = 2;
 			int zw = round(zoom*binaryImage.getWidth());
@@ -579,39 +660,52 @@ public class SignTool extends JFrame {
 
 	}	
 
-	private void displayMergedLines(List<CentroidCluster<Line>> clusters) {
-		List<Map<Line, List<Line>>> mergesList = Line.mergeLinesDebug(clusters);
-		int c = 0;
-		for ( Map<Line, List<Line>> merges : mergesList) {
-			int ln = 0;
-			for (Map.Entry<Line, List<Line>> entry : merges.entrySet()) {
-				Line line = entry.getKey();
-				List<Line> ml = entry.getValue();
-				if ( ml != null && ml.size() > 0) {
-					JFrame frame = new JFrame();
-					frame.setTitle("cluster " + c + " line " + ln + " has "+ ml.size() + " merges");
-					frame.setLayout(new FlowLayout(FlowLayout.LEFT));
-					frame.setVisible(true);
-					frame.setSize(cannyImage.getWidth(), cannyImage.getHeight());
-					SignImage image = new SignImage(cannyImage.getWidth(), cannyImage.getHeight());
-					frame.getContentPane().add(image);
-					List<Line> mLines = new ArrayList<Line>();
-					mLines.add(line);
-					for (Line l : ml) {
-						mLines.add(l);
-
-					}
-					image.setLines(mLines);
-				}
-				ln++;
-			}
-			c++;
-		}
+	public void readSign() {
+		SignImage image = null;
+		JFileChooser c = new JFileChooser(imageDir);
+		int rVal = c.showOpenDialog(this);
+        if (rVal == JFileChooser.APPROVE_OPTION) {
+          	File file = c.getSelectedFile();
+        	image = new SignImage(file, logger);
+      	}
+      	Profiler profiler = new Profiler("readSign", null, this);
+		signBuilder = new SignBuilder(image, logger);
+		ParkingSchedule schedule = signBuilder.readSign(0);
+		profiler.stop();
+		logger.logProfile(profiler);
 	}
 
-	void readSign() {
-		SignBuilder builder = new SignBuilder(zoomImage);
-		ParkingSchedule schedule = builder.readSign(0);
+	public void readSignFromLoadedImage() {
+		signBuilder = new SignBuilder(origImage, logger);
+		ParkingSchedule schedule = signBuilder.readSign(0);
+	}
+
+	public SignBuilder getBuilder() {
+		return signBuilder;
+	}
+
+	public void show(String title, SignImage image) {
+		int width = image.getWidth() > 800 ? 800 : image.getWidth();
+		int height = image.getHeight() > 1000 ? 1000 : image.getHeight();		
+		double scaleFactor = 800.0 /image.getMinDim();
+		logger.log("got scale factor = "+scaleFactor);
+		SignImage displayImage = scaleFactor < 1.0 ? image.scale(scaleFactor) : image;
+		logger.log("display "+title+" size "+image.getWidth()+" x "+image.getHeight()+" as "+displayImage.getWidth()+" x "+displayImage.getHeight());
+		JFrame frame = new JFrame();
+		frame.setLayout(new FlowLayout(FlowLayout.LEFT));
+		frame.setTitle(title);
+		frame.setSize(width, height);
+		frame.add(displayImage);
+		frame.setVisible(true);
+/*		
+		displayImage.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                System.out.println("clicked");
+            }
+        });
+*/        
 	}
 
 	private static int round(double val) {

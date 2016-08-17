@@ -27,6 +27,13 @@ public class Vector {
 		computeProps();
 	}
 
+	public Vector( double radius, double angle, boolean dummy) {
+		this.length = radius;
+		this.angle = angle;
+		x = radius * Math.cos( angle );
+		y = radius * Math.sin( angle );
+	}
+
 	private void computeProps() {
 		length = Math.sqrt(x*x + y *y);
 		angle = Math.atan2(y, x);

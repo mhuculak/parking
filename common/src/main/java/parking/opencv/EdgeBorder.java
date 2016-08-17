@@ -1,6 +1,8 @@
 package parking.opencv;
 
 import parking.display.SignImage;
+import parking.util.Logger;
+import parking.util.LoggingTag;
 
 import org.opencv.core.Point;
 
@@ -162,6 +164,7 @@ public class EdgeBorder {
 	}
 
 	public static List<EdgeBorder> getEdges(SignImage image, List<Line> lines) {
+		Logger logger = new Logger(LoggingTag.Border, "EdgeBorder", "getEdges");
 		List<EdgeBorder> edges = new ArrayList<EdgeBorder>();
 		double maxScore = 0.0;
 		for (Line line : lines) {
@@ -174,11 +177,13 @@ public class EdgeBorder {
 		}
 		EdgeComparator comparator = new EdgeComparator();
 		Collections.sort(edges, comparator);
-		System.out.println("Found " + edges.size() + " edges");
+		logger.log("Found " + edges.size() + " edges");		
 		for (EdgeBorder e : edges) {
-			e.setScore(e.getScore()/maxScore);
-//			System.out.println(e);
+//			e.setScore(e.getScore()/maxScore);
+			e.setScore(e.getScore());
+//			logger.log(e.toString());
 		}
+		
 		return edges;
 	}
 

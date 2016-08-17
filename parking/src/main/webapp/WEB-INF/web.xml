@@ -47,6 +47,11 @@
      <url-pattern>/main/upload</url-pattern>
   </servlet-mapping>
 
+  <servlet-mapping>
+     <servlet-name>UploadSign</servlet-name>
+     <url-pattern>/upload</url-pattern>
+  </servlet-mapping>
+
   <servlet>
      <servlet-name>SignServlet</servlet-name>
      <servlet-class>parking.admin.SignServlet</servlet-class>
@@ -57,6 +62,30 @@
      <url-pattern>/main/signs</url-pattern>
   </servlet-mapping>
 
+   <servlet>
+     <servlet-name>VerifyServlet</servlet-name>
+     <servlet-class>parking.admin.VerifyServlet</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+     <servlet-name>VerifyServlet</servlet-name>
+     <url-pattern>/upload/verify</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+     <servlet-name>VerifyServlet</servlet-name>
+     <url-pattern>/main/edit/verify</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
+     <servlet-name>EditServlet</servlet-name>
+     <servlet-class>parking.admin.EditServlet</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+     <servlet-name>EditServlet</servlet-name>
+     <url-pattern>/main/edit</url-pattern>
+  </servlet-mapping>
   <servlet>
      <servlet-name>TestServlet</servlet-name>
      <servlet-class>parking.admin.TestServlet</servlet-class>

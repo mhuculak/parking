@@ -1,273 +1,120 @@
-Read new image BufferedImage@747fc8ee: type = 5 ColorModel: #pixelBits = 24 numComponents = 3 color space = java.awt.color.ICC_ColorSpace@82809d transparency = 1 has alpha = false isAlphaPre = false ByteInterleavedRaster: width = 2448 height = 3264 #numDataElements 3 dataOff[0] = 2
-Zoom image is 612 x 816
-Convert to Mat
-image size 612 x 816
-image has 3 channels
-image has 0 depth
-Convert to greyscale
-Filter to remove noise
-Canny Edge Detector with low threashold 50
-Found 53 edges
-edges took 644 msec
-Found 21 horizontal lines and 28 vertical lines
-Found 420 vertical pairs, made 756 checks max 490.68609096897745 min 0.07142857129793805 avg 204.29066208687817
-Found 168 horizontal pairs, made 420checks max 536.5442915375988 min 0.00732893936386959 avg 208.16184413851636
-cluster 0 : 310/552, 0/0, 0/0, 51/96, 0/0, 0/0, 
-cluster 1 : 0/0, 0/2, 0/0, 0/0, 0/0, 10/38, 
-cluster 2 : 
-cluster 3 : 51/96, 0/0, 0/0, 8/12, 0/0, 0/0, 
-cluster 4 : 
-cluster 5 : 0/0, 10/38, 0/0, 0/0, 0/0, 148/342, 
-full size is 1100 reduced is 943
-Found 943 rectangles at level 0
-borders took 557 msec
-full size is 100 reduced is 44
-signs took 233 msec
-shapes took 417 msec
-Dropping 3 1:2:1:2:1 bounds = 0.0,89.0 0.0,319.0 20.0,319.0 20.0,89.0
-Dropping NONE 1 bounds = 0.0,319.0 0.0,390.0 6.0,390.0 6.0,319.0
-Dropping 1:2:1 2:1 bounds = 30.0,0.0 30.0,122.0 409.0,122.0 409.0,0.0
-sign type took 142 msec
-Classify line of size 8 raw text: TERCRE0r
-Baseline is {0.0, 430.4763014937076}:{370.0, 428.0247713835396} len = 370.0081215323267 dir = -0.006625660098700331
-Ti1rLJlI 1 1
-E 1:3 1
-RC 1:2 1:2:1:2
-C 1:2 1:2:1:2:1
-RC 1:2 1:2:1:2
-E 1:3 1
-0DC 1:2 1:2:1
-rT1iLJlI 1 1
-Got hour = hrs score = 0.4305933655979009 index = 6 cannonical =0 value = 1 score = 0.543399628004257 index = 0
-no time range found
-best match for Sunday is dim score = 0.5349990838640392 index = 6 cannonical =0
-best match for Monday is lundi score = 0.32099945031842353 index = 3 cannonical =0
-best match for Tuesday is mar score = 0.4305933655979009 index = 5 cannonical =0
-best match for Wednesday is mercredi score = 0.7483501261783614 index = 0 cannonical =0
-best match for Thursday is jeu score = 0.3779744436700167 index = 0 cannonical =0
-best match for Friday is vendredi score = 0.5405508573721094 index = 0 cannonical =0
-best match for Saturday is samdi score = 0.32099945031842353 index = 3 cannonical =0
-best match for January is January score = 0.18454001382767182 index = 2 cannonical =0
-best match for February is fevrier score = 0.31482457797384295 index = 1 cannonical =0
-best match for March is mar score = 0.4305933655979009 index = 5 cannonical =0
-best match for April is apr score = 0.4305933655979009 index = 5 cannonical =0
-best match for May is mai score = 0.24266445942415124 index = 5 cannonical =0
-best match for June is June score = 0.22799784378803617 index = 2 cannonical =0
-best match for July is juil score = 0.18199834456811342 index = 5 cannonical =0
-best match for August is aout score = 0.2344175362976385 index = 4 cannonical =0
-best match for September is sept score = 0.4624153800856747 index = 4 cannonical =0
-best match for October is oct score = 0.5550825223208845 index = 5 cannonical =0
-best match for November is November score = 0.16147251209921284 index = 0 cannonical =0
-best match for December is dec score = 0.5465229323080814 index = 4 cannonical =0
-retain oct score = 0.5550825223208845 index = 5 cannonical =9 5 8
-TIMEPERIOD score = 0.9739929936021579 60
-WEEKDAYS score = 0.7483501261783614 3
-Using TIMEPERIOD score = 0.9739929936021579 60 for text group size = 8
-Classify line of size 1 raw text: L
-Baseline is {11.0, 69.0}:{39.0, 69.0} len = 28.0 dir = 0.0
-LITr1iJl 1 1
-Got minute = minutes score = 0.0 index = 0 cannonical =0 value = null
-no time range found
-best match for Sunday is Sunday score = 0.0 index = 0 cannonical =0
-best match for Monday is lun score = 0.37486778419676625 index = 0 cannonical =0
-best match for Tuesday is tue score = 0.29795416635210653 index = 0 cannonical =0
-best match for Wednesday is Wednesday score = 0.0 index = 0 cannonical =0
-best match for Thursday is thur score = 0.22346562476407988 index = 0 cannonical =0
-best match for Friday is Friday score = 0.0 index = 0 cannonical =0
-best match for Saturday is Saturday score = 0.0 index = 0 cannonical =0
-best match for January is jan score = 0.021126974536525827 index = 0 cannonical =0
-best match for February is February score = 0.0 index = 0 cannonical =0
-best match for March is March score = 0.0 index = 0 cannonical =0
-best match for April is April score = 0.0 index = 0 cannonical =0
-best match for May is May score = 0.0 index = 0 cannonical =0
-best match for June is jun score = 0.021126974536525827 index = 0 cannonical =0
-best match for July is jul score = 0.021126974536525827 index = 0 cannonical =0
-best match for August is August score = 0.0 index = 0 cannonical =0
-best match for September is September score = 0.0 index = 0 cannonical =0
-best match for October is October score = 0.0 index = 0 cannonical =0
-best match for November is November score = 0.0 index = 0 cannonical =0
-best match for December is December score = 0.0 index = 0 cannonical =0
-retain jan score = 0.021126974536525827 index = 0 cannonical =0 0 3
-WEEKDAYS score = 0.37486778419676625 1
-Using WEEKDAYS score = 0.37486778419676625 1 for text group size = 1
-Classify line of size 1 raw text: r
-Baseline is {16.0, 118.0}:{51.0, 118.0} len = 35.0 dir = 0.0
-rLJ1liIT 1 1
-Got minute = minutes score = 0.0 index = 0 cannonical =0 value = null
-no time range found
-best match for Sunday is Sunday score = 0.0 index = 0 cannonical =0
-best match for Monday is lun score = 0.09888421115675254 index = 0 cannonical =0
-best match for Tuesday is tue score = 0.019776842231350508 index = 0 cannonical =0
-best match for Wednesday is Wednesday score = 0.0 index = 0 cannonical =0
-best match for Thursday is jeu score = 0.09888421115675254 index = 0 cannonical =0
-best match for Friday is Friday score = 0.0 index = 0 cannonical =0
-best match for Saturday is Saturday score = 0.0 index = 0 cannonical =0
-best match for January is jan score = 0.09888421115675254 index = 0 cannonical =0
-best match for February is February score = 0.0 index = 0 cannonical =0
-best match for March is March score = 0.0 index = 0 cannonical =0
-best match for April is April score = 0.0 index = 0 cannonical =0
-best match for May is May score = 0.0 index = 0 cannonical =0
-best match for June is jun score = 0.09888421115675254 index = 0 cannonical =0
-best match for July is jul score = 0.09888421115675254 index = 0 cannonical =0
-best match for August is August score = 0.0 index = 0 cannonical =0
-best match for September is September score = 0.0 index = 0 cannonical =0
-best match for October is October score = 0.0 index = 0 cannonical =0
-best match for November is November score = 0.0 index = 0 cannonical =0
-best match for December is December score = 0.0 index = 0 cannonical =0
-retain jan score = 0.09888421115675254 index = 0 cannonical =0 0 3
-WEEKDAYS score = 0.09888421115675254 1
-Ignore WEEKDAYS score = 0.09888421115675254 1 for text group size = 1
-Classify line of size 1 raw text: I
-Baseline is {45.0, 512.0}:{119.0, 512.0} len = 74.0 dir = 0.0
-IL1TrliJ 1 1
-Got minute = minutes score = 0.0 index = 0 cannonical =0 value = null
-no time range found
-best match for Sunday is Sunday score = 0.0 index = 0 cannonical =0
-best match for Monday is lun score = 0.17670682730923695 index = 0 cannonical =0
-best match for Tuesday is tue score = 0.16810097532989085 index = 0 cannonical =0
-best match for Wednesday is Wednesday score = 0.0 index = 0 cannonical =0
-best match for Thursday is thur score = 0.12607573149741813 index = 0 cannonical =0
-best match for Friday is Friday score = 0.0 index = 0 cannonical =0
-best match for Saturday is Saturday score = 0.0 index = 0 cannonical =0
-best match for January is jan score = 0.007896404138439768 index = 0 cannonical =0
-best match for February is February score = 0.0 index = 0 cannonical =0
-best match for March is March score = 0.0 index = 0 cannonical =0
-best match for April is April score = 0.0 index = 0 cannonical =0
-best match for May is May score = 0.0 index = 0 cannonical =0
-best match for June is jun score = 0.007896404138439768 index = 0 cannonical =0
-best match for July is jul score = 0.007896404138439768 index = 0 cannonical =0
-best match for August is August score = 0.0 index = 0 cannonical =0
-best match for September is September score = 0.0 index = 0 cannonical =0
-best match for October is October score = 0.0 index = 0 cannonical =0
-best match for November is November score = 0.0 index = 0 cannonical =0
-best match for December is December score = 0.0 index = 0 cannonical =0
-retain jan score = 0.007896404138439768 index = 0 cannonical =0 0 3
-WEEKDAYS score = 0.17670682730923695 1
-Ignore WEEKDAYS score = 0.17670682730923695 1 for text group size = 1
-Classify line of size 1 raw text: 7
-Baseline is {47.0, 370.0}:{81.0, 370.0} len = 34.0 dir = 0.0
-7 2:1 1
-Got minute = minutes score = 0.0 index = 0 cannonical =0 value = null
-no time range found
-best match for Sunday is Sunday score = 0.0 index = 0 cannonical =0
-best match for Monday is Monday score = 0.0 index = 0 cannonical =0
-best match for Tuesday is Tuesday score = 0.0 index = 0 cannonical =0
-best match for Wednesday is Wednesday score = 0.0 index = 0 cannonical =0
-best match for Thursday is Thursday score = 0.0 index = 0 cannonical =0
-best match for Friday is Friday score = 0.0 index = 0 cannonical =0
-best match for Saturday is Saturday score = 0.0 index = 0 cannonical =0
-best match for January is January score = 0.0 index = 0 cannonical =0
-best match for February is February score = 0.0 index = 0 cannonical =0
-best match for March is March score = 0.0 index = 0 cannonical =0
-best match for April is April score = 0.0 index = 0 cannonical =0
-best match for May is May score = 0.0 index = 0 cannonical =0
-best match for June is June score = 0.0 index = 0 cannonical =0
-best match for July is July score = 0.0 index = 0 cannonical =0
-best match for August is August score = 0.0 index = 0 cannonical =0
-best match for September is September score = 0.0 index = 0 cannonical =0
-best match for October is October score = 0.0 index = 0 cannonical =0
-best match for November is November score = 0.0 index = 0 cannonical =0
-best match for December is December score = 0.0 index = 0 cannonical =0
-Classify line of size 11 raw text: MAR8AU15w0r
-Baseline is {98.0, 503.97366881488057}:{375.0, 505.1127542160306} len = 277.00234207593104 dir = 0.004112198485310953
-M 1 2:3
-A 1:2:1 1:2:1:2
-RC 1:2 1:2:1:2
-835sS 2:3:2 1:2:1:2:1
-A 1:2:1 1:2:1:2
-UuvVYr 1 2:1
-1TrliJIL 1 1
-5s 2:3 1:2:1
-wN 1 2:3:2
-0DO9pP4bo 1:2:1 1:2:1
-rYvVUu 1 2:1
-Got hour = hours score = 0.4180683056156189 index = 3 cannonical =0 value = null
-no time range found
-best match for Sunday is sun score = 0.3261826182618242 index = 4 cannonical =0
-best match for Monday is Monday score = 0.444185411249759 index = 0 cannonical =0
-best match for Tuesday is mar score = 0.9227485057193663 index = 0 cannonical =0
-best match for Wednesday is mer score = 0.5894151723860329 index = 0 cannonical =0
-best match for Thursday is thur score = 0.42976768265061716 index = 3 cannonical =0
-best match for Friday is fri score = 0.3265129026450313 index = 9 cannonical =0
-best match for Saturday is sam score = 0.4324011933790172 index = 3 cannonical =0
-best match for January is jan score = 0.3600677042117275 index = 6 cannonical =0
-best match for February is fev score = 0.2583418062820972 index = 8 cannonical =0
-best match for March is mar score = 0.9227485057193663 index = 0 cannonical =0
-best match for April is avr score = 0.8247737941056258 index = 4 cannonical =0
-best match for May is May score = 0.6666666666666666 index = 0 cannonical =0
-best match for June is juin score = 0.3968312653479106 index = 4 cannonical =0
-best match for July is jul score = 0.5332134979876594 index = 4 cannonical =0
-best match for August is aug score = 0.6595159515951575 index = 4 cannonical =0
-best match for September is sep score = 0.32131452247085607 index = 7 cannonical =0
-best match for October is oct score = 0.28692810457516477 index = 4 cannonical =0
-best match for November is nov score = 0.7002039910322102 index = 8 cannonical =0
-best match for December is dec score = 0.2751955180834463 index = 9 cannonical =0
-retain mar score = 0.9227485057193663 index = 0 cannonical =2 0 3
-retain avr score = 0.8247737941056258 index = 4 cannonical =3 4 7
-retain nov score = 0.7002039910322102 index = 8 cannonical =10 8 11
-first = mar score = 0.9227485057193663 index = 0 cannonical =2 second = avr score = 0.8247737941056258 index = 4 cannonical =3
-day1 = null day2 = 150 score = 2.1983315025429335 index = 4 to = a score = 1.0 index = 1 cannonical =0
-WEEKDAYS score = 1.6816626017434149 2 6 5
-Using WEEKDAYS score = 1.6816626017434149 2 6 5 for text group size = 11
-Classify line of size 4 raw text: 7h9h
-Baseline is {106.0, 343.789217339178}:{327.0, 342.2036079577386} len = 221.0056880650598 dir = -0.007174579978028337
-7 1:2:1 1
-h 1 1:2:1:2
-9a 2:3:1 1:2:1:2:1
-h 1 1:2:1:2
-Got hour = h score = 0.8413786563146566 index = 1 cannonical =0 value = 7 score = 1.0 index = 0
-Found h1=h score = 0.8413786563146566 index = 1 cannonical =0 h2 = h score = 0.6089827681924752 index = 3 cannonical =0 hourVal1 = 7 score = 1.0 index = 0
-Found to = a score = 0.530650890226289 index = 2 cannonical =0 hourVal2 = 9 score = 0.8378393505427524 index = 2
-best match for Sunday is Sunday score = 0.0 index = 0 cannonical =0
-best match for Monday is Monday score = 0.0 index = 0 cannonical =0
-best match for Tuesday is mar score = 0.17688363007542965 index = 1 cannonical =0
-best match for Wednesday is Wednesday score = 0.0 index = 0 cannonical =0
-best match for Thursday is thur score = 0.21034466407866415 index = 0 cannonical =0
-best match for Friday is Friday score = 0.0 index = 0 cannonical =0
-best match for Saturday is sam score = 0.17688363007542965 index = 1 cannonical =0
-best match for January is jan score = 0.17688363007542965 index = 1 cannonical =0
-best match for February is February score = 0.0 index = 0 cannonical =0
-best match for March is mar score = 0.17688363007542965 index = 1 cannonical =0
-best match for April is apr score = 0.17688363007542965 index = 2 cannonical =0
-best match for May is May score = 0.17688363007542965 index = 1 cannonical =0
-best match for June is June score = 0.0 index = 0 cannonical =0
-best match for July is July score = 0.0 index = 0 cannonical =0
-best match for August is aug score = 0.17688363007542965 index = 2 cannonical =0
-best match for September is September score = 0.0 index = 0 cannonical =0
-best match for October is October score = 0.0 index = 0 cannonical =0
-best match for November is November score = 0.0 index = 0 cannonical =0
-best match for December is December score = 0.0 index = 0 cannonical =0
-retain apr score = 0.17688363007542965 index = 2 cannonical =3 2 5
-TIMERANGE score = 3.288200775049884 7 9
-TIMEPERIOD score = 1.8413786563146566 420
-WEEKDAYS score = 0.21034466407866415 4
-Using TIMERANGE score = 3.288200775049884 7 9 for text group size = 4
-Classify line of size 1 raw text: v
-Baseline is {401.0, 360.0}:{409.0, 360.0} len = 8.0 dir = 0.0
-vVYUur 1 2:1
-Got minute = minutes score = 0.0 index = 0 cannonical =0 value = null
-no time range found
-best match for Sunday is Sunday score = 0.0 index = 0 cannonical =0
-best match for Monday is Monday score = 0.0 index = 0 cannonical =0
-best match for Tuesday is Tuesday score = 0.0 index = 0 cannonical =0
-best match for Wednesday is Wednesday score = 0.0 index = 0 cannonical =0
-best match for Thursday is Thursday score = 0.0 index = 0 cannonical =0
-best match for Friday is ven score = 0.21071072938086388 index = 0 cannonical =0
-best match for Saturday is Saturday score = 0.0 index = 0 cannonical =0
-best match for January is January score = 0.0 index = 0 cannonical =0
-best match for February is February score = 0.0 index = 0 cannonical =0
-best match for March is March score = 0.0 index = 0 cannonical =0
-best match for April is April score = 0.0 index = 0 cannonical =0
-best match for May is May score = 0.0 index = 0 cannonical =0
-best match for June is June score = 0.0 index = 0 cannonical =0
-best match for July is July score = 0.0 index = 0 cannonical =0
-best match for August is August score = 0.0 index = 0 cannonical =0
-best match for September is September score = 0.0 index = 0 cannonical =0
-best match for October is October score = 0.0 index = 0 cannonical =0
-best match for November is November score = 0.0 index = 0 cannonical =0
-best match for December is December score = 0.0 index = 0 cannonical =0
-WEEKDAYS score = 0.21071072938086388 5
-Ignore WEEKDAYS score = 0.21071072938086388 5 for text group size = 1
-ERROR: dont know how process time limit for parking restriction
-No Parking: 07:00 to 09:00 Tuesday Saturday Friday  every day of the year
-schedule took 25 msec
+read C:\Users\mike\java-dev\parking\tagMaps.txt
+Read new image BufferedImage@df89ed5: type = 5 ColorModel: #pixelBits = 24 numComponents = 3 color space = java.awt.color.ICC_ColorSpace@6c3c4163 transparency = 1 has alpha = false isAlphaPre = false ByteInterleavedRaster: width = 2416 height = 3306 #numDataElements 3 dataOff[0] = 2
+Scale image with minDim 2416 by factor 0.33112582781456956
+Working image is 800 x 1095
+Found 459 total lines
+Found 459 verified lines
+cluster 137 lines
+Found 20 clustered lines
+min separation factor = 0.25 min dim = 800 min separation = 200.0
+min separation = 200.0
+full size is 85 reduced is 85
+Found 85 rectangles at level 0
+edge winner: 169.52054571066665,248.3434510307705 527.4780208816219,241.31917997521816 527.4780208816219,990.6075940998587 157.43484382356795,987.3621006868058
+color winner: 209.4549499672363,247.55981023710865 226.3812202019273,987.9668004198717 679.6276678643037,991.9420348021749 680.0242934105369,238.32573399048076
+shape winner: 674.7319867620569,840.0179391810193 669.8831929549781,238.5247348309225 277.54875381410375,246.22359191900935 277.54875381410375,835.0905685715745
+combined winner: 169.52054571066665,248.3434510307705 669.8831929549781,238.5247348309225 675.9564270097243,991.9098358893182 157.43484382356795,987.3621006868058
+border: 169.52054571066665,248.3434510307705 669.8831929549781,238.5247348309225 675.9564270097243,991.9098358893182 157.43484382356795,987.3621006868058 wins = 1 rank = 5 score = 0.8788298122060799 0.8788298122060799  Color: 0.8788298122060799 Shape: 0.9730106836310113 Edge: 5118.634190802656 Area: 380138.7388586311 0.9730106836310113 Asp:0.9813470351053251 Ang:0.9564451550937352 Skw:0.9810300879014735 Per:2511.5275469755684 
+  orig edge:{230.14038232791322, 247.15389586492438}:{616.1683433505859, 239.57879205699186} len = 386.10227775684393 dir = -0.01962068161448985 score = 989.1824069069588
+  orig edge:{671.257876718744, 409.05435001655263}:{674.5454879199305, 816.8827450231576} len = 407.84164593757896 dir = 1.5627352402441608 score = 231.0086167201962
+  orig edge:{14.937620849336193, 986.1123173447158}:{625.9958633316481, 991.4716527518294} len = 611.0817442712373 dir = 0.008770355462064849 score = 829.0031981950493
+  orig edge:{173.35150097290682, 14.087516932674399}:{158.02708508904757, 951.1476263952832} len = 937.1854066662892 dir = 1.5871485861718166 score = 3069.439968980452
+border: 209.4549499672363,247.55981023710865 226.3812202019273,987.9668004198717 679.6276678643037,991.9420348021749 680.0242934105369,238.32573399048076 wins = 1 rank = 12 score = 0.8927101741624922 0.8927101741624922  Color: 0.8927101741624922 Shape: 0.9453850285833387 Edge: 4773.220347895605 Area: 345072.30882196047 0.9453850285833387 Asp:0.9228853063334627 Ang:0.9683728607084852 Skw:0.944349125485705 Per:2418.14065950573 
+  orig edge:{220.18139090125507, 716.7672456148515}:{223.71316832311535, 871.258025606983} len = 154.53114428598118 dir = 1.5479395429654468 score = 130.0346077425998
+  orig edge:{14.937620849336193, 986.1123173447158}:{625.9958633316481, 991.4716527518294} len = 611.0817442712373 dir = 0.008770355462064849 score = 829.0031981950493
+  orig edge:{680.1497247298737, -0.0025526824145440555}:{679.6592121889666, 932.0056099050037} len = 932.0082916649014 dir = 1.571322623146483 score = 2825.0001350509974
+  orig edge:{230.14038232791322, 247.15389586492438}:{616.1683433505859, 239.57879205699186} len = 386.10227775684393 dir = -0.01962068161448985 score = 989.1824069069588
+border: 169.52054571066665,248.3434510307705 527.4780208816219,241.31917997521816 527.4780208816219,990.6075940998587 157.43484382356795,987.3621006868058 wins = 1 rank = 45 score = 0.7550749562092495 0.7550749562092495  Color: 0.7550749562092495 Shape: 0.8983088338680848 Edge: 5268.62557408246 Area: 270860.7109923222 0.8983088338680848 Asp:0.7301047710724915 Ang:0.9564451550937352 Skw:0.9864258571079839 Per:2216.4896773380738 
+  orig edge:{230.14038232791322, 247.15389586492438}:{616.1683433505859, 239.57879205699186} len = 386.10227775684393 dir = -0.01962068161448985 score = 989.1824069069588
+  orig edge:{527.478020881622, 571.0}:{527.478020881622, 777.0000000000001} len = 206.0000000000001 dir = 1.5707963267948966 score = 381.0000000000001
+  orig edge:{14.937620849336193, 986.1123173447158}:{625.9958633316481, 991.4716527518294} len = 611.0817442712373 dir = 0.008770355462064849 score = 829.0031981950493
+  orig edge:{173.35150097290682, 14.087516932674399}:{158.02708508904757, 951.1476263952832} len = 937.1854066662892 dir = 1.5871485861718166 score = 3069.439968980452
+border: 674.7319867620569,840.0179391810193 669.8831929549781,238.5247348309225 277.54875381410375,246.22359191900935 277.54875381410375,835.0905685715745 wins = 1 rank = 60 score = 0.779495408357651 0.779495408357651  Color: 0.779495408357651 Shape: 0.9867240275357808 Edge: 2027.1923827356395 Area: 234955.95935473274 0.9867240275357808 Asp:0.9900562902290921 Ang:0.9910933578316372 Skw:0.9789767197380715 Per:1980.003490084941 
+  orig edge:{671.257876718744, 409.05435001655263}:{674.5454879199305, 816.8827450231576} len = 407.84164593757896 dir = 1.5627352402441608 score = 231.0086167201962
+  orig edge:{230.14038232791322, 247.15389586492438}:{616.1683433505859, 239.57879205699186} len = 386.10227775684393 dir = -0.01962068161448985 score = 989.1824069069588
+  orig edge:{277.5487538141038, 692.9999999999999}:{277.5487538141038, 779.0} len = 86.00000000000011 dir = 1.5707963267948966 score = 341.0
+  orig edge:{63.081506844993214, 832.4299335755786}:{609.2406979949756, 839.2054681986708} len = 546.2012174529015 dir = 0.012405150681381124 score = 466.00135910848445
+top border is 169.52054571066665,248.3434510307705 669.8831929549781,238.5247348309225 675.9564270097243,991.9098358893182 157.43484382356795,987.3621006868058
+sign image is 519 x 753
+restored image is 800 x 1162
+sign image is 800 x 1162
+New group with size=2997 center = {77.20253586920253, 778.346012679346} bound = 63.0,702.0 63.0,836.0 107.0,836.0 107.0,702.0 aspect = 3.0454545454545454 topology = 1 1 LrIT1iJl
+Dropping 1 1:2:1:2:1:2 bounds = 80.0,464.0 80.0,579.0 131.0,579.0 131.0,464.0
+New group with size=1177 center = {113.61002548853016, 944.1129991503823} bound = 101.0,898.0 101.0,993.0 120.0,993.0 120.0,898.0 aspect = 5.0 topology = 1 1 T1lJirLI
+add size=5079 center = {153.1748375664501, 769.7147076196102} bound = 123.0,701.0 123.0,835.0 184.0,835.0 184.0,701.0 aspect = 2.19672131147541 topology = 1 2:1 UuvVYr to group size = 2
+add size=2246 center = {179.9220837043633, 945.7845057880677} bound = 156.0,896.0 156.0,989.0 204.0,989.0 204.0,896.0 aspect = 1.9375 topology = 1:2:1 1:2:1:2 A to group size = 2
+Dropping 1:2:3:5:4:5:4:2:1 1:2:3:4:3:4:3:2:1 bounds = 172.0,42.0 172.0,494.0 636.0,494.0 636.0,42.0
+New group with size=3429 center = {225.9650043744532, 567.4208223972004} bound = 197.0,511.0 197.0,643.0 250.0,643.0 250.0,511.0 aspect = 2.490566037735849 topology = 1:2:1 1 7
+add size=1965 center = {222.58727735368956, 934.9694656488549} bound = 201.0,894.0 201.0,986.0 242.0,986.0 242.0,894.0 aspect = 2.2439024390243905 topology = 1 2:1 YvVruU to group size = 3
+add size=6928 center = {242.61965935334874, 766.8885681293302} bound = 210.0,701.0 210.0,834.0 275.0,834.0 275.0,701.0 aspect = 2.046153846153846 topology = 1 2:3:2 wN to group size = 3
+Dropping 1:2:1:2 1:2:1:2 bounds = 256.0,892.0 256.0,985.0 297.0,985.0 297.0,892.0
+add size=4744 center = {293.8178752107926, 584.285623946037} bound = 270.0,511.0 270.0,643.0 324.0,643.0 324.0,511.0 aspect = 2.4444444444444446 topology = 1 1:2:1:2 h to group size = 2
+add size=1110 center = {315.61981981981984, 937.0450450450451} bound = 309.0,891.0 309.0,983.0 322.0,983.0 322.0,891.0 aspect = 7.076923076923077 topology = 1 1 rT1iLJlI to group size = 4
+add size=1428 center = {343.859243697479, 943.7703081232493} bound = 333.0,889.0 333.0,983.0 370.0,983.0 370.0,889.0 aspect = 2.5405405405405403 topology = 1 1 LITr1iJl to group size = 5
+add size=1427 center = {379.46531184302734, 802.6194814295725} bound = 361.0,766.0 361.0,834.0 397.0,834.0 397.0,766.0 aspect = 1.8888888888888888 topology = 1:2:1 1:2:1:2 A to group size = 4
+add size=1416 center = {418.5268361581921, 800.3368644067797} bound = 403.0,766.0 403.0,834.0 434.0,834.0 434.0,766.0 aspect = 2.193548387096774 topology = 1 2:1 UuYvVr to group size = 5
+add size=1224 center = {435.8692810457516, 950.0482026143791} bound = 420.0,914.0 420.0,981.0 454.0,981.0 454.0,914.0 aspect = 1.9705882352941178 topology = 1:2:1 1:2:1:2 A to group size = 6
+add size=1274 center = {474.787284144427, 947.2692307692307} bound = 460.0,912.0 460.0,981.0 489.0,981.0 489.0,912.0 aspect = 2.3793103448275863 topology = 1 2:1 UuvVYr to group size = 7
+add size=5390 center = {503.4155844155844, 573.5313543599258} bound = 474.0,506.0 474.0,642.0 529.0,642.0 529.0,506.0 aspect = 2.4727272727272727 topology = 2:3:1 1:2:1:2:1:2:1 9 to group size = 3
+add size=4734 center = {509.8286861005492, 761.397127165188} bound = 477.0,699.0 477.0,833.0 545.0,833.0 545.0,699.0 aspect = 1.9705882352941178 topology = 1 2:1 YrvVUu to group size = 6
+add size=1179 center = {552.0687022900763, 927.8269720101781} bound = 539.0,883.0 539.0,978.0 559.0,978.0 559.0,883.0 aspect = 4.75 topology = 1 1 1TlJirLI to group size = 8
+add size=4674 center = {580.5325203252032, 581.1780059905863} bound = 557.0,508.0 557.0,640.0 612.0,640.0 612.0,508.0 aspect = 2.4 topology = 1 1:2:1:2 h to group size = 4
+add size=4473 center = {578.0999329309188, 765.049183992846} bound = 559.0,698.0 559.0,833.0 608.0,833.0 608.0,698.0 aspect = 2.7551020408163267 topology = 1:3 1 E to group size = 7
+add size=2444 center = {612.1828968903437, 927.4856792144026} bound = 593.0,881.0 593.0,974.0 633.0,974.0 633.0,881.0 aspect = 2.325 topology = 1:2:1 1:2:1 0DO9pP4bo to group size = 9
+add size=7199 center = {667.3407417696902, 764.3617169051257} bound = 634.0,697.0 634.0,832.0 700.0,832.0 700.0,697.0 aspect = 2.0454545454545454 topology = 1 2:3:2 wN to group size = 8
+add size=1826 center = {658.9649507119386, 926.8992332968237} bound = 646.0,879.0 646.0,973.0 683.0,973.0 683.0,879.0 aspect = 2.5405405405405403 topology = 1:3:2 1 E to group size = 10
+add size=1703 center = {707.0469759248385, 927.1432765707575} bound = 692.0,878.0 692.0,975.0 731.0,975.0 731.0,878.0 aspect = 2.4871794871794872 topology = 1:2 1:2:1:2:1 C to group size = 11
+New group with size=1522 center = {780.0315374507227, 1141.673455978975} bound = 729.0,1098.0 729.0,1159.0 799.0,1159.0 799.0,1098.0 aspect = 0.8714285714285714 topology = 1 1 1lJirTLI
+border = 19.680003588831593,14.169585413538256 791.6411053753345,-0.4846857727934293 800.2671600677648,1161.8316738709368 0.30492569950680415,1154.3036920117956
+trans = -157.0:-239.0>285.9545418418809 rotation = 6.397883315602615E-4 center = {261.1987523747342, 377.5350306094542}
+ vert axis = {405.66055448208306, 6.842449820372413}:{400.28604288363584, 1158.0676829413662} len = 1151.237778545079 dir = 1.5754648072958952
+orig border = 169.52054571066665,248.3434510307705 669.8831929549781,238.5247348309225 675.9564270097243,991.9098358893182 157.43484382356795,987.3621006868058
+orig vert axis = {419.7018693328224, 243.4340929308465}:{416.6956354166461, 989.635968288062} len = 746.2079309609246 dir = 1.5748250189643351
+border center is {418.1987523747342, 616.5350306094542} vert axis list has size = 4
+Found ellipse at {405.8716019501618, 410.37223217704724}
+heures score = 2.8277409611700333 norm score = 0.4712901601950055 misses= 3 index = 2 cannonical =0
+hours score = 1.9487895332502916 norm score = 0.38975790665005833 misses= 3 index = 2 cannonical =0
+hrs score = 0.9677516090985989 norm score = 0.32258386969953295 misses= 2 index = 4 cannonical =0
+h score = 0.0 norm score = 0.0 misses= 1 index = 0 cannonical =0
+Got hour = heures score = 2.8277409611700333 norm score = 0.4712901601950055 misses= 3 index = 2 cannonical =0
+Got minute = minutes score = 1.8599893520714343 norm score = 0.26571276458163345 misses= 5 index = 1 cannonical =0
+Got hour = heures score = 2.8277409611700333 norm score = 0.4712901601950055 misses= 3 index = 2 cannonical =0 value = 1 score = 0.5551700459476071 index = 0
+date check1 is WEEKDAYS score = 4.57666861340369 coverage = 1.625 misses = 2 1 5 lundivendredi score = 4.57666861340369 norm score = 0.35205143180028386 misses= 2 index = 0 cannonical =0
+date check2 is WEEKDAYS score = 2.4553301200644464 coverage = 0.75 misses = 3 0 Sunday score = 2.4553301200644464 norm score = 0.4092216866774077 misses= 3 index = 0 cannonical =0
+date check1 is null
+date check2 is null
+heures score = 1.7121398388548728 norm score = 0.28535663980914544 misses= 4 index = 4 cannonical =0
+hours score = 1.7121398388548728 norm score = 0.34242796777097456 misses= 3 index = 4 cannonical =0
+hrs score = 1.2940401712117848 norm score = 0.43134672373726163 misses= 2 index = 2 cannonical =0
+h score = 0.0 norm score = 0.0 misses= 1 index = 0 cannonical =0
+Got hour = heures score = 1.7121398388548728 norm score = 0.28535663980914544 misses= 4 index = 4 cannonical =0
+Got minute = minutes score = 2.6804950591089556 norm score = 0.38292786558699365 misses= 4 index = 3 cannonical =0
+Got minute = minutes score = 2.6804950591089556 norm score = 0.38292786558699365 misses= 4 index = 3 cannonical =0 value = 1 score = 0.8712844972561475 index = 0
+date check1 is WEEKDAYS score = 5.765053168495237 coverage = 1.4545454545454546 misses = 4 4 0 thurthurdimanche score = 5.765053168495237 norm score = 0.36031582303095233 misses= 4 index = 0 cannonical =0
+date check2 is WEEKDAYS score = 2.924480761347206 coverage = 0.5454545454545454 misses = 2 5 Friday score = 2.924480761347206 norm score = 0.48741346022453436 misses= 2 index = 1 cannonical =5
+date check1 is DATES score = 8.562731291589039 coverage = 1.0 misses = 1 1 1 July December 1juilau1dec score = 8.562731291589039 norm score = 0.7784301174171854 misses= 1 index = 0 cannonical =0
+date check2 is DATES score = 10.30439000234992 coverage = 1.0909090909090908 misses = 1 1 1 April December avril score = 3.7165730830580603 norm score = 0.743314616611612 misses= 1 index = 1 cannonical =3 dec score = 2.6098868267427333 norm score = 0.8699622755809111 misses= 0 index = 8 cannonical =11 au score = 1.9894231409712593 norm score = 0.9947115704856296 misses= 0 index = 5 cannonical =0 1 score = 0.8712844972561475 index = 0 1 score = 1.1172224543217184 index = 7
+h score = 0.633992967328685 norm score = 0.633992967328685 misses= 0 index = 1 cannonical =0
+hrs score = 0.633992967328685 norm score = 0.2113309891095617 misses= 2 index = 1 cannonical =0
+heures score = 0.633992967328685 norm score = 0.10566549455478084 misses= 2 index = 1 cannonical =0
+hours score = 0.633992967328685 norm score = 0.12679859346573702 misses= 2 index = 1 cannonical =0
+Got hour = h score = 0.633992967328685 norm score = 0.633992967328685 misses= 0 index = 1 cannonical =0
+Got minute = minutes score = 0.0 norm score = 0.0 misses= 4 index = 0 cannonical =0
+Got hour = h score = 0.633992967328685 norm score = 0.633992967328685 misses= 0 index = 1 cannonical =0 value = 7 score = 1.0 index = 0
+date check1 is WEEKDAYS score = 0.633992967328685 coverage = 2.0 misses = 3 4 Thursday score = 0.633992967328685 norm score = 0.07924912091608563 misses= 3 index = 0 cannonical =4
+date check2 is WEEKDAYS score = 0.633992967328685 coverage = 1.0 misses = 3 4 thur score = 0.633992967328685 norm score = 0.15849824183217126 misses= 3 index = 0 cannonical =4
+date check1 is null
+date check2 is null
+heures score = 0.0 norm score = 0.0 misses= 1 index = 0 cannonical =0
+hours score = 0.0 norm score = 0.0 misses= 1 index = 0 cannonical =0
+h score = 0.0 norm score = 0.0 misses= 1 index = 0 cannonical =0
+hrs score = 0.0 norm score = 0.0 misses= 1 index = 0 cannonical =0
+Got hour = heures score = 0.0 norm score = 0.0 misses= 1 index = 0 cannonical =0
+Got minute = minutes score = 0.0 norm score = 0.0 misses= 1 index = 0 cannonical =0
+Got minute = minutes score = 0.0 norm score = 0.0 misses= 1 index = 0 cannonical =0 value = null
+date check1 is WEEKDAYS score = 0.8620858543053488 coverage = 5.0 misses = 0 1 lundi score = 0.8620858543053488 norm score = 0.17241717086106975 misses= 0 index = 0 cannonical =1
+date check2 is WEEKDAYS score = 0.8620858543053488 coverage = 3.0 misses = 0 1 lun score = 0.8620858543053488 norm score = 0.2873619514351163 misses= 0 index = 0 cannonical =1
+date check1 is null
+date check2 is null
+NP;T=07:00,09:00;W=M,F,;D=A 1,D 1
+parking.display.SignTool.readSign 7456 msec
