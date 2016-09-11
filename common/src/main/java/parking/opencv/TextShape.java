@@ -598,13 +598,7 @@ public class TextShape {
 		for ( int i=begin ; i<end ; i++ ) {
 			List<Double> trans = transData.transList.get(i);
 			int g1 = trans.size()-1 <= 2*g+1 ?  trans.size()-2 : 2*g+1;
-			try {
-				gap[i] =  trans.get(g1+1) - trans.get(g1);
-//				System.out.println("Got gap = "+gap[i]+" between branch "+g+" and branch "+(g+1));
-			}
-			catch (Exception ex) {
-				System.out.println("failed to get gap between branch "+g+" and branch "+(g+1)+" because size = "+trans.size());
-			}
+			gap[i] =  trans.get(g1+1) - trans.get(g1);
 		}
 		return gap;
 	}

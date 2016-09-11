@@ -291,7 +291,7 @@ public class ColorWindow implements Clusterable {
 		for ( Color c: colorList) {
 			stats.put(c, new WindowStats( xWinSize*yWinSize ));
 		}
-		try {
+
 		for ( int x=xpos ; x<xpos+xWinSize ; x++) {
 			for ( int y=ypos ; y<ypos+yWinSize ; y++) {
 				if (x>=0 && y>=0 && x<image.getWidth() && y<image.getHeight()) {
@@ -302,10 +302,7 @@ public class ColorWindow implements Clusterable {
 				}
 			}
 		}
-		}
-		catch (Exception ex) {
-			System.out.println("caught "+ex+" for "+this.toString());
-		}
+
 		for ( Color c: colorList) {
 			WindowStats cStats = stats.get(c);
 			cStats.compute();

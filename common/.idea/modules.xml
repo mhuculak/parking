@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/../android/android.iml" filepath="$PROJECT_DIR$/../android/android.iml" />
+      <module fileurl="file://$PROJECT_DIR$/common.iml" filepath="$PROJECT_DIR$/common.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../db-setup/db-setup.iml" filepath="$PROJECT_DIR$/../db-setup/db-setup.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../parking.iml" filepath="$PROJECT_DIR$/../parking.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../parking/parking-parking.iml" filepath="$PROJECT_DIR$/../parking/parking-parking.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../signtool/signtool.iml" filepath="$PROJECT_DIR$/../signtool/signtool.iml" />
+    </modules>
+  </component>
+</project>

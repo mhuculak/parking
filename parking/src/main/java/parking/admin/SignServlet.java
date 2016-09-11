@@ -5,8 +5,10 @@ import parking.map.SignMarker;
 import parking.map.Sign;
 import parking.map.Position;
 import parking.map.MapBounds;
+import parking.map.MapInit;
 import parking.security.WebLogin;
-
+import parking.display.ThumbNail;
+import parking.util.Utils;
 import parking.util.Logger;
 import parking.util.LoggingTag;
 
@@ -16,22 +18,37 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import java.awt.image.BufferedImage;
+import javax.imageio.ImageIO;
+
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ByteArrayInputStream;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
+
+import com.mongodb.gridfs.GridFSDBFile;
 
 public class SignServlet extends HttpServlet {
 
 	public void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		Logger logger = new Logger(request.getSession(), LoggingTag.Servlet, this, "service");
+		MapInit mapInit = new MapInit();
 		String method = request.getMethod();
 		Map<String,String> postData = null;
 		if (method.equals("POST")) {
 			postData = WebLogin.getBody(request);
 
 		}
+		WebLogin login = WebLogin.authenticate(request);
+		if (login.isLoggedIn() == false) {        
+         	login.setResponseNotAuthorized(response);         
+         	return;
+      	}
 		String db = request.getParameter("db");
 		String id = request.getParameter("id");
 		
@@ -42,11 +59,12 @@ public class SignServlet extends HttpServlet {
 
 		String signNum = request.getParameter("signNum");	
 
-		PrintWriter out = response.getWriter();
+		
 		response.setContentType("text/plain");
 		
 		MongoInterface mongo = MongoInterface.getInstance(db, request.getServerPort(), logger);
 		if (method.equals("POST")) {
+			PrintWriter out = response.getWriter();			
 			Position p = new Position (postData.get("lat"), postData.get("lng"));
 			String user = postData.get("user");
 			logger.log("move sign id " + postData.get("id") + " to " + p.toString());			
@@ -57,16 +75,48 @@ public class SignServlet extends HttpServlet {
 			else {
 				out.println("failed");
 			}
+			out.close();
 		}
 		else { // GET
 			String json = null;
 			try {
-				ObjectMapper mapper = new ObjectMapper();
-				
+				ObjectMapper mapper = new ObjectMapper();				
 				if ( id != null) {
 					Sign sign = mongo.getSignDB().getSign(id);
-					String signDetails = sign.displayText();
-					json = mapper.writeValueAsString(signDetails);
+					if (sign != null) {
+						String action = request.getParameter("action");
+						if (action != null) {
+							if (action.equals("thumbnail")) {
+								String size = request.getParameter("size");
+								logger.log("get image "+sign.getImageName());
+								GridFSDBFile image = mongo.getPictureDB().getPicture(sign.getImageName());
+								if (image != null) {
+									BufferedImage signImage = ImageIO.read(image.getInputStream());
+									ThumbNail thumb = null;
+									logger.log("create thumb ");
+									if (size == null) {
+									 	thumb = new ThumbNail(signImage, null);
+									}
+									else {
+										thumb = new ThumbNail(signImage, null, Utils.parseInt(size));
+									}
+									ByteArrayOutputStream os = new ByteArrayOutputStream();
+									ImageIO.write(thumb.getImage(),"jpg", os); 
+									InputStream inStream = new ByteArrayInputStream(os.toByteArray());
+									OutputStream outStream = response.getOutputStream();
+									response.setContentType("image/jpeg");
+        							response.setContentLength(os.toByteArray().length);
+        							logger.log("send data... ");
+									sendImage(inStream, outStream, logger);
+									return;																
+								}
+							}
+						}
+						else {						
+							String signDetails = sign.displayText();
+							json = mapper.writeValueAsString(signDetails);
+						}
+					}
 				}
 				else if ( signNum != null) {
 					List<SignMarker> signs = new ArrayList<SignMarker>();
@@ -91,10 +141,23 @@ public class SignServlet extends HttpServlet {
 				ex.printStackTrace();
 			}
 //			System.out.println("send "+json+" to client");
+			PrintWriter out = response.getWriter();
 			out.println(json);
-
+			out.close();
 		}		
-		out.close();
+		
 	}
-	
+	private void sendImage( InputStream is, OutputStream outStream, Logger logger) throws IOException {
+		byte[] buffer = new byte[4096];
+        int bytesRead = -1;
+         
+        while ((bytesRead = is.read(buffer)) != -1) {
+            outStream.write(buffer, 0, bytesRead);
+            logger.log("send " + bytesRead + " bytes from input stream to output stream");
+        }
+         
+        is.close();
+        outStream.close();  
+
+	}
 }

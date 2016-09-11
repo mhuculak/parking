@@ -18,6 +18,7 @@ import parking.opencv.ColorSegmenter;
 import parking.schedule.ParkingSignType;
 import parking.util.Logger;
 import parking.util.LoggingTag;
+import parking.util.Utils;
 
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 
@@ -199,6 +200,7 @@ public class SignImage extends JComponent {
 	private double zoom;
 	private List<Integer> rank;
 	private int winCount;
+	private List<String> winList;
 	private Integer totalRank;
 	private Logger m_logger;
 
@@ -207,6 +209,7 @@ public class SignImage extends JComponent {
 	private final Color[] colors = new Color[] { Color.red, Color.green, Color.orange, Color.cyan, Color.pink, 
 		Color.yellow, Color.magenta,  Color.blue};
 
+/*
 	public SignImage(String uri) {
 		try {
     		HttpClient httpClient = new HttpClient();
@@ -218,7 +221,7 @@ public class SignImage extends JComponent {
         }
         zoom = 1.0;
 	}
-
+*/
 	public SignImage(File imageFile) {
 		System.out.println("ERROR: no logger defined for SignImage");
 		try {    		
@@ -254,8 +257,8 @@ public class SignImage extends JComponent {
 
 	public SignImage( int width, int height, double zoom) {
 		this.zoom = zoom;
-		int w = round(width*zoom);
-		int h = round(height*zoom);
+		int w = Utils.round(width*zoom);
+		int h = Utils.round(height*zoom);
 		img = new BufferedImage ( w, h, BufferedImage.TYPE_INT_ARGB );
 		Graphics2D g = img.createGraphics();
 		g.setColor( Color.black) ;
@@ -339,6 +342,26 @@ public class SignImage extends JComponent {
 
 	}
 
+	public SignImage rotate90() {
+		BufferedImage rotatedImage = rotateImage90(img);
+		return new SignImage(rotatedImage, m_logger);
+	}
+
+	public static BufferedImage rotateImage90(BufferedImage bufferdImage) {
+		BufferedImage rotatedImage = new BufferedImage( bufferdImage.getHeight(), bufferdImage.getWidth(), bufferdImage.getType());
+		Graphics2D g = rotatedImage.createGraphics();
+		for ( int origx=0 ; origx<bufferdImage.getWidth() ; origx++) {
+			int y = origx;
+			for ( int origy=0 ; origy<bufferdImage.getHeight() ; origy++ ) {
+				int x = bufferdImage.getHeight() - origy;
+				Color color = new Color(bufferdImage.getRGB(origx, origy));
+				g.setColor(color);
+				g.fillRect(x,y,1,1);
+			}
+		}
+		g.dispose();
+		return rotatedImage;
+	}
 	
 	public void setLetters(List<TextShape> letters) {
 		this.letters = letters;
@@ -425,13 +448,22 @@ public class SignImage extends JComponent {
 		return totalRank;
 	}
 
-	public void won() {
+	public void won(String metric) {
 		winCount++;
+		if ( winList == null) {
+			winList = new ArrayList<String>();
+		}
+		winList.add(metric);
 	}
 
 	public int getWins() {
 		return winCount;
 	}
+
+	public List<String> getWinList() {
+		return winList;
+	}
+
 /*
 	private void computeScore(ColorSegmenter colorSegmenter) {
 		
@@ -473,11 +505,13 @@ public class SignImage extends JComponent {
 	//
 
 	public ParkingSignType getSignType(SignImage canny, List<Line> lines, Rectangle cannyBorder, List<TextGroup> textGroups) {
+/*		
 		System.out.println("border = "+theBorder.toString());		
 		System.out.println(theBorder.getTransform().toString());
 		System.out.println(" vert axis = "+theBorder.getVertAxis());
 		System.out.println("orig border = "+cannyBorder.toString());
 		System.out.println("orig vert axis = "+cannyBorder.getVertAxis());
+*/		
 		List<Line> vertAxisList = estimateVertAxisFromTextGroups(textGroups, cannyBorder);
 //		canny.setLines(vertAxisList);
 		System.out.println("border center is "+cannyBorder.getCentroid()+" vert axis list has size = "+vertAxisList.size());
@@ -765,7 +799,7 @@ public class SignImage extends JComponent {
        		for (Circle c : circles) {
        			int k = i % 8;
         		g.setColor(colors[k]);
-        		g.drawOval(round(c.getCenter().x - c.getRadius()), round(c.getCenter().y - c.getRadius()), round(2*c.getRadius()), round(2*c.getRadius()));
+        		g.drawOval(Utils.round(c.getCenter().x - c.getRadius()), Utils.round(c.getCenter().y - c.getRadius()), Utils.round(2*c.getRadius()), Utils.round(2*c.getRadius()));
        		}
        		i++;
        	}
@@ -774,10 +808,10 @@ public class SignImage extends JComponent {
        		g.setColor(Color.blue);
 //       		System.out.println("display outerEllipse "+outerEllipse);
        		if (Math.abs(Math.sin(outerEllipse.getAngle())) < 1/Math.sqrt(2)) {
-       			g.drawOval(round(outerEllipse.getCenter().x - outerEllipse.getMajor()), round(outerEllipse.getCenter().y - outerEllipse.getMinor()), round(2*outerEllipse.getMajor()), round(2*outerEllipse.getMinor()));
+       			g.drawOval(Utils.round(outerEllipse.getCenter().x - outerEllipse.getMajor()), Utils.round(outerEllipse.getCenter().y - outerEllipse.getMinor()), Utils.round(2*outerEllipse.getMajor()), Utils.round(2*outerEllipse.getMinor()));
        		}
        		else {
-       			g.drawOval(round(outerEllipse.getCenter().x - outerEllipse.getMinor()), round(outerEllipse.getCenter().y - outerEllipse.getMajor()), round(2*outerEllipse.getMinor()), round(2*outerEllipse.getMajor()));
+       			g.drawOval(Utils.round(outerEllipse.getCenter().x - outerEllipse.getMinor()), Utils.round(outerEllipse.getCenter().y - outerEllipse.getMajor()), Utils.round(2*outerEllipse.getMinor()), Utils.round(2*outerEllipse.getMajor()));
        		}
        	}
        	if (boundaries != null) {
@@ -825,46 +859,31 @@ public class SignImage extends JComponent {
     }
 
     private static List<SignImage> rankSigns(List<SignImage> signs, Logger logger) {
-
-    	List<SignImage> topChoices = new ArrayList<SignImage>();
+    	if (signs.size() == 0) {
+    		return signs;
+    	}
+    	Map<SignImage, Integer> topMap = new HashMap<SignImage, Integer>();
     	Map<String, Comparator> comparators = new HashMap<String, Comparator>();
     	comparators.put( "combined", new CombinedComparator());
     	comparators.put( "color", new ColorComparator());
     	comparators.put( "shape", new ShapeComparator() );
     	comparators.put( "edge", new EdgeComparator() );
 
-    	for (String comparison : comparators.keySet()) {
+    	for (String metric : comparators.keySet()) {
     		try {
-    			Collections.sort(signs, comparators.get(comparison));
-    			logger.log(comparison+" winner: "+signs.get(0).getOrigBorder().toString());
-				addWinner(signs, topChoices);
+    			Collections.sort(signs, comparators.get(metric));
+    			logger.log(metric+" winner: "+signs.get(0).getOrigBorder().toString());
+				addWinner(signs, topMap, metric);
     		}
     		catch (IllegalArgumentException ex) {
-    			logger.error("Skipped "+comparison+" because "+ex.toString());
+    			logger.error("Skipped "+metric+" because "+ex.toString());
     		}
     	}
- /*   	
-		Collections.sort(signs, combined);
-		logger.log("combined winner: "+signs.get(0).getOrigBorder().toString());
-		addWinner(signs, topChoices);
-
-		ColorComparator color = new ColorComparator();
-		Collections.sort(signs, color);
-		logger.log("color winner: "+signs.get(0).getOrigBorder().toString());
-		addWinner(signs, topChoices);
-
-		ShapeComparator shape = new ShapeComparator();
-		Collections.sort(signs, shape);
-		logger.log("shape winner: "+signs.get(0).getOrigBorder().toString());
-		addWinner(signs, topChoices);
-
-		EdgeComparator edge = new EdgeComparator();
-		Collections.sort(signs, edge);
-		logger.log("edge winner: "+signs.get(0).getOrigBorder().toString());
-		addWinner(signs, topChoices);	
-*/		
+ 	
+ 		List<SignImage> topChoices = new ArrayList<SignImage>(topMap.keySet());
 		WinComparator win = new WinComparator();
 		Collections.sort(topChoices, win);
+		topChoices.get(0).won("top");
 
 		return topChoices;
 
@@ -872,10 +891,16 @@ public class SignImage extends JComponent {
 
     // 
 
-    private static void addWinner(List<SignImage> signs, List<SignImage> topChoices) {
+    private static void addWinner(List<SignImage> signs, Map<SignImage, Integer> topMap, String metric) {
     	SignImage top = signs.get(0);
-    	top.won();
-    	topChoices.add(top);
+    	top.won(metric);
+    	Integer topCount = topMap.get(top);
+    	if (topCount == null) {
+    		topMap.put(top, 1);
+    	}
+    	else {
+    		topMap.put(top, ++topCount);
+    	}
     	addRank(signs);
     }
 
@@ -918,8 +943,8 @@ public class SignImage extends JComponent {
 		signImage.setOrigBorder(rect);
 		Graphics2D g2 = (Graphics2D)signImage.getImage().createGraphics();
 		Point pos = rect.getBoundPos();
-		int xoff = -1*round(pos.x);
-		int yoff = -1*round(pos.y);
+		int xoff = -1*Utils.round(pos.x);
+		int yoff = -1*Utils.round(pos.y);
 		double correction = rect.getCorrectAngle();
         g2.setColor(Color.red);
         g2.setStroke(new BasicStroke(4));
@@ -940,23 +965,18 @@ public class SignImage extends JComponent {
 
     public static BufferedImage applyBorderTransform(BufferedImage image, Rectangle border) {
     	Point boundDim = border.getBoundDim();
-    	BufferedImage outImage = new BufferedImage(round(boundDim.x), round(boundDim.y), BufferedImage.TYPE_INT_ARGB );
+    	BufferedImage outImage = new BufferedImage(Utils.round(boundDim.x), Utils.round(boundDim.y), BufferedImage.TYPE_INT_ARGB );
     	Graphics2D g2 = (Graphics2D)outImage.createGraphics();
 		Point pos = border.getBoundPos();
-		int xoff = -1*round(pos.x);
-		int yoff = -1*round(pos.y);
+		int xoff = -1*Utils.round(pos.x);
+		int yoff = -1*Utils.round(pos.y);
 		double correction = border.getCorrectAngle();
 		Point centroid = border.getCentroid();
 		AffineTransform transform = new AffineTransform();
 		transform.setToTranslation(xoff, yoff);
-        transform.rotate( correction, round(centroid.x), round(centroid.y));
+        transform.rotate( correction, Utils.round(centroid.x), Utils.round(centroid.y));
         g2.drawImage( image, transform, null);
         g2.dispose();
         return outImage;
     }
-
-
-	private static int round(double val) {
-		return (int)(val +0.5);
-	}
 }

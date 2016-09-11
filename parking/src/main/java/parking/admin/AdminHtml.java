@@ -55,15 +55,17 @@ public class AdminHtml {
       }
       else {
          Address address = sign.getAddress();
-         List<String> nearby = sign.getPosition().findNearbyStreets(maxStreetSearchAngle, logger);
+         List<String> nearby = sign.getPosition().findNearbyStreets(maxStreetSearchAngle);
          String signStreet = address.getStreetName();
          sb.append("<input type=\"hidden\" name=\"city\" value=\""+address.getCity()+"\">");
          sb.append("<input type=\"hidden\" name=\"zip\" value=\""+address.getPostalCodeZIP()+"\">");
          sb.append("Street Number: <input type=\"text\" style=\"width:50px;\" name=\"streetNumber\" value=\""+address.getStreetNumber()+"\"><br>");
          sb.append("Street Name:<input type=\"checkbox\" name=\"street\" value=\""+signStreet+"\" checked>"+signStreet+"<br>");
-         sb.append("Nearby streets:<br>");
-         for ( String street : nearby) {
-            sb.append("<input type=\"checkbox\" name=\"street\" value=\""+street+"\">"+street+"<br>");
+         if (nearby != null) {
+            sb.append("Nearby streets:<br>");
+            for ( String street : nearby) {
+               sb.append("<input type=\"checkbox\" name=\"street\" value=\""+street+"\">"+street+"<br>");
+            }
          }
       }  
    }
@@ -103,7 +105,7 @@ public class AdminHtml {
       }
       WeekDaySet weekDays = schedule.getWeekDays();
       if (weekDays != null) {
-         Map<String, Boolean> weekDayMap = weekDays.getMap();
+         Map<String, Boolean> weekDayMap = weekDays.getWeekDayMap();
          sb.append("Week Day Range Read From Sign:<br>");
          int i=0;
          for ( String day : WeekDaySet.allDays) {
@@ -175,5 +177,32 @@ public class AdminHtml {
       sb.append("</body>");
       sb.append("</html>");
       return sb.toString();
+   }
+
+   public static String simplePage(String content, String userAgent) {
+      StringBuilder sb = new StringBuilder(100);
+      sb.append("<html>");
+      sb.append("<head>");
+      sb.append(getStyle(userAgent));
+      sb.append("<title>Servlet upload</title>");  
+      sb.append("</head>");
+      sb.append("<body>");
+      sb.append("<p>"+content+"</p>"); 
+      sb.append("</body>");
+      sb.append("</html>");
+      return sb.toString();
+   }
+
+
+   //
+   // FIXME: when I try this with my Android phone, the web pages still use a tiny font size that needs to be zoomed to read
+   //
+   private static String getStyle(String userAgent) {
+      if (userAgent.contains("Android")) {
+         return "<style> body {font size: 5 em;} p {font size: 5 em;}h1 {font size: 7 em;} h2 {font size: 6 em;} </style>";
+      }
+      else {
+         return "<style> body {font size: 2 em;} p {font size: 2 em;}h1 {font size: 4 em;} h2 {font size: 3 em;} </style>";
+      }
    }
 }

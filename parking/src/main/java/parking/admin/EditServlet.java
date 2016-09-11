@@ -4,6 +4,7 @@ import parking.security.WebLogin;
 import parking.security.User.Permission;
 import parking.database.MongoInterface;
 import parking.map.Sign;
+import parking.map.MapInit;
 
 import parking.util.Logger;
 import parking.util.LoggingTag;
@@ -22,6 +23,7 @@ public class EditServlet extends HttpServlet {
 
 	public void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		Logger logger = new Logger(request.getSession(), LoggingTag.Servlet, this, "service");
+      MapInit mapInit = new MapInit();
       Map<String, String> postData = WebLogin.getBody(request);
 		String method = request.getMethod();
 		int port = request.getServerPort();
@@ -34,7 +36,7 @@ public class EditServlet extends HttpServlet {
          }
          else if (login == null) {
             logger.log("create dummy login...");
-            login = new WebLogin(request.getRequestURI());
+            login = new WebLogin(request);
          }
       }	
       else {

@@ -10,11 +10,15 @@ public enum LoggingTag {
 	Security,
 	SignDB, 
 	PictureDB, 
-	UserDB, 
+	UserDB,
+	TrajectoryDB,
+	MapDB,
+	MapEditDB,
 	Image, 
 	Shape, 
 	Circle, 
 	Border,
 	BorderScore, 
-	Binary
+	Binary,
+	Accuracy
 };

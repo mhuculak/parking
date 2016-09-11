@@ -18,14 +18,18 @@ import parking.opencv.BinarySegmenter;
 import parking.opencv.ColorSegmenter;
 import parking.opencv.ShapeGenMode;
 import parking.opencv.WindowCluster;
+import parking.opencv.SignRecognizer;
 
 import parking.schedule.ParkingSchedule;
 import parking.schedule.ParkingSign;
 import parking.schedule.ParkingSignType;
 
+import parking.database.DbCleanup;
+
 import parking.util.Profiler;
 import parking.util.Logger;
 import parking.util.LoggingTag;
+import parking.util.Utils;
 
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
@@ -100,7 +104,7 @@ public class SignTool extends JFrame {
 	private List<SignBorder> borders;
 	private List<EdgeBorder> edges;
 	private List<TextShape> shapes;
-	private SignBuilder signBuilder;
+	private SignRecognizer signRecognizer;
 	private ColorSegmenter colorSegmenter;
 
 	private Logger logger;
@@ -629,8 +633,8 @@ public class SignTool extends JFrame {
 			logger.log(schedule.toString());
 			binaryImage.setLines(groupsBase);
 			double zoom = 2;
-			int zw = round(zoom*binaryImage.getWidth());
-			int zh = round(zoom*binaryImage.getHeight());
+			int zw = Utils.round(zoom*binaryImage.getWidth());
+			int zh = Utils.round(zoom*binaryImage.getHeight());
 			textSegmentImage = new SignImage(binaryImage.getWidth(), binaryImage.getHeight(), zoom);
 			textSegmentFrame.getContentPane().add(textSegmentImage);			
 			textSegmentFrame.setSize(zw, zh);
@@ -669,19 +673,19 @@ public class SignTool extends JFrame {
         	image = new SignImage(file, logger);
       	}
       	Profiler profiler = new Profiler("readSign", null, this);
-		signBuilder = new SignBuilder(image, logger);
-		ParkingSchedule schedule = signBuilder.readSign(0);
+		signRecognizer = new SignRecognizer(image, logger);
+		ParkingSchedule schedule = signRecognizer.readSign(0);
 		profiler.stop();
 		logger.logProfile(profiler);
 	}
 
 	public void readSignFromLoadedImage() {
-		signBuilder = new SignBuilder(origImage, logger);
-		ParkingSchedule schedule = signBuilder.readSign(0);
+		signRecognizer = new SignRecognizer(origImage, logger);
+		ParkingSchedule schedule = signRecognizer.readSign(0);
 	}
 
-	public SignBuilder getBuilder() {
-		return signBuilder;
+	public SignRecognizer getRecognizer() {
+		return signRecognizer;
 	}
 
 	public void show(String title, SignImage image) {
@@ -696,19 +700,29 @@ public class SignTool extends JFrame {
 		frame.setTitle(title);
 		frame.setSize(width, height);
 		frame.add(displayImage);
-		frame.setVisible(true);
-/*		
-		displayImage.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                super.mouseClicked(e);
-                System.out.println("clicked");
-            }
-        });
-*/        
+		frame.setVisible(true);    
 	}
 
-	private static int round(double val) {
-		return (int)(val +0.5);
+	public void testSignDatabase() {
+		SignTester signTester = new SignTester(logger);
+//		signTester.run();
+	}
+
+	public void verifySignDatabase() {
+		SignVerifier signVerifier = new SignVerifier(logger);
+//		signTester.run();
+	}
+
+	public void cleanupSignDatabase() {
+		DbCleanup dbCleanup = new DbCleanup(logger);
+		dbCleanup.findMissingPictures("demo_test");
+		dbCleanup.removeDuplicatePictures("demo_test");
+		dbCleanup.addMissingSigns("demo_test");
+		dbCleanup.findMissingPictures("demo_test");
+	}
+
+	public void viewSignDatabase() {
+		DBViewer dbViewer = new DBViewer(logger);
+		dbViewer.viewDatabase();
 	}
 }

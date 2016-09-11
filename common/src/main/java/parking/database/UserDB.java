@@ -22,6 +22,7 @@ import com.mongodb.DBCursor;
 import com.mongodb.BasicDBList;
 
 import java.util.Base64;
+// import android.util.Base64;
 
 public class UserDB {
 

@@ -6,6 +6,7 @@ import parking.security.Password;
 import parking.security.User.Permission;
 
 import parking.map.Sign;
+import parking.map.MapInit;
 import parking.schedule.ParkingSchedule;
 
 import parking.util.Logger;
@@ -77,14 +78,20 @@ public class MapServlet extends HttpServlet {
 
 	public void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		Logger logger = new Logger(request.getSession(), LoggingTag.Servlet, this, "service");
+		MapInit mapInit = new MapInit();
 		String method = request.getMethod();
+		String userAgent = request.getHeader("User-Agent");
+      	logger.log("request from "+userAgent);
+      	
 		int port = request.getServerPort();
 		Map<String,String> postData = null;
 		if (method.equals("POST")) {
 			postData = WebLogin.getBody(request);
 		}
+		WebLogin login = WebLogin.authenticate(request);
 		response.setContentType("text/html");
 		PrintWriter out = response.getWriter();
+/*		
 		WebLogin login = null;
 		if (postData == null) {
 			logger.log( "Authenticating...");
@@ -93,8 +100,14 @@ public class MapServlet extends HttpServlet {
 		else {
 			 login = WebLogin.Authenticate(request, response, Permission.user, postData);
 		}
+*/		
+		if (login.isLoggedIn() == false) {        
+         	login.setResponseNotAuthorized(response);         
+         	return;
+      	}
 		logger.log("Got login session "+login);
 		String db = request.getParameter("db");
+/*		
 		if (login.isLoggedIn() == false) {
 			out.println("<!DOCTYPE html>");
 			out.println("<html>");
@@ -104,6 +117,7 @@ public class MapServlet extends HttpServlet {
 			out.println("</html>");
 			return;
 		}
+*/		
 		mongo = MongoInterface.getInstance(db, request.getServerPort(), logger);
 		if (postData != null) {
 			String signID = postData.get("signID");
@@ -111,7 +125,8 @@ public class MapServlet extends HttpServlet {
 			if (signID != null) {
 				Sign sign = mongo.getSignDB().getSign(signID);
 				if (sign != null) {
-					ParkingSchedule verifiedSchedule = new ParkingSchedule(postData, logger);
+//					ParkingSchedule verifiedSchedule = new ParkingSchedule(postData, logger);
+					ParkingSchedule verifiedSchedule = new ParkingSchedule(postData);
 					sign.setParkingSchedule(verifiedSchedule);
 					mongo.getSignDB().updateSign(sign, login.getUserName());
 					logger.log(verifiedSchedule.toString());

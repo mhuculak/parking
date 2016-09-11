@@ -11,6 +11,8 @@ import com.drew.imaging.ImageProcessingException;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.BufferedInputStream;
 
 public class Exif {
 	
@@ -28,40 +30,61 @@ public class Exif {
         
 	}
 
+    public static Position getPosition(InputStream inStream) {
+        Position p = null;
+        try {
+            BufferedInputStream bStream = new BufferedInputStream(inStream);
+            Metadata metadata = ImageMetadataReader.readMetadata(bStream, true);
+            p = readMetaData(metadata);
+        }
+        catch (ImageProcessingException ex) {
+            System.out.println(ex);
+        } catch (IOException ex) {
+            System.out.println(ex);
+        }
+        if ( p != null) {
+            return p;
+        }
+        return null;
+    }
+
 	public static Position getPosition(File file) {
-        Logger logger = new Logger(LoggingTag.Image, "Exif", "getPosition");
-		Position p = new Position();
+//        Logger logger = new Logger(LoggingTag.Image, "Exif", "getPosition");
+		Position p = null;
 		try {
 			Metadata metadata = ImageMetadataReader.readMetadata(file);
-			for (Directory directory : metadata.getDirectories()) {
-				for (Tag tag : directory.getTags()) {
-					String tagName = tag.getTagName();
-					if (tagName.contains("GPS")) {
-						String desc = tag.getDescription();
-//						System.out.println(tagName + ":" + desc);
-						if (tagName.equals("GPS Longitude")) {							
-//							System.out.println("long = " + desc);
-							p.setLongitude(desc);
-						}
-						else if (tagName.equals("GPS Latitude")) {							
-//							System.out.println("lat = " + desc);
-							p.setLatitude(desc);
-						}
-					}
-				}
-			}
+			p = readMetaData(metadata);
 		}
 		catch (ImageProcessingException ex) {
 			System.out.println(ex);
 		} catch (IOException ex) {
             System.out.println(ex);
         }
-        if ( p.isValid() ) {
-        	logger.log("got position " + p.toString());
+        if ( p != null) {
+//        	logger.log("got position " + p.toString());
         	return p;
         }
         return null;
 	}
+
+    private static Position readMetaData(Metadata metadata) {
+        Position p = new Position();
+        for (Directory directory : metadata.getDirectories()) {
+            for (Tag tag : directory.getTags()) {
+                String tagName = tag.getTagName();
+                if (tagName.contains("GPS")) {
+                    String desc = tag.getDescription();
+                    if (tagName.equals("GPS Longitude")) {                          
+                        p.setLongitude(desc);
+                    }
+                    else if (tagName.equals("GPS Latitude")) {                          
+                        p.setLatitude(desc);
+                    }
+                }
+            }
+        }
+        return p;
+    }
 
 	private static void print(Metadata metadata)
     {

@@ -541,7 +541,8 @@ public class ParkingSign {
 	}
 
 	private static ParkingSchedule createSchedule( ParkingSignType signType, Map<ScheduleComponent, ComponentChoice> components, Logger logger ) {
-		ParkingSchedule schedule = new ParkingSchedule(signType, logger);
+//		ParkingSchedule schedule = new ParkingSchedule(signType, logger);
+		ParkingSchedule schedule = new ParkingSchedule(signType);
 		for (Map.Entry<ScheduleComponent, ComponentChoice> entry : components.entrySet()) {
 			ScheduleComponent component = entry.getKey();
 			ComponentChoice choice = entry.getValue();
@@ -638,20 +639,20 @@ public class ParkingSign {
 	private static ComponentChoice checkForTimePeriod(TextGroup textLine) {
 		List<WordChoice> hChoices = matchWordsFrom(hours, 0, textLine);
 		for (WordChoice hr : hChoices) {
-			System.out.println(hr);
+//			System.out.println(hr);
 		}
 		WordChoice hourChoice = matchBestWordListFrom(hours, 0, textLine);
 		if (hourChoice != null) {
-			System.out.println("Got hour = "+hourChoice);
+//			System.out.println("Got hour = "+hourChoice);
 		}
 		WordChoice minuteChoice = matchBestWordListFrom(minutes, 0, textLine);
 		if (minuteChoice != null) {
-			System.out.println("Got minute = "+minuteChoice);
+//			System.out.println("Got minute = "+minuteChoice);
 		}
 		List<Integer> periodValues = new ArrayList<Integer>();
 		if (hourChoice != null && (minuteChoice == null || hourChoice.getScore() > minuteChoice.getScore())) {
 			NumberChoice hourVal = getDigits(textLine, 0, hourChoice.index-1);
-			System.out.println("Got hour = "+hourChoice+" value = "+hourVal);
+//			System.out.println("Got hour = "+hourChoice+" value = "+hourVal);
 			if (hourVal != null) {
 				periodValues.add(hourVal.number*60);
 				ComponentChoice compChoice = new ComponentChoice( ScheduleComponent.TIMEPERIOD, textLine.size(), periodValues);
@@ -662,7 +663,7 @@ public class ParkingSign {
 		}
 		else if (minuteChoice != null) {
 			NumberChoice minVal = getDigits(textLine, 0, minuteChoice.index-1);
-			System.out.println("Got minute = "+minuteChoice+" value = "+minVal);
+//			System.out.println("Got minute = "+minuteChoice+" value = "+minVal);
 			if (minVal != null) {
 				periodValues.add(minVal.number);
 				ComponentChoice compChoice = new ComponentChoice( ScheduleComponent.TIMEPERIOD, textLine.size(), periodValues);
@@ -759,9 +760,9 @@ public class ParkingSign {
 	private static ComponentChoice checkForWeekDays(TextGroup textLine) {
 		ComponentChoice[] choices = new ComponentChoice[2];
 		choices[0] = weekCheck1(textLine);
-		System.out.println("date check1 is "+choices[0]);
+//		System.out.println("date check1 is "+choices[0]);
 		choices[1] = weekCheck2(textLine);
-		System.out.println("date check2 is "+choices[1]);
+//		System.out.println("date check2 is "+choices[1]);
 		ComponentChoice best = choices[0];
 		for ( int i=1 ; i<choices.length ; i++) {
 			if (best == null || (choices[i] != null && best.getScore() < choices[i].getScore())) {
@@ -933,9 +934,9 @@ public class ParkingSign {
 	private static ComponentChoice checkForDates(TextGroup textLine) {
 		ComponentChoice[] choices = new ComponentChoice[2];
 		choices[0] = dateCheck1(textLine);
-		System.out.println("date check1 is "+choices[0]);
+//		System.out.println("date check1 is "+choices[0]);
 		choices[1] = dateCheck2(textLine);
-		System.out.println("date check2 is "+choices[1]);
+//		System.out.println("date check2 is "+choices[1]);
 		ComponentChoice best = choices[0];
 		for ( int i=1 ; i<choices.length ; i++) {
 			if (best == null || (choices[i] != null && best.getScore() < choices[i].getScore())) {

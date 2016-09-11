@@ -37,6 +37,26 @@
      <url-pattern>/main</url-pattern>
   </servlet-mapping>
 
+ <servlet>
+     <servlet-name>MapEditServlet</servlet-name>
+     <servlet-class>parking.admin.MapEditServlet</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+     <servlet-name>MapEditServlet</servlet-name>
+     <url-pattern>/map-edit</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
+     <servlet-name>MapBorderServlet</servlet-name>
+     <servlet-class>parking.admin.MapBorderServlet</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+     <servlet-name>MapBorderServlet</servlet-name>
+     <url-pattern>/border-edit</url-pattern>
+  </servlet-mapping>
+
   <servlet>
      <servlet-name>UploadSign</servlet-name>
      <servlet-class>parking.admin.UploadSign</servlet-class>
@@ -86,6 +106,37 @@
      <servlet-name>EditServlet</servlet-name>
      <url-pattern>/main/edit</url-pattern>
   </servlet-mapping>
+
+  <servlet>
+     <servlet-name>TrajectoryServlet</servlet-name>
+     <servlet-class>parking.admin.TrajectoryServlet</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+     <servlet-name>TrajectoryServlet</servlet-name>
+     <url-pattern>/trajectory</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
+     <servlet-name>SegmentServlet</servlet-name>
+     <servlet-class>parking.admin.SegmentServlet</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+     <servlet-name>SegmentServlet</servlet-name>
+     <url-pattern>/map-edit/segments</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
+     <servlet-name>BorderServlet</servlet-name>
+     <servlet-class>parking.admin.BorderServlet</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+     <servlet-name>BorderServlet</servlet-name>
+     <url-pattern>/map-edit/borders</url-pattern>
+  </servlet-mapping>
+
   <servlet>
      <servlet-name>TestServlet</servlet-name>
      <servlet-class>parking.admin.TestServlet</servlet-class>

@@ -29,6 +29,7 @@ public class ProcessOpenCV {
 			}
 		}
 		catch (Exception ex) {
+			System.out.println("Caought exception initializing open CV - server requires restart");
 			ex.printStackTrace();
 		}
 	}

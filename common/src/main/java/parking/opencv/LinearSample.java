@@ -266,13 +266,7 @@ public class LinearSample {
 				}								
 			}
 		}
-/*		
-		}
-		catch (Exception ex) {
-			System.out.println("i="+i+" start="+start+" end="+end+" size="+size+"samp len="+samples.length+" "+dsamp.length);
-			ex.printStackTrace();
-		}
-*/
+
 
 //		MyGraph my = new MyGraph( dsamp );
 //		graph = my.getGraph();

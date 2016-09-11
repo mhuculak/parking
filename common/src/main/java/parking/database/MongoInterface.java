@@ -6,7 +6,8 @@ import parking.util.LoggingTag;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.io.PrintWriter;
-import java.util.*;
+import java.util.Map;
+import java.util.HashMap;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoException;
@@ -27,6 +28,9 @@ public class MongoInterface {
     private UserDB m_userDB;
     private SignDB m_signDB;
     private PictureDB m_pictureDB;
+    private TrajectoryDB m_trajectoryDB;
+    private MapDB m_mapDB;
+    private MapEditDB m_mapEditDB;
 
     private Logger logger;
 
@@ -48,7 +52,10 @@ public class MongoInterface {
 	    	m_counter = m_db.getCollection("counters");	    	
 	    	m_userDB = new UserDB(this);
 	    	m_signDB = new SignDB(this);
-	    	m_pictureDB = new PictureDB(this);	    	 
+	    	m_pictureDB = new PictureDB(this);
+	    	m_trajectoryDB = new TrajectoryDB(this);
+            m_mapEditDB = new MapEditDB(this);
+            m_mapDB = new MapDB(this);
 	    }
 		catch (MongoException | UnknownHostException e) {
 	     	e.printStackTrace();
@@ -133,6 +140,18 @@ public class MongoInterface {
 
     public PictureDB getPictureDB() {
     	return m_pictureDB;
+    }
+
+    public TrajectoryDB getTrajectoryDB() {
+    	return m_trajectoryDB;
+    }
+
+    public MapDB getMapDB() {
+        return m_mapDB;
+    }
+
+    public MapEditDB getMapEditDB() {
+        return m_mapEditDB;
     }
 
     public Logger getLogger() {

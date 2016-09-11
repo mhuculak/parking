@@ -199,12 +199,7 @@ public class BinarySegmenter {
 		int xWin = x/xNominalWinSize;
 		int yWin = y/yNominalWinSize;
 		double thr = 0.0;
-		try {
-			thr = bwindow[xWin][yWin].threshold;
-		}
-		catch (Exception ex) {
-			System.out.println("getThreshold exception "+ex+" with x="+x+" y ="+y+" xWin="+xWin+" yWin="+yWin+" nomX="+xNominalWinSize+" nomY="+yNominalWinSize);
-		}
+		thr = bwindow[xWin][yWin].threshold;
 		return thr;
 	}
 

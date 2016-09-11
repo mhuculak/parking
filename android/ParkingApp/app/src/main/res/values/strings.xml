@@ -1,0 +1,41 @@
+<resources>
+    <string name="app_name">Parking App</string>
+    <string name="title_activity_maps">Find Parking</string>
+    <string name="title_activity_verify">Verify Parking Schedule</string>
+    <string name="start_time_label">From</string>
+    <string name="end_time_label">Until</string>
+    <string name="destination_label">Destination</string>
+
+    <string name="schedule">Schedule</string>
+    <string name="verify">Verify</string>
+    <string name="report_problem">Report Problem</string>
+    <string name="destination">Destination</string>
+    <string name="period">Period</string>
+    <string name="schedule_unavailable">Schedule Unavailable</string>
+    <string name="take_picture">Take Picture</string>
+    <string name="time_limit_label">Time Limit</string>
+    <string name="parking">Parking</string>
+    <string name="no_parking">No Parking</string>
+    <string name="sign_type_label">Sign Type:</string>
+    <string name="time_range_label">Time Range:</string>
+    <string name="date_range_label">Date Range:</string>
+    <string name="from_label"> From </string>
+    <string name="to_label"> To </string>
+    <string name="spaces">    </string>
+    <string name="weekday_label">Weekdays:</string>
+    <string name="monday">M</string>
+    <string name="tuesday">Tu</string>
+    <string name="wednesday">W</string>
+    <string name="thursday">Th</string>
+    <string name="friday">F</string>
+    <string name="saturday">Sa</string>
+    <string name="sunday">Su</string>
+    <string name="address_label">Address:</string>
+    <string name="city_label">City:</string>
+    <string name="no_time_range">None</string>
+    <string name="no_date_range">None</string>
+    <string name="no_week_days">None</string>
+    <string name="view_image">View Image</string>
+    <string name="submit">Submit</string>
+    <string name="cancel">Cancel</string>
+</resources>

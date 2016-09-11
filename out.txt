@@ -1,120 +1,179 @@
 read C:\Users\mike\java-dev\parking\tagMaps.txt
-Read new image BufferedImage@df89ed5: type = 5 ColorModel: #pixelBits = 24 numComponents = 3 color space = java.awt.color.ICC_ColorSpace@6c3c4163 transparency = 1 has alpha = false isAlphaPre = false ByteInterleavedRaster: width = 2416 height = 3306 #numDataElements 3 dataOff[0] = 2
-Scale image with minDim 2416 by factor 0.33112582781456956
-Working image is 800 x 1095
-Found 459 total lines
-Found 459 verified lines
-cluster 137 lines
-Found 20 clustered lines
-min separation factor = 0.25 min dim = 800 min separation = 200.0
-min separation = 200.0
-full size is 85 reduced is 85
-Found 85 rectangles at level 0
-edge winner: 169.52054571066665,248.3434510307705 527.4780208816219,241.31917997521816 527.4780208816219,990.6075940998587 157.43484382356795,987.3621006868058
-color winner: 209.4549499672363,247.55981023710865 226.3812202019273,987.9668004198717 679.6276678643037,991.9420348021749 680.0242934105369,238.32573399048076
-shape winner: 674.7319867620569,840.0179391810193 669.8831929549781,238.5247348309225 277.54875381410375,246.22359191900935 277.54875381410375,835.0905685715745
-combined winner: 169.52054571066665,248.3434510307705 669.8831929549781,238.5247348309225 675.9564270097243,991.9098358893182 157.43484382356795,987.3621006868058
-border: 169.52054571066665,248.3434510307705 669.8831929549781,238.5247348309225 675.9564270097243,991.9098358893182 157.43484382356795,987.3621006868058 wins = 1 rank = 5 score = 0.8788298122060799 0.8788298122060799  Color: 0.8788298122060799 Shape: 0.9730106836310113 Edge: 5118.634190802656 Area: 380138.7388586311 0.9730106836310113 Asp:0.9813470351053251 Ang:0.9564451550937352 Skw:0.9810300879014735 Per:2511.5275469755684 
-  orig edge:{230.14038232791322, 247.15389586492438}:{616.1683433505859, 239.57879205699186} len = 386.10227775684393 dir = -0.01962068161448985 score = 989.1824069069588
-  orig edge:{671.257876718744, 409.05435001655263}:{674.5454879199305, 816.8827450231576} len = 407.84164593757896 dir = 1.5627352402441608 score = 231.0086167201962
-  orig edge:{14.937620849336193, 986.1123173447158}:{625.9958633316481, 991.4716527518294} len = 611.0817442712373 dir = 0.008770355462064849 score = 829.0031981950493
-  orig edge:{173.35150097290682, 14.087516932674399}:{158.02708508904757, 951.1476263952832} len = 937.1854066662892 dir = 1.5871485861718166 score = 3069.439968980452
-border: 209.4549499672363,247.55981023710865 226.3812202019273,987.9668004198717 679.6276678643037,991.9420348021749 680.0242934105369,238.32573399048076 wins = 1 rank = 12 score = 0.8927101741624922 0.8927101741624922  Color: 0.8927101741624922 Shape: 0.9453850285833387 Edge: 4773.220347895605 Area: 345072.30882196047 0.9453850285833387 Asp:0.9228853063334627 Ang:0.9683728607084852 Skw:0.944349125485705 Per:2418.14065950573 
-  orig edge:{220.18139090125507, 716.7672456148515}:{223.71316832311535, 871.258025606983} len = 154.53114428598118 dir = 1.5479395429654468 score = 130.0346077425998
-  orig edge:{14.937620849336193, 986.1123173447158}:{625.9958633316481, 991.4716527518294} len = 611.0817442712373 dir = 0.008770355462064849 score = 829.0031981950493
-  orig edge:{680.1497247298737, -0.0025526824145440555}:{679.6592121889666, 932.0056099050037} len = 932.0082916649014 dir = 1.571322623146483 score = 2825.0001350509974
-  orig edge:{230.14038232791322, 247.15389586492438}:{616.1683433505859, 239.57879205699186} len = 386.10227775684393 dir = -0.01962068161448985 score = 989.1824069069588
-border: 169.52054571066665,248.3434510307705 527.4780208816219,241.31917997521816 527.4780208816219,990.6075940998587 157.43484382356795,987.3621006868058 wins = 1 rank = 45 score = 0.7550749562092495 0.7550749562092495  Color: 0.7550749562092495 Shape: 0.8983088338680848 Edge: 5268.62557408246 Area: 270860.7109923222 0.8983088338680848 Asp:0.7301047710724915 Ang:0.9564451550937352 Skw:0.9864258571079839 Per:2216.4896773380738 
-  orig edge:{230.14038232791322, 247.15389586492438}:{616.1683433505859, 239.57879205699186} len = 386.10227775684393 dir = -0.01962068161448985 score = 989.1824069069588
-  orig edge:{527.478020881622, 571.0}:{527.478020881622, 777.0000000000001} len = 206.0000000000001 dir = 1.5707963267948966 score = 381.0000000000001
-  orig edge:{14.937620849336193, 986.1123173447158}:{625.9958633316481, 991.4716527518294} len = 611.0817442712373 dir = 0.008770355462064849 score = 829.0031981950493
-  orig edge:{173.35150097290682, 14.087516932674399}:{158.02708508904757, 951.1476263952832} len = 937.1854066662892 dir = 1.5871485861718166 score = 3069.439968980452
-border: 674.7319867620569,840.0179391810193 669.8831929549781,238.5247348309225 277.54875381410375,246.22359191900935 277.54875381410375,835.0905685715745 wins = 1 rank = 60 score = 0.779495408357651 0.779495408357651  Color: 0.779495408357651 Shape: 0.9867240275357808 Edge: 2027.1923827356395 Area: 234955.95935473274 0.9867240275357808 Asp:0.9900562902290921 Ang:0.9910933578316372 Skw:0.9789767197380715 Per:1980.003490084941 
-  orig edge:{671.257876718744, 409.05435001655263}:{674.5454879199305, 816.8827450231576} len = 407.84164593757896 dir = 1.5627352402441608 score = 231.0086167201962
-  orig edge:{230.14038232791322, 247.15389586492438}:{616.1683433505859, 239.57879205699186} len = 386.10227775684393 dir = -0.01962068161448985 score = 989.1824069069588
-  orig edge:{277.5487538141038, 692.9999999999999}:{277.5487538141038, 779.0} len = 86.00000000000011 dir = 1.5707963267948966 score = 341.0
-  orig edge:{63.081506844993214, 832.4299335755786}:{609.2406979949756, 839.2054681986708} len = 546.2012174529015 dir = 0.012405150681381124 score = 466.00135910848445
-top border is 169.52054571066665,248.3434510307705 669.8831929549781,238.5247348309225 675.9564270097243,991.9098358893182 157.43484382356795,987.3621006868058
-sign image is 519 x 753
-restored image is 800 x 1162
-sign image is 800 x 1162
-New group with size=2997 center = {77.20253586920253, 778.346012679346} bound = 63.0,702.0 63.0,836.0 107.0,836.0 107.0,702.0 aspect = 3.0454545454545454 topology = 1 1 LrIT1iJl
-Dropping 1 1:2:1:2:1:2 bounds = 80.0,464.0 80.0,579.0 131.0,579.0 131.0,464.0
-New group with size=1177 center = {113.61002548853016, 944.1129991503823} bound = 101.0,898.0 101.0,993.0 120.0,993.0 120.0,898.0 aspect = 5.0 topology = 1 1 T1lJirLI
-add size=5079 center = {153.1748375664501, 769.7147076196102} bound = 123.0,701.0 123.0,835.0 184.0,835.0 184.0,701.0 aspect = 2.19672131147541 topology = 1 2:1 UuvVYr to group size = 2
-add size=2246 center = {179.9220837043633, 945.7845057880677} bound = 156.0,896.0 156.0,989.0 204.0,989.0 204.0,896.0 aspect = 1.9375 topology = 1:2:1 1:2:1:2 A to group size = 2
-Dropping 1:2:3:5:4:5:4:2:1 1:2:3:4:3:4:3:2:1 bounds = 172.0,42.0 172.0,494.0 636.0,494.0 636.0,42.0
-New group with size=3429 center = {225.9650043744532, 567.4208223972004} bound = 197.0,511.0 197.0,643.0 250.0,643.0 250.0,511.0 aspect = 2.490566037735849 topology = 1:2:1 1 7
-add size=1965 center = {222.58727735368956, 934.9694656488549} bound = 201.0,894.0 201.0,986.0 242.0,986.0 242.0,894.0 aspect = 2.2439024390243905 topology = 1 2:1 YvVruU to group size = 3
-add size=6928 center = {242.61965935334874, 766.8885681293302} bound = 210.0,701.0 210.0,834.0 275.0,834.0 275.0,701.0 aspect = 2.046153846153846 topology = 1 2:3:2 wN to group size = 3
-Dropping 1:2:1:2 1:2:1:2 bounds = 256.0,892.0 256.0,985.0 297.0,985.0 297.0,892.0
-add size=4744 center = {293.8178752107926, 584.285623946037} bound = 270.0,511.0 270.0,643.0 324.0,643.0 324.0,511.0 aspect = 2.4444444444444446 topology = 1 1:2:1:2 h to group size = 2
-add size=1110 center = {315.61981981981984, 937.0450450450451} bound = 309.0,891.0 309.0,983.0 322.0,983.0 322.0,891.0 aspect = 7.076923076923077 topology = 1 1 rT1iLJlI to group size = 4
-add size=1428 center = {343.859243697479, 943.7703081232493} bound = 333.0,889.0 333.0,983.0 370.0,983.0 370.0,889.0 aspect = 2.5405405405405403 topology = 1 1 LITr1iJl to group size = 5
-add size=1427 center = {379.46531184302734, 802.6194814295725} bound = 361.0,766.0 361.0,834.0 397.0,834.0 397.0,766.0 aspect = 1.8888888888888888 topology = 1:2:1 1:2:1:2 A to group size = 4
-add size=1416 center = {418.5268361581921, 800.3368644067797} bound = 403.0,766.0 403.0,834.0 434.0,834.0 434.0,766.0 aspect = 2.193548387096774 topology = 1 2:1 UuYvVr to group size = 5
-add size=1224 center = {435.8692810457516, 950.0482026143791} bound = 420.0,914.0 420.0,981.0 454.0,981.0 454.0,914.0 aspect = 1.9705882352941178 topology = 1:2:1 1:2:1:2 A to group size = 6
-add size=1274 center = {474.787284144427, 947.2692307692307} bound = 460.0,912.0 460.0,981.0 489.0,981.0 489.0,912.0 aspect = 2.3793103448275863 topology = 1 2:1 UuvVYr to group size = 7
-add size=5390 center = {503.4155844155844, 573.5313543599258} bound = 474.0,506.0 474.0,642.0 529.0,642.0 529.0,506.0 aspect = 2.4727272727272727 topology = 2:3:1 1:2:1:2:1:2:1 9 to group size = 3
-add size=4734 center = {509.8286861005492, 761.397127165188} bound = 477.0,699.0 477.0,833.0 545.0,833.0 545.0,699.0 aspect = 1.9705882352941178 topology = 1 2:1 YrvVUu to group size = 6
-add size=1179 center = {552.0687022900763, 927.8269720101781} bound = 539.0,883.0 539.0,978.0 559.0,978.0 559.0,883.0 aspect = 4.75 topology = 1 1 1TlJirLI to group size = 8
-add size=4674 center = {580.5325203252032, 581.1780059905863} bound = 557.0,508.0 557.0,640.0 612.0,640.0 612.0,508.0 aspect = 2.4 topology = 1 1:2:1:2 h to group size = 4
-add size=4473 center = {578.0999329309188, 765.049183992846} bound = 559.0,698.0 559.0,833.0 608.0,833.0 608.0,698.0 aspect = 2.7551020408163267 topology = 1:3 1 E to group size = 7
-add size=2444 center = {612.1828968903437, 927.4856792144026} bound = 593.0,881.0 593.0,974.0 633.0,974.0 633.0,881.0 aspect = 2.325 topology = 1:2:1 1:2:1 0DO9pP4bo to group size = 9
-add size=7199 center = {667.3407417696902, 764.3617169051257} bound = 634.0,697.0 634.0,832.0 700.0,832.0 700.0,697.0 aspect = 2.0454545454545454 topology = 1 2:3:2 wN to group size = 8
-add size=1826 center = {658.9649507119386, 926.8992332968237} bound = 646.0,879.0 646.0,973.0 683.0,973.0 683.0,879.0 aspect = 2.5405405405405403 topology = 1:3:2 1 E to group size = 10
-add size=1703 center = {707.0469759248385, 927.1432765707575} bound = 692.0,878.0 692.0,975.0 731.0,975.0 731.0,878.0 aspect = 2.4871794871794872 topology = 1:2 1:2:1:2:1 C to group size = 11
-New group with size=1522 center = {780.0315374507227, 1141.673455978975} bound = 729.0,1098.0 729.0,1159.0 799.0,1159.0 799.0,1098.0 aspect = 0.8714285714285714 topology = 1 1 1lJirTLI
-border = 19.680003588831593,14.169585413538256 791.6411053753345,-0.4846857727934293 800.2671600677648,1161.8316738709368 0.30492569950680415,1154.3036920117956
-trans = -157.0:-239.0>285.9545418418809 rotation = 6.397883315602615E-4 center = {261.1987523747342, 377.5350306094542}
- vert axis = {405.66055448208306, 6.842449820372413}:{400.28604288363584, 1158.0676829413662} len = 1151.237778545079 dir = 1.5754648072958952
-orig border = 169.52054571066665,248.3434510307705 669.8831929549781,238.5247348309225 675.9564270097243,991.9098358893182 157.43484382356795,987.3621006868058
-orig vert axis = {419.7018693328224, 243.4340929308465}:{416.6956354166461, 989.635968288062} len = 746.2079309609246 dir = 1.5748250189643351
-border center is {418.1987523747342, 616.5350306094542} vert axis list has size = 4
-Found ellipse at {405.8716019501618, 410.37223217704724}
-heures score = 2.8277409611700333 norm score = 0.4712901601950055 misses= 3 index = 2 cannonical =0
-hours score = 1.9487895332502916 norm score = 0.38975790665005833 misses= 3 index = 2 cannonical =0
-hrs score = 0.9677516090985989 norm score = 0.32258386969953295 misses= 2 index = 4 cannonical =0
-h score = 0.0 norm score = 0.0 misses= 1 index = 0 cannonical =0
-Got hour = heures score = 2.8277409611700333 norm score = 0.4712901601950055 misses= 3 index = 2 cannonical =0
-Got minute = minutes score = 1.8599893520714343 norm score = 0.26571276458163345 misses= 5 index = 1 cannonical =0
-Got hour = heures score = 2.8277409611700333 norm score = 0.4712901601950055 misses= 3 index = 2 cannonical =0 value = 1 score = 0.5551700459476071 index = 0
-date check1 is WEEKDAYS score = 4.57666861340369 coverage = 1.625 misses = 2 1 5 lundivendredi score = 4.57666861340369 norm score = 0.35205143180028386 misses= 2 index = 0 cannonical =0
-date check2 is WEEKDAYS score = 2.4553301200644464 coverage = 0.75 misses = 3 0 Sunday score = 2.4553301200644464 norm score = 0.4092216866774077 misses= 3 index = 0 cannonical =0
-date check1 is null
-date check2 is null
-heures score = 1.7121398388548728 norm score = 0.28535663980914544 misses= 4 index = 4 cannonical =0
-hours score = 1.7121398388548728 norm score = 0.34242796777097456 misses= 3 index = 4 cannonical =0
-hrs score = 1.2940401712117848 norm score = 0.43134672373726163 misses= 2 index = 2 cannonical =0
-h score = 0.0 norm score = 0.0 misses= 1 index = 0 cannonical =0
-Got hour = heures score = 1.7121398388548728 norm score = 0.28535663980914544 misses= 4 index = 4 cannonical =0
-Got minute = minutes score = 2.6804950591089556 norm score = 0.38292786558699365 misses= 4 index = 3 cannonical =0
-Got minute = minutes score = 2.6804950591089556 norm score = 0.38292786558699365 misses= 4 index = 3 cannonical =0 value = 1 score = 0.8712844972561475 index = 0
-date check1 is WEEKDAYS score = 5.765053168495237 coverage = 1.4545454545454546 misses = 4 4 0 thurthurdimanche score = 5.765053168495237 norm score = 0.36031582303095233 misses= 4 index = 0 cannonical =0
-date check2 is WEEKDAYS score = 2.924480761347206 coverage = 0.5454545454545454 misses = 2 5 Friday score = 2.924480761347206 norm score = 0.48741346022453436 misses= 2 index = 1 cannonical =5
-date check1 is DATES score = 8.562731291589039 coverage = 1.0 misses = 1 1 1 July December 1juilau1dec score = 8.562731291589039 norm score = 0.7784301174171854 misses= 1 index = 0 cannonical =0
-date check2 is DATES score = 10.30439000234992 coverage = 1.0909090909090908 misses = 1 1 1 April December avril score = 3.7165730830580603 norm score = 0.743314616611612 misses= 1 index = 1 cannonical =3 dec score = 2.6098868267427333 norm score = 0.8699622755809111 misses= 0 index = 8 cannonical =11 au score = 1.9894231409712593 norm score = 0.9947115704856296 misses= 0 index = 5 cannonical =0 1 score = 0.8712844972561475 index = 0 1 score = 1.1172224543217184 index = 7
-h score = 0.633992967328685 norm score = 0.633992967328685 misses= 0 index = 1 cannonical =0
-hrs score = 0.633992967328685 norm score = 0.2113309891095617 misses= 2 index = 1 cannonical =0
-heures score = 0.633992967328685 norm score = 0.10566549455478084 misses= 2 index = 1 cannonical =0
-hours score = 0.633992967328685 norm score = 0.12679859346573702 misses= 2 index = 1 cannonical =0
-Got hour = h score = 0.633992967328685 norm score = 0.633992967328685 misses= 0 index = 1 cannonical =0
-Got minute = minutes score = 0.0 norm score = 0.0 misses= 4 index = 0 cannonical =0
-Got hour = h score = 0.633992967328685 norm score = 0.633992967328685 misses= 0 index = 1 cannonical =0 value = 7 score = 1.0 index = 0
-date check1 is WEEKDAYS score = 0.633992967328685 coverage = 2.0 misses = 3 4 Thursday score = 0.633992967328685 norm score = 0.07924912091608563 misses= 3 index = 0 cannonical =4
-date check2 is WEEKDAYS score = 0.633992967328685 coverage = 1.0 misses = 3 4 thur score = 0.633992967328685 norm score = 0.15849824183217126 misses= 3 index = 0 cannonical =4
-date check1 is null
-date check2 is null
-heures score = 0.0 norm score = 0.0 misses= 1 index = 0 cannonical =0
-hours score = 0.0 norm score = 0.0 misses= 1 index = 0 cannonical =0
-h score = 0.0 norm score = 0.0 misses= 1 index = 0 cannonical =0
-hrs score = 0.0 norm score = 0.0 misses= 1 index = 0 cannonical =0
-Got hour = heures score = 0.0 norm score = 0.0 misses= 1 index = 0 cannonical =0
-Got minute = minutes score = 0.0 norm score = 0.0 misses= 1 index = 0 cannonical =0
-Got minute = minutes score = 0.0 norm score = 0.0 misses= 1 index = 0 cannonical =0 value = null
-date check1 is WEEKDAYS score = 0.8620858543053488 coverage = 5.0 misses = 0 1 lundi score = 0.8620858543053488 norm score = 0.17241717086106975 misses= 0 index = 0 cannonical =1
-date check2 is WEEKDAYS score = 0.8620858543053488 coverage = 3.0 misses = 0 1 lun score = 0.8620858543053488 norm score = 0.2873619514351163 misses= 0 index = 0 cannonical =1
-date check1 is null
-date check2 is null
-NP;T=07:00,09:00;W=M,F,;D=A 1,D 1
-parking.display.SignTool.readSign 7456 msec
+907 Sun Aug 28 16:10:39 EDT 2016 position: null image: 907.jpg auto: null schedule: null user: android updates: 0
+908 Sun Aug 28 16:12:14 EDT 2016 position: null image: 908.jpg auto: P;T=any;W=M,;D=any schedule: null user: android updates: 1
+909 Sun Aug 28 16:16:21 EDT 2016 position: null image: 909.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+990 Thu Sep 01 09:40:04 EDT 2016 position: null image: 990.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+870 Sat Aug 27 12:13:26 EDT 2016 position: null image: 870.jpg auto: P;T=any;W=F,;D=any schedule: null user: android updates: 1
+991 Thu Sep 01 09:41:03 EDT 2016 position: null image: 991.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+871 Sat Aug 27 12:13:36 EDT 2016 position: null image: 871.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+992 Thu Sep 01 09:49:26 EDT 2016 position: null image: 992.jpg auto: null schedule: null user: android updates: 0
+872 Sat Aug 27 12:37:40 EDT 2016 position: null image: 872.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+993 Thu Sep 01 10:21:53 EDT 2016 position: null image: 993.jpg auto: null schedule: null user: android updates: 0
+873 Sat Aug 27 12:42:02 EDT 2016 position: null image: 873.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+994 Thu Sep 01 11:41:07 EDT 2016 position: null image: 994.jpg auto: null schedule: null user: android updates: 0
+874 Sat Aug 27 12:45:37 EDT 2016 position: null image: 874.jpg auto: P;T=any;W=Tu,;D=any schedule: null user: android updates: 1
+995 Thu Sep 01 11:46:03 EDT 2016 position: null image: 995.jpg auto: P;T=any;W=F,;D=any schedule: null user: android updates: 1
+875 Sat Aug 27 16:37:14 EDT 2016 position: null image: 875.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+996 Thu Sep 01 11:49:05 EDT 2016 position: null image: 996.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+876 Sat Aug 27 16:45:45 EDT 2016 position: null image: 876.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+997 Thu Sep 01 11:55:51 EDT 2016 position: null image: 997.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+877 Sat Aug 27 18:43:26 EDT 2016 position: null image: 877.jpg auto: null schedule: null user: android updates: 0
+910 Sun Aug 28 16:19:13 EDT 2016 position: null image: 910.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+998 Thu Sep 01 11:56:41 EDT 2016 position: null image: 998.jpg auto: null schedule: null user: android updates: 0
+878 Sat Aug 27 18:48:16 EDT 2016 position: null image: 878.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+911 Sun Aug 28 16:25:54 EDT 2016 position: null image: 911.jpg auto: null schedule: null user: android updates: 0
+999 Thu Sep 01 11:59:57 EDT 2016 position: null image: 999.jpg auto: null schedule: null user: android updates: 0
+879 Sat Aug 27 18:52:03 EDT 2016 position: null image: 879.jpg auto: null schedule: null user: android updates: 0
+912 Sun Aug 28 16:26:11 EDT 2016 position: null image: 912.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+913 Sun Aug 28 16:31:04 EDT 2016 position: null image: 913.jpg auto: null schedule: null user: android updates: 0
+914 Sun Aug 28 16:31:25 EDT 2016 position: null image: 914.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+915 Sun Aug 28 16:35:13 EDT 2016 position: null image: 915.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+916 Sun Aug 28 16:38:15 EDT 2016 position: null image: 916.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+917 Sun Aug 28 16:40:10 EDT 2016 position: null image: 917.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+918 Sun Aug 28 16:51:32 EDT 2016 position: null image: 918.jpg auto: null schedule: null user: android updates: 0
+919 Sun Aug 28 16:52:08 EDT 2016 position: null image: 919.jpg auto: P;T=any;W=Th,;D=any schedule: null user: android updates: 1
+880 Sat Aug 27 18:53:16 EDT 2016 position: null image: 880.jpg auto: null schedule: null user: android updates: 0
+881 Sat Aug 27 18:53:43 EDT 2016 position: null image: 881.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+882 Sat Aug 27 19:01:18 EDT 2016 position: null image: 882.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+245 Wed Aug 10 16:52:06 EDT 2016 position: 45_-73 image: 245.jpg auto: NP;T=07:00,09:00;W=M,F,;D=A 1,D 1 schedule: NP;T=07:00,09:00;W=M:F;D=A 1,D 1 user: mike updates: 3
+883 Sat Aug 27 19:07:59 EDT 2016 position: null image: 883.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+246 Wed Aug 10 16:57:16 EDT 2016 position: 45_-73 image: 246.jpg auto: P;T=any;W=any;D=any schedule: NP;T=any;W=any;D=any user: mike updates: 0
+884 Sun Aug 28 06:17:30 EDT 2016 position: null image: 884.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+247 Wed Aug 10 16:57:53 EDT 2016 position: 45_-73 image: 247.jpg auto: P;L=120;T=09:00,18:00;W=M:F;D=any schedule: P;L=60;T=09:00,18:00;W=M:F;D=any user: mike updates: 1
+885 Sun Aug 28 06:27:20 EDT 2016 position: null image: 885.jpg auto: P;T=any;W=M,;D=any schedule: null user: android updates: 1
+886 Sun Aug 28 06:47:58 EDT 2016 position: null image: 886.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+887 Sun Aug 28 07:27:39 EDT 2016 position: null image: 887.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+920 Sun Aug 28 16:57:56 EDT 2016 position: null image: 920.jpg auto: null schedule: null user: android updates: 0
+888 Sun Aug 28 07:41:14 EDT 2016 position: null image: 888.jpg auto: P;T=any;W=M,;D=any schedule: null user: android updates: 1
+921 Sun Aug 28 16:58:35 EDT 2016 position: null image: 921.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+889 Sun Aug 28 08:01:55 EDT 2016 position: null image: 889.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+922 Sun Aug 28 17:14:20 EDT 2016 position: null image: 922.jpg auto: P;T=any;W=Tu,;D=any schedule: null user: android updates: 1
+923 Sun Aug 28 17:47:36 EDT 2016 position: null image: 923.jpg auto: null schedule: null user: android updates: 0
+924 Sun Aug 28 17:47:54 EDT 2016 position: null image: 924.jpg auto: P;T=any;W=F,;D=any schedule: null user: android updates: 1
+925 Sun Aug 28 17:54:12 EDT 2016 position: null image: 925.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+926 Sun Aug 28 17:58:16 EDT 2016 position: null image: 926.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+927 Sun Aug 28 18:02:50 EDT 2016 position: null image: 927.jpg auto: P;T=any;W=Su,;D=any schedule: null user: android updates: 1
+928 Sun Aug 28 18:17:00 EDT 2016 position: null image: 928.jpg auto: P;T=any;W=F,;D=any schedule: null user: android updates: 1
+929 Mon Aug 29 08:39:03 EDT 2016 position: null image: 929.jpg auto: P;T=any;W=Th,;D=any schedule: null user: android updates: 1
+1000 Thu Sep 01 12:03:41 EDT 2016 position: null image: 1000.jpg auto: null schedule: null user: android updates: 0
+890 Sun Aug 28 08:06:55 EDT 2016 position: null image: 890.jpg auto: P;T=any;W=Tu,;D=any schedule: null user: android updates: 1
+891 Sun Aug 28 08:23:29 EDT 2016 position: null image: 891.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+892 Sun Aug 28 08:34:16 EDT 2016 position: null image: 892.jpg auto: P;T=any;W=M,;D=any schedule: null user: android updates: 1
+893 Sun Aug 28 08:55:33 EDT 2016 position: null image: 893.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+894 Sun Aug 28 08:58:54 EDT 2016 position: null image: 894.jpg auto: P;T=any;W=F,;D=any schedule: null user: android updates: 1
+895 Sun Aug 28 09:07:10 EDT 2016 position: null image: 895.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+896 Sun Aug 28 09:10:03 EDT 2016 position: null image: 896.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+897 Sun Aug 28 09:12:35 EDT 2016 position: null image: 897.jpg auto: P;T=any;W=F,;D=any schedule: null user: android updates: 1
+930 Mon Aug 29 08:55:54 EDT 2016 position: null image: 930.jpg auto: P;T=any;W=Tu,;D=any schedule: null user: android updates: 1
+898 Sun Aug 28 15:26:53 EDT 2016 position: null image: 898.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+931 Mon Aug 29 09:03:46 EDT 2016 position: null image: 931.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+899 Sun Aug 28 15:35:27 EDT 2016 position: null image: 899.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+932 Mon Aug 29 10:26:28 EDT 2016 position: null image: 932.jpg auto: null schedule: null user: android updates: 0
+933 Mon Aug 29 10:31:02 EDT 2016 position: null image: 933.jpg auto: null schedule: null user: android updates: 0
+934 Mon Aug 29 10:34:45 EDT 2016 position: null image: 934.jpg auto: null schedule: null user: android updates: 0
+935 Mon Aug 29 12:32:01 EDT 2016 position: null image: 935.jpg auto: null schedule: null user: android updates: 0
+936 Mon Aug 29 12:42:04 EDT 2016 position: null image: 936.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+937 Mon Aug 29 12:50:07 EDT 2016 position: null image: 937.jpg auto: P;T=any;W=Tu,;D=any schedule: null user: android updates: 1
+938 Mon Aug 29 12:55:34 EDT 2016 position: null image: 938.jpg auto: P;T=any;W=Tu,;D=any schedule: null user: android updates: 1
+939 Mon Aug 29 13:05:16 EDT 2016 position: null image: 939.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+1011 Thu Sep 01 15:23:43 EDT 2016 position: null image: 1011.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+1010 Thu Sep 01 15:17:53 EDT 2016 position: null image: 1010.jpg auto: null schedule: null user: android updates: 0
+1008 Thu Sep 01 15:10:49 EDT 2016 position: null image: 1008.jpg auto: null schedule: null user: android updates: 0
+1007 Thu Sep 01 13:49:39 EDT 2016 position: null image: 1007.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+1006 Thu Sep 01 13:35:57 EDT 2016 position: null image: 1006.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+1005 Thu Sep 01 12:27:27 EDT 2016 position: null image: 1005.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+1004 Thu Sep 01 12:22:49 EDT 2016 position: null image: 1004.jpg auto: null schedule: null user: android updates: 0
+940 Mon Aug 29 13:09:45 EDT 2016 position: null image: 940.jpg auto: P;T=any;W=Su,;D=any schedule: null user: android updates: 1
+1003 Thu Sep 01 12:16:58 EDT 2016 position: null image: 1003.jpg auto: null schedule: null user: android updates: 0
+941 Mon Aug 29 13:13:18 EDT 2016 position: null image: 941.jpg auto: P;T=any;W=Su,;D=any schedule: null user: android updates: 1
+1002 Thu Sep 01 12:14:16 EDT 2016 position: null image: 1002.jpg auto: null schedule: null user: android updates: 0
+942 Mon Aug 29 13:14:37 EDT 2016 position: null image: 942.jpg auto: P;T=any;W=Su,;D=any schedule: null user: android updates: 1
+1001 Thu Sep 01 12:08:21 EDT 2016 position: null image: 1001.jpg auto: null schedule: null user: android updates: 0
+943 Mon Aug 29 13:30:31 EDT 2016 position: null image: 943.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+944 Mon Aug 29 13:45:04 EDT 2016 position: null image: 944.jpg auto: P;T=any;W=Tu,;D=any schedule: null user: android updates: 1
+945 Mon Aug 29 14:11:04 EDT 2016 position: null image: 945.jpg auto: null schedule: null user: android updates: 0
+946 Mon Aug 29 14:45:27 EDT 2016 position: null image: 946.jpg auto: P;T=any;W=F,;D=any schedule: null user: android updates: 1
+947 Mon Aug 29 15:02:19 EDT 2016 position: null image: 947.jpg auto: P;L=60;T=any;W=F,;D=any schedule: null user: android updates: 1
+948 Mon Aug 29 15:06:33 EDT 2016 position: null image: 948.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+949 Mon Aug 29 15:10:48 EDT 2016 position: null image: 949.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+1009 Thu Sep 01 15:17:15 EDT 2016 position: null image: 1009.jpg auto: P;T=any;W=Tu,;D=any schedule: null user: android updates: 1
+1022 Thu Sep 01 16:12:44 EDT 2016 position: null image: 1022.jpg auto: null schedule: null user: android updates: 0
+1021 Thu Sep 01 16:03:07 EDT 2016 position: null image: 1021.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+1020 Thu Sep 01 15:57:49 EDT 2016 position: null image: 1020.jpg auto: null schedule: null user: android updates: 0
+1019 Thu Sep 01 15:54:15 EDT 2016 position: null image: 1019.jpg auto: P;T=any;W=F,;D=any schedule: null user: android updates: 1
+1018 Thu Sep 01 15:46:26 EDT 2016 position: null image: 1018.jpg auto: P;T=any;W=F,;D=any schedule: null user: android updates: 1
+1017 Thu Sep 01 15:45:52 EDT 2016 position: null image: 1017.jpg auto: null schedule: null user: android updates: 0
+1016 Thu Sep 01 15:45:09 EDT 2016 position: null image: 1016.jpg auto: P;T=any;W=F,;D=any schedule: null user: android updates: 1
+950 Mon Aug 29 15:30:05 EDT 2016 position: null image: 950.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+1015 Thu Sep 01 15:38:25 EDT 2016 position: null image: 1015.jpg auto: P;T=any;W=Su,;D=any schedule: null user: android updates: 1
+951 Mon Aug 29 15:40:59 EDT 2016 position: null image: 951.jpg auto: P;T=any;W=Th,;D=any schedule: null user: android updates: 1
+1014 Thu Sep 01 15:37:00 EDT 2016 position: null image: 1014.jpg auto: P;T=any;W=Tu,;D=any schedule: null user: android updates: 1
+952 Mon Aug 29 15:42:47 EDT 2016 position: null image: 952.jpg auto: P;T=any;W=M,;D=any schedule: null user: android updates: 1
+1013 Thu Sep 01 15:34:21 EDT 2016 position: null image: 1013.jpg auto: P;T=any;W=M,;D=any schedule: null user: android updates: 1
+953 Mon Aug 29 15:51:20 EDT 2016 position: null image: 953.jpg auto: P;T=any;W=Tu,;D=any schedule: null user: android updates: 1
+1012 Thu Sep 01 15:32:30 EDT 2016 position: null image: 1012.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+954 Mon Aug 29 16:24:52 EDT 2016 position: null image: 954.jpg auto: P;T=any;W=M,;D=any schedule: null user: android updates: 1
+955 Mon Aug 29 17:06:10 EDT 2016 position: null image: 955.jpg auto: P;T=any;W=M,;D=any schedule: null user: android updates: 1
+956 Mon Aug 29 17:16:18 EDT 2016 position: null image: 956.jpg auto: P;T=any;W=Th,;D=any schedule: null user: android updates: 1
+957 Mon Aug 29 17:23:09 EDT 2016 position: null image: 957.jpg auto: P;T=any;W=M,;D=any schedule: null user: android updates: 1
+958 Mon Aug 29 17:26:41 EDT 2016 position: null image: 958.jpg auto: P;T=any;W=M,;D=any schedule: null user: android updates: 1
+959 Mon Aug 29 21:46:31 EDT 2016 position: null image: 959.jpg auto: P;T=any;W=M,;D=any schedule: null user: android updates: 1
+960 Mon Aug 29 21:54:39 EDT 2016 position: null image: 960.jpg auto: P;T=any;W=M,;D=any schedule: null user: android updates: 1
+1027 Thu Sep 01 16:39:12 EDT 2016 position: null image: 1027.jpg auto: P;T=any;W=M,;D=any schedule: null user: android updates: 1
+961 Mon Aug 29 22:00:25 EDT 2016 position: null image: 961.jpg auto: P;T=any;W=Tu,;D=any schedule: null user: android updates: 1
+1026 Thu Sep 01 16:35:28 EDT 2016 position: null image: 1026.jpg auto: P;T=any;W=Tu,;D=any schedule: null user: android updates: 1
+962 Mon Aug 29 22:08:40 EDT 2016 position: null image: 962.jpg auto: P;T=any;W=M,;D=any schedule: null user: android updates: 1
+1025 Thu Sep 01 16:27:38 EDT 2016 position: null image: 1025.jpg auto: null schedule: null user: android updates: 0
+963 Tue Aug 30 11:33:24 EDT 2016 position: null image: 963.jpg auto: null schedule: null user: android updates: 0
+1024 Thu Sep 01 16:20:31 EDT 2016 position: null image: 1024.jpg auto: P;T=any;W=Tu,;D=any schedule: null user: android updates: 1
+964 Tue Aug 30 12:07:08 EDT 2016 position: null image: 964.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+1023 Thu Sep 01 16:18:01 EDT 2016 position: null image: 1023.jpg auto: null schedule: null user: android updates: 0
+965 Tue Aug 30 12:53:48 EDT 2016 position: null image: 965.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+966 Wed Aug 31 11:28:31 EDT 2016 position: null image: 966.jpg auto: P;T=any;W=Tu,;D=any schedule: null user: android updates: 1
+967 Wed Aug 31 11:31:45 EDT 2016 position: null image: 967.jpg auto: P;T=any;W=Su,;D=any schedule: null user: android updates: 1
+968 Wed Aug 31 12:09:58 EDT 2016 position: null image: 968.jpg auto: P;T=any;W=M,;D=any schedule: null user: android updates: 1
+969 Wed Aug 31 12:10:47 EDT 2016 position: null image: 969.jpg auto: P;T=any;W=M,;D=any schedule: null user: android updates: 1
+970 Wed Aug 31 13:04:39 EDT 2016 position: null image: 970.jpg auto: null schedule: null user: android updates: 0
+971 Wed Aug 31 13:14:21 EDT 2016 position: null image: 971.jpg auto: null schedule: null user: android updates: 0
+972 Wed Aug 31 13:33:38 EDT 2016 position: null image: 972.jpg auto: null schedule: null user: android updates: 0
+852 Mon Aug 22 07:34:32 EDT 2016 position: 45_-73 image: 852.jpg auto: P;T=any;W=Th,;D=any schedule: NP;T=any;W=any;D=any user: mike updates: 1
+973 Wed Aug 31 13:52:47 EDT 2016 position: null image: 973.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+853 Mon Aug 22 08:59:45 EDT 2016 position: 45_-73 image: 853.jpg auto: NP;T=any;W=Th,;D=N 98,N 18 schedule: NP;T=any;W=Th,;D=N 98,N 18 user: mike updates: 1
+974 Wed Aug 31 13:59:04 EDT 2016 position: null image: 974.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+854 Mon Aug 22 14:21:25 EDT 2016 position: 45_-73 image: 854.jpg auto: NP;T=07:00,09:00;W=M,F,;D=A 1,D 1 schedule: NP;T=07:00,09:00;W=M,F,;D=A 1,D 1 user: mike updates: 1
+975 Wed Aug 31 14:01:16 EDT 2016 position: null image: 975.jpg auto: P;T=any;W=Tu,;D=any schedule: null user: android updates: 1
+855 Thu Aug 25 11:16:08 EDT 2016 position: null image: 855.jpg auto: NP;T=01:01,04:80;W=Tu,;D=A 7,D 7 schedule: NP;T=01:01,04:80;W=Tu,;D=A 7,D 7 user: mike updates: 2
+976 Wed Aug 31 14:19:02 EDT 2016 position: null image: 976.jpg auto: null schedule: null user: android updates: 0
+856 Thu Aug 25 11:23:34 EDT 2016 position: 45_-73 image: 856.jpg auto: NP;T=any;W=Th,;D=M 9,N 18 schedule: null user: carol updates: 1
+977 Wed Aug 31 14:57:48 EDT 2016 position: null image: 977.jpg auto: P;T=any;W=Tu,;D=any schedule: null user: android updates: 1
+857 Thu Aug 25 11:34:54 EDT 2016 position: 45_-73 image: 857.jpg auto: NP;T=any;W=Th,;D=M 1,N 18 schedule: null user: carol updates: 1
+978 Wed Aug 31 15:00:36 EDT 2016 position: null image: 978.jpg auto: null schedule: null user: android updates: 0
+858 Thu Aug 25 11:43:24 EDT 2016 position: 45_-73 image: 858.jpg auto: NP;T=any;W=Th,;D=M 9,N 18 schedule: null user: carol updates: 1
+979 Wed Aug 31 19:31:50 EDT 2016 position: null image: 979.jpg auto: null schedule: null user: android updates: 0
+859 Thu Aug 25 11:48:15 EDT 2016 position: 45_-73 image: 859.jpg auto: NP;T=any;W=Th,;D=N 98,N 18 schedule: null user: carol updates: 1
+980 Wed Aug 31 19:41:34 EDT 2016 position: null image: 980.jpg auto: null schedule: null user: android updates: 0
+860 Thu Aug 25 11:58:31 EDT 2016 position: 45_-73 image: 860.jpg auto: NP;T=any;W=Th,;D=M 18,N 13 schedule: NP;T=any;W=Th,;D=M 18,N 13 user: carol updates: 2
+981 Wed Aug 31 19:46:18 EDT 2016 position: 45_-73 image: 981.jpg auto: null schedule: null user: mike updates: 0
+861 Thu Aug 25 12:00:26 EDT 2016 position: null image: 861.jpg auto: NP;T=any;W=Th,;D=A 7,D 14 schedule: NP;T=any;W=Th,;D=A 7,D 14 user: mike updates: 2
+982 Wed Aug 31 19:46:51 EDT 2016 position: 45_-73 image: 982.jpg auto: null schedule: null user: mike updates: 0
+862 Thu Aug 25 12:01:21 EDT 2016 position: null image: 862.jpg auto: NP;T=01:01,04:80;W=Tu,;D=F 7,D 7 schedule: NP;T=01:01,04:80;W=Tu,;D=F 7,D 7 user: carol updates: 2
+983 Wed Aug 31 19:53:15 EDT 2016 position: 45_-73 image: 983.jpg auto: null schedule: null user: mike updates: 0
+863 Thu Aug 25 12:04:35 EDT 2016 position: null image: 863.jpg auto: NP;T=01:01,09:00;W=Tu,;D=A 7,D 1 schedule: NP;T=01:01,09:00;W=Tu,;D=A 7,D 1 user: carol updates: 2
+984 Thu Sep 01 08:46:05 EDT 2016 position: 45_-73 image: 984.jpg auto: P;T=17:00,01:00;W=M,F,;D=any schedule: P;T=17:00,01:00;W=M,F,;D=any user: mike updates: 2
+864 Thu Aug 25 12:08:24 EDT 2016 position: 45_-73 image: 864.jpg auto: NP;T=any;W=M,F,;D=Jn 7,N 12 schedule: NP;T=any;W=M,F,;D=Jn 7,N 12 user: mike updates: 2
+985 Thu Sep 01 08:47:30 EDT 2016 position: null image: 985.jpg auto: null schedule: null user: android updates: 0
+986 Thu Sep 01 09:05:39 EDT 2016 position: null image: 986.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+866 Fri Aug 26 21:40:35 EDT 2016 position: 45_-73 image: 866.jpg auto: P;T=17:00,01:00;W=M,F,;D=A 9,F 9 schedule: P;T=17:00,01:00;W=M,F,;D=A 9,F 9 user: mike updates: 2
+987 Thu Sep 01 09:09:07 EDT 2016 position: null image: 987.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+867 Sat Aug 27 11:40:37 EDT 2016 position: 45_-73 image: 867.jpg auto: NP;T=07:00,09:00;W=M,F,;D=A 1,D 1 schedule: null user: mike updates: 1
+900 Sun Aug 28 15:40:45 EDT 2016 position: null image: 900.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+988 Thu Sep 01 09:15:25 EDT 2016 position: null image: 988.jpg auto: P;T=any;W=M,;D=any schedule: null user: android updates: 1
+868 Sat Aug 27 11:46:03 EDT 2016 position: 45_-73 image: 868.jpg auto: P;L=540;T=17:00,01:00;W=Th,;D=any schedule: null user: mike updates: 1
+901 Sun Aug 28 15:42:32 EDT 2016 position: null image: 901.jpg auto: P;T=any;W=Tu,;D=any schedule: null user: android updates: 1
+989 Thu Sep 01 09:30:19 EDT 2016 position: null image: 989.jpg auto: null schedule: null user: android updates: 0
+869 Sat Aug 27 11:54:57 EDT 2016 position: 45_-73 image: 869.jpg auto: NP;T=any;W=Th,;D=M 18,N 18 schedule: NP;T=any;W=Th,;D=M 18,N 18 user: mike updates: 2
+902 Sun Aug 28 15:52:27 EDT 2016 position: null image: 902.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+903 Sun Aug 28 16:02:39 EDT 2016 position: null image: 903.jpg auto: null schedule: null user: android updates: 0
+904 Sun Aug 28 16:05:43 EDT 2016 position: null image: 904.jpg auto: P;T=any;W=any;D=any schedule: null user: android updates: 1
+905 Sun Aug 28 16:07:56 EDT 2016 position: null image: 905.jpg auto: P;T=any;W=M,;D=any schedule: null user: android updates: 1
+906 Sun Aug 28 16:10:07 EDT 2016 position: null image: 906.jpg auto: null schedule: null user: android updates: 0

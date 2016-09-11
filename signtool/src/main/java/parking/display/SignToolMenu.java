@@ -1,5 +1,7 @@
 package parking.display;
 
+import parking.opencv.SignRecognizer;
+
 import javax.swing.JMenuBar;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -12,12 +14,17 @@ class SignToolMenu {
 	private SignTool signTool;
 	private JMenuBar menuBar;
 	private JMenu fileMenu;
+	private JMenu testMenu;
 	private JMenu viewMenu;
 	private JMenu imageMenu;
 	private JMenu lineMenu;
 	private JMenuItem fileLoadImage;
 	private JMenuItem fileLoadImage4;
 	private JMenuItem fileReadSign;
+	private JMenuItem testSignDB;
+	private JMenuItem verifySignDB;
+	private JMenuItem cleanupDB;
+	private JMenuItem viewDB;
 	private JMenuItem viewWorking;
 	private JMenuItem viewLines;
 	private JMenuItem viewEdges;
@@ -47,6 +54,7 @@ class SignToolMenu {
 	private JMenuItem lineMerged;
 	
 	private FileMenuListener fileMenuListener;
+	private TestMenuListener testMenuListener;
 	private ViewMenuListener viewMenuListener;
 	private ImageMenuListener imageMenuListener;
 	private LineMenuListener lineMenuListener;
@@ -59,16 +67,19 @@ class SignToolMenu {
 		signTool.setJMenuBar(menuBar);
 
 		fileMenu = new JMenu("File");
+		testMenu = new JMenu("Database");
 		viewMenu = new JMenu("View");
 		imageMenu = new JMenu("Image");
 		lineMenu = new JMenu("Line");
 
 		menuBar.add(fileMenu);
+		menuBar.add(testMenu);
 		menuBar.add(viewMenu);
 		menuBar.add(imageMenu);
 		menuBar.add(lineMenu);
 
 		fileMenuListener = new FileMenuListener();
+		testMenuListener = new TestMenuListener();
 		viewMenuListener = new ViewMenuListener();
 		imageMenuListener = new ImageMenuListener();
 		lineMenuListener = new LineMenuListener();
@@ -88,6 +99,25 @@ class SignToolMenu {
 		fileReadSign.addActionListener(fileMenuListener);
 		fileMenu.add(fileReadSign);
 
+		testSignDB = new JMenuItem("Test Signs");
+		testSignDB.setActionCommand("SignDatabase");
+		testSignDB.addActionListener(testMenuListener);
+		testMenu.add(testSignDB);
+
+		verifySignDB = new JMenuItem("Verify Signs");
+		verifySignDB.setActionCommand("VerifySigns");
+		verifySignDB.addActionListener(testMenuListener);
+		testMenu.add(verifySignDB);
+
+		cleanupDB = new JMenuItem("Cleanup DB");
+		cleanupDB.setActionCommand("CleanupDB");
+		cleanupDB.addActionListener(testMenuListener);
+		testMenu.add(cleanupDB);
+
+		viewDB = new JMenuItem("View DB");
+		viewDB.setActionCommand("ViewDB");
+		viewDB.addActionListener(testMenuListener);
+		testMenu.add(viewDB);
 
 		viewWorking = new JMenuItem("Working");
 		viewWorking.setActionCommand("Working");
@@ -242,52 +272,70 @@ class SignToolMenu {
          	}
          }
 	}
+ 
+	class TestMenuListener implements ActionListener {
+		public void actionPerformed(ActionEvent e) {
+			String cmd = e.getActionCommand();
+			if (cmd.equals("SignDatabase")){
+         		signTool.testSignDatabase();
+         	}
+         	else if (cmd.equals("VerifySigns")){
+         		signTool.verifySignDatabase();
+         	}
+         	else if (cmd.equals("CleanupDB")){
+         		signTool.cleanupSignDatabase();
+         	}
+         	else if (cmd.equals("ViewDB")){
+         		signTool.viewSignDatabase();
+         	}
+         }
+    }
 
 	class ViewMenuListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
 			String cmd = e.getActionCommand();
-			SignBuilder builder = signTool.getBuilder();
+			SignRecognizer recognizer = signTool.getRecognizer();
 			if (cmd.equals("Working")){
-       			signTool.show(cmd, builder.getWorkingImage());
+       			signTool.show(cmd, recognizer.getWorkingImage());
          	}
          	else if (cmd.equals("Lines")){
-       			signTool.show(cmd, builder.getLineImage());
+       			signTool.show(cmd, recognizer.getLineImage());
          	}
          	else if (cmd.equals("Edges")){
-       			signTool.show(cmd, builder.getEdgeImage());
+       			signTool.show(cmd, recognizer.getEdgeImage());
          	}
          	else if (cmd.equals("Rectangles")){
-       			signTool.show(cmd, builder.getRectangleImage());
+       			signTool.show(cmd, recognizer.getRectangleImage());
          	}
          	else if (cmd.equals("ClusterBoundaries")){
-       			signTool.show(cmd, builder.showClusterBoundaries());
+       			signTool.show(cmd, recognizer.showClusterBoundaries());
          	}         	
          	else if (cmd.equals("Resized")){
-       			signTool.show(cmd, builder.getResizedImage());
+       			signTool.show(cmd, recognizer.getResizedImage());
          	}
          	else if (cmd.equals("CannyOrig")){
-         		signTool.show(cmd, builder.getCannyOrig());
+         		signTool.show(cmd, recognizer.getCannyOrig());
          	}
          	else if (cmd.equals("CannyRaw")) {
-         		signTool.show(cmd, builder.getRawCanny());
+         		signTool.show(cmd, recognizer.getRawCanny());
          	}
          	else if (cmd.equals("TransCanny")) {
-         		signTool.show(cmd, builder.getTransCanny());
+         		signTool.show(cmd, recognizer.getTransCanny());
          	}
          	else if (cmd.equals("ResizedCanny")) {
-         		signTool.show(cmd, builder.getResizedCanny());
+         		signTool.show(cmd, recognizer.getResizedCanny());
          	}
          	else if (cmd.equals("Binary")) {
-         		signTool.show(cmd, builder.getBinaryImage());
+         		signTool.show(cmd, recognizer.getBinaryImage());
          	}
          	else if (cmd.equals("Shape")) {
-         		signTool.show(cmd, builder.getShapeImage());
+         		signTool.show(cmd, recognizer.getShapeImage());
          	}
          	else if (cmd.equals("TextSegments")) {
-         		signTool.show(cmd, builder.getTextSegmentImage(1.0));
+         		signTool.show(cmd, recognizer.getTextSegmentImage(1.0));
          	}
          	else if (cmd.equals("TextSegments2")) {
-         		signTool.show(cmd, builder.getTextSegmentImage(2.0));
+         		signTool.show(cmd, recognizer.getTextSegmentImage(2.0));
          	}
          }
 	}

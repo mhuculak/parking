@@ -1,6 +1,6 @@
 package parking.util;
 
-import parking.security.WebLogin;
+
 
 import javax.servlet.http.HttpSession;
 
@@ -25,7 +25,7 @@ public class Logger {
 	private LoggingTag tag;
 	private String className;
 	private String method;
-	private String user;
+	
 
 	private final String defaultTagMapsFile = "tagMaps.txt";
 
@@ -44,7 +44,6 @@ public class Logger {
 	// ctor used within a class
 	public Logger(Logger parent, Object obj, LoggingTag tag) {
 		this.logger = parent.getLogger();
-		this.user = parent.getUser();
 		className = obj.getClass().getName();
 		this.tag = tag;
 	}
@@ -52,7 +51,6 @@ public class Logger {
 	// ctor used within method
 	public Logger(Logger parent, LoggingTag tag, String method) {
 		this.logger = parent.getLogger();
-		this.user = parent.getUser();
 		this.className = parent.getClassName();
 		this.tag = tag;
 		this.method = method;
@@ -61,7 +59,6 @@ public class Logger {
 	// ctor used within method
 	public Logger(Logger parent, String method) {
 		this.logger = parent.getLogger();
-		this.user = parent.getUser();
 		this.className = parent.getClassName();
 		this.tag = parent.getTag();
 		this.method = method;
@@ -71,7 +68,6 @@ public class Logger {
 
 	public Logger(Logger parent, LoggingTag tag, String className, String method) {
 		this.logger = parent.getLogger();
-		this.user = parent.getUser();
 		this.className = className;
 		this.tag = tag;
 	}
@@ -90,11 +86,7 @@ public class Logger {
 	}
 
 	private void init(HttpSession session, LoggingTag tag, String method) {
-		logger = TheLogger.getInstance(session);
-		WebLogin login = (WebLogin)session.getAttribute("login-session");
-		if (login != null) {
-			user = login.getUserName();
-		}
+		logger = TheLogger.getInstance(session);		
 		this.tag = tag;
 		this.method = method;
 	}
@@ -109,10 +101,6 @@ public class Logger {
 		return logger;
 	}
 
-	public String getUser() {
-		return user;
-	}
-
 	public String getClassName() {
 		return className;
 	}
@@ -122,10 +110,18 @@ public class Logger {
 	}
 
 	public void log(String content) {
+		logger.log(tag, null, className, method, content);
+	}
+
+	public void log(String content, String user) {
 		logger.log(tag, user, className, method, content);
 	}
 
 	public void error(String error) {
+		logger.error(null, className, method, error);
+	}
+
+	public void error(String error, String user) {
 		logger.error(user, className, method, error);
 	}
 
@@ -134,6 +130,10 @@ public class Logger {
 		for (String key : profile.keySet()) {
 			log(key+" "+profile.get(key)+" msec");
 		}
+	}
+
+	public void enable(LoggingTag tag) {
+		logger.enable(tag);
 	}
 }
 
@@ -307,4 +307,5 @@ class TheLogger {
             }
         }
 	}
+
 }
