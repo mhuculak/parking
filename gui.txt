@@ -1,0 +1,74 @@
+GUI
+===
+
+Contents
+--------
+
+1. Street Panel
+
+   a. Label (Text)
+   b. Street Name (Text)
+   c. Select/Save (Button)
+
+2. Map Panel
+   a. Map
+   b. Pan Controls (N,S,E,W)
+   c. Zoom Control (+, -)
+
+3. Sign Panel
+   a. Sign (Image)
+   b. Schedule (Form)
+   c. Edit/Save (Button)
+
+4. Message Panel
+
+5. Mode Panel
+
+Operation Modes
+---------------
+
+1. Street Select/Naviagation Mode
+
+   a. no street name displayed
+   b. street panel button labeled as "Select"
+   c. map pan via mouse drag
+   d. map zoom using mouse wheel
+   e. left click map selects nearest street
+   f. map panel displays unassigned signs in red
+
+2. Street Edit Mode
+
+   a. mouse left click
+     i) empty space - adds point at closest end
+     ii) point icon - selects point
+     iii) sign icon - select and add sign                           // TODO
+
+   b. mouse drag
+      i) selected point - move point
+      ii) selected sign - move sign                                 // TODO
+
+   c. mouse right click
+      i) selected point - delete point
+      ii) empty space = insert point
+
+   d. map panel displays 4 icons for pan (N,S,E,W)
+
+   e. map panel displays 2 icons for zoom (+ -)
+
+   f. map panel displays assigned signs in blue and                  // TODO
+      unassigned signed in red. Selected sign is highlighted
+      with a larger icon with bold outline
+
+   g. map panel displays points with a selection circle
+      and selected point with a bold circle. points are
+      connected with a green line
+   
+   h. street panel contains name of selected street
+   
+   i. street panel button is labled as "Save"
+
+3. Sign Edit Mode                                                    // TODO
+
+   a. selected sign displayed in sign panel
+   b. click edit button to modify schedule
+   c. click save button to save changes

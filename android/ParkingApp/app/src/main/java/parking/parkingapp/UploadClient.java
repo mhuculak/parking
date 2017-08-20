@@ -58,7 +58,10 @@ public class UploadClient extends AsyncTask<String, Integer, Boolean> {
     private User user;
     private OkHttpClient httpClient;
     private MapsActivity parent;
+    private Register register;
     private String uploadResponse;
+    private String errorMessage;
+    private int httpResponseCode;
 
     public UploadClient(File uploadFile, MapsActivity parent, User user) {
         this.uploadFile = uploadFile;
@@ -85,7 +88,12 @@ public class UploadClient extends AsyncTask<String, Integer, Boolean> {
         httpClient = createHttpClient(user, 10);
     }
 
-    private OkHttpClient createRetryClient(int timeout) {
+    public UploadClient(User user, Register register) {
+        this.user = user;
+        this.register = register;
+    }
+
+    private OkHttpClient createNoAuthClient(int timeout) {
         Log.i(TAG, "create retry client with "+timeout+" sec timeout");
         OkHttpClient httpClient = new OkHttpClient.Builder()
                 .readTimeout(timeout, TimeUnit.SECONDS)
@@ -133,6 +141,9 @@ public class UploadClient extends AsyncTask<String, Integer, Boolean> {
         else if (trajectory != null) {
             return uploadTrajectory(urls[0]);
         }
+        else if (register != null) {
+            return uploadRegistration(urls[0]);
+        }
         return false;
     }
 
@@ -150,6 +161,7 @@ public class UploadClient extends AsyncTask<String, Integer, Boolean> {
             Request httpRequest = new Request.Builder()
                     .url(url)
                     .post(formBody)
+                    .addHeader("Phone", user.getPhone())
                     .build();
             Response response = httpClient.newCall(httpRequest).execute();
             uploadResponse = readResponse(response);
@@ -157,7 +169,9 @@ public class UploadClient extends AsyncTask<String, Integer, Boolean> {
                 return true;
             }
             Log.e(TAG,"failure response = "+response.message());
+            errorMessage = response.message();
         } catch (Exception ex) {
+            errorMessage = ex.toString();
             Log.e(TAG, "exception", ex);
         }
         return false;
@@ -174,6 +188,7 @@ public class UploadClient extends AsyncTask<String, Integer, Boolean> {
             Request httpRequest = new Request.Builder()
                     .url(url)
                     .post(formBody)
+                    .addHeader("Phone", user.getPhone())
                     .build();
             Response response = httpClient.newCall(httpRequest).execute();
             Headers responseHeaders = response.headers();
@@ -185,13 +200,43 @@ public class UploadClient extends AsyncTask<String, Integer, Boolean> {
                 return true;
             }
             Log.e(TAG,"failure response = "+response.message());
+            errorMessage = response.message();
         } catch (Exception ex) {
+            errorMessage = ex.toString();
+            Log.e(TAG, "exception", ex);
+        }
+        return false;
+    }
+
+    private boolean uploadRegistration(String url) {
+        try {
+            OkHttpClient registrationClient = createNoAuthClient(10);
+            JSONObject jObj = user.serialize();
+            String json = jObj.toString();
+            Log.i(TAG, "uploading registration info " + json+ " to "+url);
+            RequestBody formBody = new FormBody.Builder()
+                    .add("register", json)
+                    .build();
+            Request httpRequest = new Request.Builder()
+                    .url(url)
+                    .post(formBody)
+                    .build();
+            Response response = registrationClient.newCall(httpRequest).execute();
+            uploadResponse = readResponse(response);
+            if (uploadResponse != null) {
+                return true;
+            }
+            Log.e(TAG,"failure response = "+response.message());
+            errorMessage = response.message();
+        } catch (Exception ex) {
+            errorMessage = ex.toString();
             Log.e(TAG, "exception", ex);
         }
         return false;
     }
 
     private String readResponse(Response response) throws IOException {
+        httpResponseCode = response.code();
         if (response.isSuccessful()) {
             Log.i(TAG,"succesful upload "+response.message());
             ResponseBody body = response.body();
@@ -224,7 +269,11 @@ public class UploadClient extends AsyncTask<String, Integer, Boolean> {
                     .setType(MultipartBody.FORM)
                     .addFormDataPart("image", uploadFile.getName(), RequestBody.create(mediaType, uploadFile)).build();
 
-            httpRequest = new Request.Builder().url(url).post(multipart).build();
+            httpRequest = new Request.Builder()
+                    .url(url)
+                    .post(multipart)
+                    .addHeader("Phone", user.getPhone())
+                    .build();
 
             Log.i(TAG,"fetching "+url);
             Response response = httpClient.newCall(httpRequest).execute();
@@ -238,13 +287,14 @@ public class UploadClient extends AsyncTask<String, Integer, Boolean> {
             Log.e(TAG, "Caught excpetion "+e+" attempting to post file "+uploadFile.getPath()+" to "+url);
             Log.e(TAG, "exception", e);
             try { // if fist you don't succeed
-                OkHttpClient retryClient = createRetryClient(120);
+                OkHttpClient retryClient = createNoAuthClient(120);
                 String userPass = user.getUserName()+":"+user.getPassword();
                 String  encodedUserPass = Base64.encodeToString(userPass.getBytes(), Base64.NO_WRAP);
                 httpRequest = new Request.Builder()
                         .url(url)
                         .post(multipart)
                         .addHeader("Authorization", "Basic "+encodedUserPass)
+                        .addHeader("Phone", user.getPhone())
                         .build();
                 Response response = retryClient.newCall(httpRequest).execute();
                 uploadResponse = readResponse(response);
@@ -252,8 +302,10 @@ public class UploadClient extends AsyncTask<String, Integer, Boolean> {
                     return true;
                 }
                 Log.e(TAG,"retry failure response = "+response.message());
+                errorMessage = response.message();
             }
             catch (Exception ex) {
+                errorMessage = ex.toString();
                 Log.e(TAG, "Caught excpetion "+ex+" on retry...giving up");
                 Log.e(TAG, "exception", ex);
             }
@@ -266,8 +318,24 @@ public class UploadClient extends AsyncTask<String, Integer, Boolean> {
     }
 
     @Override
-    protected void onPostExecute(Boolean result) {
-        Log.i(TAG, "pass result "+result+" to main activity");
-        parent.uploadResultAvailable(uploadResponse);
+    protected void onPostExecute(Boolean success) {
+        if (parent != null) {
+            if (success) {
+                Log.i(TAG, "pass result to main activity");
+                parent.uploadResultAvailable(uploadResponse);
+            }
+            else {
+                parent.uploadConnectionFailure(errorMessage, httpResponseCode);
+            }
+        }
+        else if (register != null) {
+            if (success) {
+                Log.i(TAG, "pass result to the registration fragment");
+                register.uploadResultAvailable(uploadResponse);
+            }
+            else {
+                register.uploadConnectionFailure(errorMessage, httpResponseCode);
+            }
+        }
     }
 }

@@ -4,7 +4,7 @@ import parking.database.MongoInterface;
 import parking.map.Trajectory;
 import parking.map.MapInit;
 import parking.security.WebLogin;
-
+import parking.util.ClientType;
 import parking.util.Logger;
 import parking.util.LoggingTag;
 

@@ -20,13 +20,22 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin">
 
-    <fragment
-        android:id="@+id/map"
+    <RelativeLayout
+        android:id="@+id/map_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        class="com.google.android.gms.maps.SupportMapFragment" />
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true">
 
-        <LinearLayout
+        <fragment
+            android:id="@+id/map"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            class="com.google.android.gms.maps.SupportMapFragment" />
+
+    </RelativeLayout>
+
+
+    <LinearLayout
             android:id="@+id/start_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -140,6 +149,7 @@
             android:visibility="invisible"
             android:text="@string/take_picture" />
 
+
     <LinearLayout
         android:id="@+id/web_layout"
         android:layout_width="wrap_content"
@@ -192,5 +202,11 @@
                 android:text="@string/period" />
         </LinearLayout>
 
+    <FrameLayout
+        android:id="@+id/register"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
-    </RelativeLayout>
+
+
+</RelativeLayout>

@@ -20,4 +20,20 @@ public class MapBounds {
 		}
 		return false;
 	}
+
+	public Position getCenter() {
+		return new Position( (northEast.getLatitude()+southWest.getLatitude())/2, (northEast.getLongitude()+southWest.getLongitude())/2);
+	}
+
+	public Position getNE() {
+		return northEast;
+	}
+
+	public Position getSW() {
+		return southWest;
+	}
+
+	public String toString() {
+		return "ne:"+northEast+" sw:"+southWest;
+	}
 }

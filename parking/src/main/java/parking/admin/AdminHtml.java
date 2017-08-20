@@ -122,8 +122,11 @@ public class AdminHtml {
       }
       else {
          sb.append("No Week Days Found (Please add if required):<br>");
+         int i=0;
          for ( String day : WeekDaySet.allDays) {
-            sb.append("<input type=\"checkbox\" name=\""+day+"\" value=\""+day+"\">"+day+"<br>");
+            String name = "day"+i;
+            sb.append("<input type=\"checkbox\" name=\""+name+"\" value=\""+day+"\">"+day+"<br>");
+            i++;
          }
       }
       DateRange dateRange = schedule.getDateRange();

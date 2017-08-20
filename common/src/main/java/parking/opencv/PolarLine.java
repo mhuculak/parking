@@ -6,6 +6,10 @@ import org.opencv.core.Point;
 //  A wrapper on the line classs that can be used to form clusters
 //  of colinear lines
 //
+//  Note: could do this using an adapter design pattern:
+//        1. composition method: Line is an attriubte of PolarLine (as we did it)
+//        2. inhertence mathod: PolarLine could inherit from Line and override getPoint()
+//
 public class PolarLine implements Clusterable {
 
 	private double[] theta;

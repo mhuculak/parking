@@ -58,6 +58,40 @@ public class UserDB {
 		}		
 	}
 
+	public void addUser(User user) {
+		Logger logger = new Logger(m_logger, "addUser");
+		BasicDBObject searchQuery = new BasicDBObject();
+		if (user == null || user.getUserName() == null) {
+			logger.error("cannot add null user");
+			return;
+		}
+		searchQuery.put("name", user.getUserName());		
+		DBCursor cursor = m_users.find(searchQuery);
+		if (cursor.count() == 0) {
+			BasicDBObject document = new BasicDBObject();
+			Object id = m_mongo.getNextID();
+			document.append("_id", id);
+			document.append("name", user.getUserName());
+			if (user.getPassword() != null) {
+				setPassword(document, user.getPassword());
+			}
+			if (user.getPhone() != null) {
+				document.append("phone", user.getPhone());
+			}
+			if (user.getEmail() != null) {
+				document.append("email", user.getEmail());
+			}
+			if (user.getAddress() != null) {
+				document.append("address", user.getAddress());
+			}
+			document.append("permission", Permission.user.toString()); // default permission
+			m_users.insert(document);
+		}
+		else {
+			logger.log("User " + user.getUserName() + " already exists");
+		}		
+	}
+
 	public void setPermission(String name, Permission permission) {
 		BasicDBObject searchQuery = new BasicDBObject();
 		searchQuery.put("name", name);		
@@ -77,19 +111,24 @@ public class UserDB {
 		searchQuery.put("name", name);		
 		DBCursor cursor = m_users.find(searchQuery);
 		if (cursor.count() == 1) {
-			byte[] salt = Password.getRandomSalt();
-//			System.out.println("Set password = " + password + " with salt = " + salt.toString());
-			byte[] encrypted = Password.createKey(password, salt);
 	    	BasicDBObject updateQuery =  new BasicDBObject();
 	    	BasicDBObject newFields = new BasicDBObject();
-	    	String encryptedPassword = Base64.getEncoder().encodeToString(encrypted);
-	    	newFields.append("password",  encryptedPassword);
-	    	String encodedSalt = Base64.getEncoder().encodeToString(salt);
-	    	newFields.append("salt", encodedSalt);
+	    	setPassword(newFields, password);	    	
 	    	updateQuery.append( "$set", newFields);
 //	    	System.out.println("Storing password in DB as " + encryptedPassword + " with salt " + encodedSalt);
 	    	m_users.update(searchQuery, updateQuery);
 		}
+	}
+
+	private void setPassword(BasicDBObject document, String password) {
+//		Logger logger = new Logger(m_logger, "setPassword");
+//		logger.log("Adding password "+password+" to the DB");
+		byte[] salt = Password.getRandomSalt();
+		byte[] encrypted = Password.createKey(password, salt);
+		String encryptedPassword = Base64.getEncoder().encodeToString(encrypted);
+		String encodedSalt = Base64.getEncoder().encodeToString(salt);
+		document.append("password",  encryptedPassword);
+		document.append("salt", encodedSalt);
 	}
 
 	public boolean checkPassword(String name, String password) {
@@ -110,6 +149,22 @@ public class UserDB {
 	    		}
 	    	}
 	    	return true;
+		}
+		return false;
+	}
+
+	public boolean checkPhone(String name, String phone) {
+		BasicDBObject searchQuery = new BasicDBObject();
+		searchQuery.put("name", name);		
+		DBCursor cursor = m_users.find(searchQuery);
+		if (cursor.count() == 1) {
+			DBObject document = cursor.next();
+			if (document.get("phone") != null) {
+				String correctPhone = (String)document.get("phone");
+				if (correctPhone.equals(phone)) {
+					return true;
+				}
+			}
 		}
 		return false;
 	}

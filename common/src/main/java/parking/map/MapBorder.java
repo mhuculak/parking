@@ -45,6 +45,16 @@ public class MapBorder {
 		computeProperties();
 	}
 
+	public void addPoints(List<Position> pts) {
+		if (pts != null && pts.size() > 0) {
+			if (points == null) {
+				points = new ArrayList<Position>();
+			}
+			points.addAll(pts);
+			computeProperties();
+		}
+	}
+
 	private void computeProperties() {
 		double sumLat = 0.0;
 		double sumLng = 0.0;

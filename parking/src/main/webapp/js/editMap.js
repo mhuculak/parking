@@ -201,7 +201,7 @@ function processSegments(data) {
     for (var i=0 ;i<segments.length ; i++) {
         var segment = segments[i];
         if (selectedSegment != null && selectedSegmentId.localeCompare(segment.id) == 0) {
-            console.log("Keeping selected segment");
+//            console.log("Keeping selected segment");
             gSegments.push(selectedSegment);
         }
         else {
@@ -243,6 +243,7 @@ function getSegment(data) {
 }
 
 function displaySegment(segment, selected) {
+//    console.log("display "+segment);
     var weight = 1;
     var signUrl = "http://"+server+":"+port+"/parking/images/no-parking10.png";
     if (selected) {
@@ -340,7 +341,9 @@ function cleanupSegment(segment) {
     }
     if (segment.signs != null) { 
         for ( var j=0 ; j<segment.signs.length ; j++) {
-            segment.signs[j].marker.setMap(null);
+            if (segment.signs[j].marker != null) {
+                segment.signs[j].marker.setMap(null);
+            }
         }
     }
 }
@@ -423,7 +426,9 @@ function getSignDetails(sign) {
     selectedId = sign.id;
     console.log("get details for " + sign.id);
     httpGetAsync("http://"+server+":"+port+"/parking/main/signs?id="+sign.id, displayDetails);
-    httpGetFileAsync("http://"+server+":"+port+"/parking/main/signs?id="+sign.id+"&action=thumbnail&size=200", displayThumb);
+    var thumbUrl = "http://"+server+":"+port+"/parking/main/signs?id="+sign.id+"&action=thumbnail&size=200";
+    console.log("fetch "+thumbUrl);
+    httpGetFileAsync(thumbUrl, displayThumb);
 }
 
 function displayDetails(data) {
@@ -470,6 +475,7 @@ function insertSegmentPosition(loc, action) {
     if (points.length == 1) {
         points.push(p);
         selectedSegment.path = addPath( selectedSegment.points, "#0000FF");
+        saveSegment();
         return;
     }
     console.log("insert point is "+p);
@@ -503,6 +509,9 @@ function insertSegmentPosition(loc, action) {
         var temp = index1;
         index1 = index2;
         index2 = temp;
+        temp = min1;
+        min1 = min2;
+        min2 = temp;
     }
     if (index2-index1 != 1) {
         console.log("ERROR: cannot insert into incorrectly ordered list "+points);
@@ -511,12 +520,23 @@ function insertSegmentPosition(loc, action) {
     }
     var d12 = getDist(points[index1], points[index2]);
     if (min1 > d12 || min2 > d12) {
-        if (index1 == 0) {
+        if (points.length == 2) {
+            if (min1 < min2) {
+                index1 = -1;
+                index2 = 0;                
+            }
+            else {
+                index1 = 1;
+                index2 = 2;
+            }
+        }
+        else if (index1 == 0) {
             index1 = -1;  // add new point at the start of list
             index2 = 0;
         }
         else if (index2 == points.length-1) {
             index1 = index2; // add new point at end of list
+            index2 = points.length;
         }
     }
     var newPoints = new Array();

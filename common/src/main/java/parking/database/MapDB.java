@@ -19,6 +19,8 @@ import com.mongodb.BasicDBList;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.text.Normalizer;
+import java.text.Normalizer.Form;
 
 public class MapDB {
 
@@ -33,16 +35,17 @@ public class MapDB {
 	}
 
 	public MapEntity addCountry(Country country) {
-		BasicDBObject searchQuery = new BasicDBObject("country", country.toString());
+		BasicDBObject searchQuery = new BasicDBObject("entity", country.toString());
 		DBCursor cursor = m_map.find(searchQuery);
 		MapEntityType type = MapEntityType.Country;
 		if (cursor.count()==0) {
+			m_logger.log("Add Country "+country.toString()+" to map DB");
 			BasicDBObject document = new BasicDBObject();
 			Object id = m_mongo.getNextID();
 			document.append("_id", id);
-			document.append("country", country.toString());
-			document.append("type", type);
-			MapEntity newEntity = new MapEntity(m_mongo, id.toString(), country.toString(), type);
+			document.append("entity", country.toString());
+			document.append("type", type.toString());
+			MapEntity newEntity = new MapEntity(m_mongo, id.toString(), null, country.toString(), type);
 			m_map.insert(document);
 			return newEntity;
 		}
@@ -53,12 +56,12 @@ public class MapDB {
 	}
 
 	public MapEntity getCountry(Country country) {
-		BasicDBObject searchQuery = new BasicDBObject("country", country.toString());
+		BasicDBObject searchQuery = new BasicDBObject("entity", country.toString());
 		DBCursor cursor = m_map.find(searchQuery);
 		MapEntityType type = MapEntityType.Country;
 		if (cursor.count()==1) {
 			DBObject document = cursor.next();
-			MapEntity entity = MapEntity.getEntity(m_mongo, document);
+			MapEntity entity = MapEntity.getEntity(m_mongo, null, document);
 			return entity;
 		}
 		else if (cursor.count()==0) {
@@ -80,14 +83,17 @@ public class MapDB {
 	    	if (borderObj != null) {
 	    		MapBorder childBorder = MapBorder.getBorder(borderObj);
 	    		if (MapBorder.intersects(bounds, childBorder)) {
-	    			matches.add(MapEntity.getEntity(m_mongo, document));
+	    			matches.add(MapEntity.getEntity(m_mongo, null, document));
 	    		}
 	    		else if (childBorder.contains(p)) {
-	    			matches.add(MapEntity.getEntity(m_mongo, document));
+	    			matches.add(MapEntity.getEntity(m_mongo, null, document));
 	    		}
 	    	}
 	    }
-	    return matches;
+	    if (matches.size() > 0) {
+	    	return matches;
+	    }
+	    return null;
 	} 
 
 	public List<MapEntity> getStateMatches(Position p, MapBounds bounds, List<MapEntity> countries) {
@@ -127,16 +133,16 @@ public class MapDB {
 		return null;
 	}
 
-	public MapEntity addCity(Country country, String stateProv, String city) {
+	public MapEntity addLoc1(Country country, String stateProv, Locality loc1) {
 		if (stateProv != null) {
 			MapEntity stateEntity = getStateProv(country, stateProv);
 			if (stateEntity != null) {
-				return stateEntity.addEntity(city);
+				return stateEntity.addEntity(loc1);
 			}
 			else {
 				stateEntity = addStateProv(country, stateProv);
 				if (stateEntity != null) {
-					return stateEntity.addEntity(city);
+					return stateEntity.addEntity(loc1);
 				}
 				m_logger.error("failed to add segment because "+stateProv+" could not be added");
 			}
@@ -147,87 +153,91 @@ public class MapDB {
 		return null;
 	}
 
-	public MapEntity getCity(Country country, String stateProv, String city, MapBorder segBorder) {
-		if (city != null) {
+	public MapEntity getLoc1(Country country, String stateProv, Locality loc1, MapBorder segBorder) {
+		if (loc1 != null) {
 			MapEntity stateEntity = getStateProv(country, stateProv);
 			if (stateEntity != null) {
-				return stateEntity.getEntity(city, segBorder);
+				return stateEntity.getEntity(loc1, segBorder);
 			}
 		}
 		return null;
 	}
 
-	public MapEntity addTown(Country country, String stateProv, String city, String town, MapBorder segBorder) {
+	public MapEntity addLoc2(Country country, String stateProv, Locality loc1, Locality loc2, MapBorder segBorder) {
 		MapEntity parentEntity = null;
-		if (city == null) {
+		if (loc2 == null) {
+			m_logger.error("VIOLATION: addLoc2 assumes that loc2 is not null!"); // FIXME: throw exception here
+			return null;
+		}
+		if (loc1 == null) {
 			parentEntity = getStateProv(country, stateProv);
 			if (parentEntity != null) {
-				return parentEntity.addEntity(town, segBorder);
+				return parentEntity.addEntity(loc2, segBorder);
 			}
 			else {
 				parentEntity = addStateProv(country, stateProv);
 				if (parentEntity != null) {
-					return parentEntity.addEntity(town, segBorder);
+					return parentEntity.addEntity(loc2, segBorder);
 				}
 				m_logger.error("failed to add segment because "+stateProv+" could be added");
 			}
 		}
 		else {
-			parentEntity = getCity(country, stateProv, city, segBorder);
+			parentEntity = getLoc1(country, stateProv, loc1, segBorder);
 			if (parentEntity != null) {	
-				return parentEntity.addEntity(town, segBorder);
+				return parentEntity.addEntity(loc2, segBorder);
 			}
 			else {
-				parentEntity = addCity(country, stateProv, city);
+				parentEntity = addLoc1(country, stateProv, loc1);
 				if (parentEntity != null) {
-					return parentEntity.addEntity(town, segBorder);
+					return parentEntity.addEntity(loc2, segBorder);
 				}
-				m_logger.error("failed to add segment because "+city+" could be added");
+				m_logger.error("failed to add segment because "+loc1+" could be added");
 			}
 		}
 		return null;
 	}
 
-	public MapEntity getTown(Country country, String stateProv, String city, String town, MapBorder segBorder) {
-		if (city != null) {
-			MapEntity cityEntity = getCity(country, stateProv, city, segBorder);
-			if (cityEntity != null) {
-				return cityEntity.getEntity(town, segBorder);
+	public MapEntity getLoc2(Country country, String stateProv, Locality loc1, Locality loc2, MapBorder segBorder) {
+		if (loc1 != null) {
+			MapEntity loc1Entity = getLoc1(country, stateProv, loc1, segBorder);
+			if (loc1Entity != null) {
+				return loc1Entity.getEntity(loc2, segBorder);
 			}
 		}
 		else {
 			MapEntity stateEntity = getStateProv(country, stateProv);
 			if (stateEntity != null) {
-				return stateEntity.getEntity(town, segBorder);
+				return stateEntity.getEntity(loc2, segBorder);
 			}
 		}
 		return null;
 	}
 
-	public MapEntity addStreet(Country country, String stateProv, String city, String town, String street, MapBorder segBorder) {
+	public MapEntity addStreet(Country country, String stateProv, Locality loc1, Locality loc2, String street, MapBorder segBorder) {
 		MapEntity parentEntity = null;
-		if (town == null) {
-			parentEntity = getCity(country, stateProv, city, segBorder);
+		if (loc2 == null) {
+			parentEntity = getLoc1(country, stateProv, loc1, segBorder);
 			if (parentEntity != null) {
 				return parentEntity.addEntity(street, segBorder);
 			}
-			parentEntity = addCity(country, stateProv, city);
+			parentEntity = addLoc1(country, stateProv, loc1);
 			if (parentEntity != null) {
 				return parentEntity.addEntity(street, segBorder);
 			}
-			m_logger.error("failed to add segment because "+city+" could be added");
+			m_logger.error("failed to add segment because "+loc1+" could be added");
 		}
 		else {
-		 	parentEntity = getTown(country, stateProv, city, town, segBorder);
+		 	parentEntity = getLoc2(country, stateProv, loc1, loc2, segBorder);
 		 	if (parentEntity != null) {
 		 		return parentEntity.addEntity(street, segBorder);
 		 	}
 		 	else {
-		 		parentEntity = addTown(country, stateProv, city, town, segBorder);
+		 		parentEntity = addLoc2(country, stateProv, loc1, loc2, segBorder);
 		 		if (parentEntity != null) {
 		 			return parentEntity.addEntity(street, segBorder);
 		 		}
-		 		m_logger.error("failed to add segment because "+town+" could not be added");
+		 		m_logger.error("failed to add segment because "+loc2+" could not be added");
 		 	}
 
 		}		
@@ -237,23 +247,23 @@ public class MapDB {
 	//  Possible FIXME: we do not pass the border to getEntity because we assume that each street name is unique within the town/city
 	//                  if we find a case where this is not true, we need to create a border for the street
 	//
-	public MapEntity getStreet(Country country, String stateProv, String loc1, String loc1, String street, MapBorder segBorder) {
-		if (town != null) {
-			MapEntity townEntity = getTown(country, stateProv, city, town, segBorder);
-			if (townEntity != null) {
-				return townEntity.getEntity(street);
+	public MapEntity getStreet(Country country, String stateProv, Locality loc1, Locality loc2, String street, MapBorder segBorder) {
+		if (loc2 != null) {
+			MapEntity loc2Entity = getLoc2(country, stateProv, loc1, loc2, segBorder);
+			if (loc2Entity != null) {
+				return loc2Entity.getEntity(street);
 			}
 		}
 		else {
-			MapEntity cityEntity = getCity(country, stateProv, city, segBorder);
-			if (cityEntity != null) {
-				return cityEntity.getEntity(street);
+			MapEntity loc1Entity = getLoc1(country, stateProv, loc1, segBorder);
+			if (loc1Entity != null) {
+				return loc1Entity.getEntity(street);
 			}
 		}
 		return null;
 	}
 
-	private boolean addSegment(Country country, String stateProv, String loc1, String loc2, 
+	private boolean addSegment(Country country, String stateProv, Locality loc1, Locality loc2, 
 				String street, StreetSegment segment, MapBorder segBorder) {
 		if (street != null) {
 			MapEntity streetEntity = getStreet(country, stateProv, loc1, loc2, street, segBorder);
@@ -275,18 +285,50 @@ public class MapDB {
 	}
 
 	public boolean addSegment(StreetSegment segment) {
-		MapBorder segBorder = new MapBorder(segment.getPoints()); 
-		Address address = Address.reverseGeocode(segBorder.getCenter());
-		if (address != null) {
-			Country country = address.getCountry() == null ? null : Country.countryMap.get(address.getCountry());
-			String state = address.getProvinceState();
-			String admin = getAdminRegion()
-			String city = address.getCity();
-			String town = address.getTown();
-			String street = address.getStreetName();
-
-			if (!addSegment(country, state, city, town, street, segment, segBorder)) {
-				m_logger.error("failed to segment with address "+address.toString());
+		MapBorder segBorder = new MapBorder(segment.getPoints());
+		MyAddress myAddress = new MyAddress(segment.getStreetName());
+		if (myAddress.set(segBorder.getCenter())) {
+			Country country = myAddress.country() == null ? null : Country.countryReverseMap.get(myAddress.country());
+			String state = myAddress.state();
+			String admin = myAddress.admin();
+			String city = myAddress.city();
+			String town = myAddress.town();
+			String street = myAddress.street();
+			m_logger.log("Add segment to country ="+country.toString()+" state = "+state+" street = "+street);
+			if (town != null) {
+				if (city != null) {
+					m_logger.log("Add segment to loc1 ="+city+"(city) loc2 = "+town+"(town)");
+					Locality loc1 = new Locality(city, MapEntityType.City);
+					Locality loc2 = new Locality(town, MapEntityType.Town);
+					if (!addSegment(country, state, loc1, loc2, street, segment, segBorder)) {
+						m_logger.error("failed to segment with address "+myAddress.toString());
+					}
+					else {
+						return true;
+					}
+				}
+				else {
+					m_logger.log("Add segment to loc1 ="+admin+"(admin) loc2 = "+town+"(town)");
+					Locality loc1 = admin == null ? null : new Locality(admin, MapEntityType.AdminRegion);
+					Locality loc2 = new Locality(town, MapEntityType.Town);
+					if (!addSegment(country, state, loc1, loc2, street, segment, segBorder)) {
+						m_logger.error("failed to segment with address "+myAddress.toString());
+					}
+					else {
+						return true;
+					}
+				}
+			}
+			else {
+				m_logger.log("Add segment to loc1 ="+admin+"(admin) loc2 = "+city+"(city)");
+				Locality loc1 = admin == null ? null : new Locality(admin, MapEntityType.AdminRegion);
+				Locality loc2 = city == null ? null : new Locality(city, MapEntityType.Town);
+				if (!addSegment(country, state, loc1, loc2, street, segment, segBorder)) {
+					m_logger.error("failed to segment with address "+myAddress.toString());
+				}
+				else {
+					return true;
+				}
 			}
 		}
 		else {
@@ -298,18 +340,18 @@ public class MapDB {
 	private List<MapEntity> getCountryEntities(Position p, MapBounds bounds, MyAddress myAddress) {
 		List<MapEntity> countryEntities = getCountryMatches(p, bounds);		
 		if (countryEntities == null) {
-			myAddress.address = Address.reverseGeocode(p);
-			if (myAddress.address == null) {
-				m_logger.error("could not get address from "+p.toString());
+			if (!myAddress.set(p)) {
+				m_logger.error("Cannot get address from "+p.toString());
 				return null;
 			}
-			if (myAddress.address.getCountry() == null) {
-				m_logger.error("could not get country from "+myAddress.address.toString());
+			String countryString = myAddress.country();
+			if (countryString == null) {
+				m_logger.error("could not get country from "+myAddress.toString());
 				return null;
 			}
-			Country country = Country.countryMap.get(myAddress.address.getCountry());
+			Country country = Country.countryReverseMap.get(countryString);
 			if (country == null) {
-				m_logger.error("country "+myAddress.address.getCountry()+" is not in the database");
+				m_logger.error("country "+countryString+" is not in the database");
 			}
 			countryEntities = new ArrayList<MapEntity>();
 			MapEntity entity = getCountry(country);
@@ -319,6 +361,9 @@ public class MapDB {
 			}
 			countryEntities.add(entity);
 		}
+		else {
+			m_logger.log("found "+countryEntities.size()+" country entities");
+		}
 		return countryEntities;
 	}
 
@@ -326,24 +371,32 @@ public class MapDB {
 		List<MapEntity> stateEntities = getStateMatches(p, bounds, countryEntities);
 		if (stateEntities == null) {
 			stateEntities = new ArrayList<MapEntity>();
-			if (myAddress.address == null) {
-				myAddress.address = Address.reverseGeocode(p);
-				if (myAddress.address == null) {
-					m_logger.error("could not get address from "+p.toString());
-					return null;
-				}
+			if (!myAddress.set(p)) {
+				m_logger.error("Cannot get address from "+p.toString());
+				return null;
 			}
-			String state = myAddress.address.getProvinceState();
+			String state = myAddress.state();
 			if (state == null) {
-				m_logger.error("could not get state from "+myAddress.address.toString());
+				m_logger.error("could not get state from "+myAddress.toString());
 				return null;
 			}
 			for (MapEntity ctryEnt : countryEntities) {
+				m_logger.log("get state entity "+state+" from country entity "+ctryEnt.getName());
 				MapEntity se = ctryEnt.getEntity(state);
 				if (se != null) {
-					if (ctryEnt.getName().equals(myAddress.address.getCountry())) {
+					m_logger.log(state+" found");
+					Country country = Country.valueOf(ctryEnt.getName());
+					String countryString = Country.countryMap.get(country);
+					if (countryString.equals(myAddress.country())) {
+						m_logger.log(state+"adding "+state);
 						stateEntities.add(se);
 					}
+					else {
+						m_logger.log("country "+myAddress.country()+" does not match "+countryString+" "+ctryEnt.getName());
+					}
+				}
+				else {
+					m_logger.log(state+" not found");
 				}
 			}			
 			if (stateEntities.size() == 0) {
@@ -369,6 +422,9 @@ public class MapDB {
 		return null;
 	}
 
+	//
+	//  FIXME: need to add AdminRegion
+	//
 	private List<MapEntity> getLocalityEntities(Position p, MapBounds bounds, MyAddress myAddress, List<MapEntity> stateEntities) {
 		List<MapEntity> localityEntities = new ArrayList<MapEntity>();
 		List<MapEntity> cityEntities = getMatchesByType(p, bounds, stateEntities, MapEntityType.City);		
@@ -384,32 +440,47 @@ public class MapDB {
 			localityEntities.addAll(townEntities);
 		}
 		if (localityEntities.size() > 0) {
+			m_logger.log(" found "+localityEntities.size()+" locality entities");
 			return localityEntities;
 		}
-		if (myAddress.address == null) {
-			myAddress.address = Address.reverseGeocode(p);
-			if (myAddress.address == null) {
-				m_logger.error("could not get address from "+p.toString());
-				return null;
-			}
+		if (!myAddress.set(p)) {
+			m_logger.error("Cannot get address from "+p.toString());
+			return null;
 		}
-		String state = myAddress.address.getProvinceState();
-		String city = myAddress.address.getCity();
-		String town = myAddress.address.getTown();
+		String state = myAddress.state();
+		String city = myAddress.city();
+		String town = myAddress.town();
 		if (city != null || town != null) {
 			for (MapEntity stateEnt : stateEntities) {
 				MapEntity ce = stateEnt.getEntity(city);
 				MapEntity te = null;
-				if (ce != null && stateEnt.getName().equals(state)) {
-					localityEntities.add(ce);
-					te = ce.getEntity(town);
-					if (te != null) {
-						localityEntities.add(te);
+				if (ce != null) {
+					if ( stateEnt.getName().equals(state)) {
+						m_logger.log("add entity for "+city);
+						localityEntities.add(ce);
+						te = ce.getEntity(town);
+						if (te != null) {
+							m_logger.log("add entity for "+town+" from "+city);
+							localityEntities.add(te);
+						}
+						else {
+							m_logger.log("no entity found for "+town);
+						}
 					}
+					else {
+						m_logger.log(stateEnt.getName()+" does not match "+state);
+					}
+				}
+				else {
+					m_logger.log("no entity found for "+city);
 				}
 				te = stateEnt.getEntity(town);
 				if (te != null) {
+					m_logger.log("add entity for "+town);
 					localityEntities.add(te);
+				}
+				else {
+					m_logger.log("no entity found for "+town);
 				}
 			}
 		}
@@ -419,29 +490,39 @@ public class MapDB {
 		return null;
 	}
 
+	//
+	//  FIXME: need to add AdminRegion
+	//
 	private List<MapEntity> getStreetEntiies(Position p, MapBounds bounds, MyAddress myAddress, List<MapEntity> localityEntities) {
 		List<MapEntity> streetEntities = getMatchesByType(p, bounds, localityEntities, MapEntityType.Street);
 		if (streetEntities != null) {
+			m_logger.log(" found "+streetEntities.size()+" street entities");
 			return streetEntities;
 		}
-		if (myAddress.address == null) {
-			myAddress.address = Address.reverseGeocode(p);
-			if (myAddress.address == null) {
-				m_logger.error("could not get address from "+p.toString());
-				return null;
-			}
+		if (!myAddress.set(p)) {
+			m_logger.error("Cannot get address from "+p.toString());
+			return null;
 		}
 		streetEntities = new ArrayList<MapEntity>();
-		String street = myAddress.address.getStreetName();
-		String city = myAddress.address.getCity();
-		String town = myAddress.address.getTown();
+		String street = myAddress.street();
+		String city = myAddress.city();
+		String town = myAddress.town();
 		if (street != null) {
+			m_logger.log(" look for "+street+" in "+localityEntities.size()+" locality ntities");
 			for (MapEntity locEnt : localityEntities) {
 				if (locEnt.getName().equals(city) || locEnt.getName().equals(town)) {
+					m_logger.log("locality "+locEnt.getName()+" matches "+city+" or "+town);
 					MapEntity streetEnt = locEnt.getEntity(street);
 					if (streetEnt != null) {
+						m_logger.log("found street "+street+" in "+locEnt.getName());
 						streetEntities.add(streetEnt);
 					}
+					else {
+						m_logger.log("street "+street+" not found in "+locEnt.getName());
+					}
+				}
+				else {
+					m_logger.log("locality "+locEnt.getName()+" does not match "+city+" or "+town);
 				}
 			}
 		}	
@@ -466,37 +547,91 @@ public class MapDB {
 	}
 
 	public List<StreetSegment> search(Position p, MapBounds bounds) {
-		MyAddress myAddress = new MyAddress();
-		String errorMessage = myAddress.address == null ? p.toString() : myAddress.address.toString();
+		MyAddress myAddress = new MyAddress(null);
 		List<MapEntity> countryEntities = getCountryEntities(p, bounds, myAddress);
 		if (countryEntities != null) {
+			m_logger.log(" found "+countryEntities.size()+" country entities");
 			List<MapEntity> stateEntities = getStateEntities(p, bounds, myAddress, countryEntities);
 			if (stateEntities != null) {
+				m_logger.log(" found "+stateEntities.size()+" state entities");
 				List<MapEntity> localityEntities = getLocalityEntities(p, bounds, myAddress, stateEntities);					
 				if (localityEntities != null) {
+					m_logger.log(" found "+localityEntities.size()+" locality entities");
 					List<MapEntity> streetEntities = getStreetEntiies(p, bounds, myAddress, localityEntities);
 					if (streetEntities != null) {
+						m_logger.log(" found "+streetEntities.size()+" street entities");
 						return getSegments(p, bounds, streetEntities);
 					}
 					else {
-						m_logger.error("no streets found for "+errorMessage);
+						m_logger.error("no streets found for "+myAddress.asString(p));
 					}
 				}
 				else {
-					m_logger.error("no localities found for "+errorMessage);
+					m_logger.error("no localities found for "+myAddress.asString(p));
 				}
 			}
 			else {  // do we want to support an state-less address?
 				
-				m_logger.error("no state available for "+errorMessage);
+				m_logger.error("no state available for "+myAddress.asString(p));
 			}		
 		}
-		m_logger.error("no country found for "+errorMessage);
+		m_logger.error("no country found for "+myAddress.asString(p));
 		return null;
 	}
 	
 }
 
 class MyAddress {
-	public Address address;
+	private Address address;
+	private String streetName; //  the street name from the originating segment must override the reverse geocode result
+
+	public MyAddress(String streetName) {
+		this.streetName = normalize(streetName);
+	}
+	public boolean set(Position p) {		
+		if (address == null) {
+			address = Address.reverseGeocode(p);
+			if (address != null && streetName == null) {
+				streetName = normalize(address.getStreetName());
+			}
+			return address != null;
+		}
+		return true;
+	}
+	public String street() {
+		return streetName;
+	}
+	public String town() {
+		return normalize(address.getTown());
+	}
+	public String city() {
+		return normalize(address.getCity());
+	}
+	public String admin() {
+		return normalize(address.getAdminRegion());
+	}
+	public String state() {
+		return normalize(address.getProvinceState());
+	}
+	public String country() {
+		return normalize(address.getCountry());
+	}
+	public String toString() {
+		return address.toString();
+	}
+	public String asString(Position p) {
+		if (set(p)) {
+			return address.toString();
+		}
+		return p.toString();
+	}
+
+	public String normalize(String value) {
+		if (value != null) {
+			String norm = Normalizer.normalize(value, Form.NFD);
+			String clean = norm.replaceAll("[^\\p{ASCII}]", "");
+			return clean;
+		}
+		return null;
+	}
 }

@@ -280,11 +280,14 @@ public class MapEditDB {
 
 	public boolean publishSegment(String id) {
 		StreetSegment segment = MapEntity.getSegment(getDoc(id));
-		if (m_mongo.getMapDB().addSegment(segment)) {
-			m_mongo.getSignDB().publishSigns(segment.getSigns());			
-			removeSegment(id);
-			return true;
-		}
+		if (segment != null && segment.getPoints() != null) {
+			m_logger.log("Got segment with "+segment.getPoints().size()+" points");
+			if (m_mongo.getMapDB().addSegment(segment)) {
+				m_mongo.getSignDB().publishSigns(segment.getSigns());			
+				removeSegment(id);
+				return true;
+			}
+		}		
 		m_logger.error("could not add segment to mapDB");		
 		return false;
 	}

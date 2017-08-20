@@ -25,19 +25,48 @@ public class MapEntity {
 
 	private MongoInterface m_mongo;
 	private DBCollection m_collection;
+	private MapEntity m_parent;
 	private String m_name;
+	private String m_fullName;
+	private String m_collectionName;
 	private String m_id;
 	private MapEntityType m_type;
 	private MapBorder m_border;
 	private Logger m_logger;
 
-	public MapEntity(MongoInterface mongo, String id, String name, MapEntityType type) {
+	public MapEntity(MongoInterface mongo, String id, MapEntity parent, String name, MapEntityType type) {		
 		m_mongo = mongo;
-		m_id = id;
-		m_name = name;
-		m_type = type;
-		m_collection = m_mongo.getDB().getCollection(m_name);
 		m_logger = new Logger(m_mongo.getLogger(), this, LoggingTag.MapDB);
+		m_id = id;
+		m_name = name;		
+		m_type = type;
+		m_parent = parent;
+		StringBuilder collectionName = new StringBuilder(10);
+		if (type == MapEntityType.Street) {
+			collectionName.append("St");
+		}
+		else {
+			collectionName.append(type.toString());
+		}
+		if (parent != null) {
+			collectionName.append("_"+clean(parent.getFullName()));
+			m_fullName = parent.getFullName() + "_" + name;
+		}
+		else {
+			m_fullName = name;
+		}
+		collectionName.append("_"+clean(name));
+		m_collectionName = collectionName.toString();
+		m_collection = m_mongo.getDB().getCollection(m_collectionName);
+		m_logger.log("New entity with id = "+id+" name = "+m_name+" full name "+m_fullName+" collection "+m_collectionName);
+		if (m_parent != null) {
+			m_logger.log("parent "+m_parent.getCollectionName());
+		}
+	}
+
+	private String clean(String value) {
+		String cleaned = value.replaceAll("[-\\s+]","_");
+		return cleaned;
 	}
 
 	public String toString() {
@@ -52,8 +81,20 @@ public class MapEntity {
 		return m_name;
 	}
 
+	public String getFullName() {
+		return m_fullName;
+	}
+
+	public String getCollectionName() {
+		return m_collectionName;
+	}
+
 	public MapEntityType getType() {
 		return m_type;
+	}
+
+	public MapEntity getParent() {
+		return m_parent;
 	}
 
 	public MapEntity addEntity(String name) {
@@ -61,34 +102,77 @@ public class MapEntity {
 		DBCursor cursor = m_collection.find(searchQuery);
 		MapEntityType type = MapEntityType.subType.get(m_type);
 		if (cursor.count()==0) {
+			m_logger.log("Adding entity "+name+" to " + m_name);
 			BasicDBObject document = new BasicDBObject();
 			Object id = m_mongo.getNextID();
 			document.append("_id", id);
 			document.append("entity", name);
-			document.append("type", type);
-			MapEntity newEntity = new MapEntity(m_mongo, id.toString(), m_name+"_"+name, type);
+			document.append("type", type.toString());
+			m_logger.log("add new entity from "+m_id+" "+m_name+" "+m_fullName+" "+m_collectionName+" called name = "+name);
+			MapEntity newEntity = new MapEntity(m_mongo, id.toString(), this, name, type);
 			m_collection.insert(document);
 			return newEntity;
 		}
 		else {
-			m_logger.log("Entity "+name+" already exists");
+			m_logger.log("Country "+name+" already exists");
+		}
+		return null;
+	}
+
+	public MapEntity addEntity(Locality loc) {
+		BasicDBObject searchQuery = new BasicDBObject("entity", loc.getName());
+		DBCursor cursor = m_collection.find(searchQuery);
+		MapEntityType type = loc.getType();
+		if (cursor.count()==0) {
+			m_logger.log("Adding entity "+loc.getName()+" to " + m_name);
+			BasicDBObject document = new BasicDBObject();
+			Object id = m_mongo.getNextID();
+			document.append("_id", id);
+			document.append("entity", loc.getName());
+			document.append("type", type.toString());
+			m_logger.log("add new entity from "+m_id+" "+m_name+" "+m_fullName+" "+m_collectionName+" called loc name = "+loc.getName());
+			MapEntity newEntity = new MapEntity(m_mongo, id.toString(), this, loc.getName(), type);
+			m_collection.insert(document);
+			return newEntity;
+		}
+		else {
+			m_logger.log("Entity "+ loc.getName()+" already exists");
 		}
 		return null;
 	}
 
 	public MapEntity addEntity(String name, MapBorder entityBorder) {
+/*	
+        FIXME: for now we allow new entities to be added without a border
+
 		if (m_border == null) {
 			m_logger.error("Cannot add "+name+" to "+m_name+" because it has no border");
 			return null;
 		}
-		if (!MapBorder.intersects(m_border, entityBorder)) {
+*/		
+		if (m_border != null  && !MapBorder.intersects(m_border, entityBorder)) {
 			m_logger.error("Cannot add "+name+" to "+m_name+" because it is outside the border");
 			return null;
 		}
 		return addEntity(name);
 	}
 
-	public void addBorder(String name, MapBorder border) {
+	public MapEntity addEntity(Locality loc, MapBorder entityBorder) {
+		/*
+		if (m_border == null) {
+			m_logger.error("Cannot add "+loc.getName()+" to "+m_name+" because it has no border");
+			return null;
+		}
+		*/
+		if (m_border != null  && !MapBorder.intersects(m_border, entityBorder)) {
+			m_logger.error("Cannot add "+loc.getName()+" to "+m_name+" because it is outside the border");
+			return null;
+		}
+		return addEntity(loc);
+	}
+
+	public void setBorder(String name, MapBorder border) {
+		m_logger.log("Add border to entity "+name+" of "+m_collection);
 		BasicDBObject searchQuery = new BasicDBObject("entity", name);
 		DBCursor cursor = m_collection.find(searchQuery);
 		if (cursor.count() == 1) {
@@ -99,20 +183,47 @@ public class MapEntity {
 	    	m_collection.update(searchQuery, updateQuery);
 		}
 		else {
-			m_logger.error("found " + cursor.count() + " entries for entity " + m_name+"_"+name);
+			m_logger.error("found " + cursor.count() + " entries for entity " + name);
 		}
 	}
 
 	public MapEntity getEntity(String name) {
-		BasicDBObject searchQuery = new BasicDBObject("entity", m_name+"_"+name);
+		if (name == null) {
+			return null;
+		}
+		BasicDBObject searchQuery = new BasicDBObject("entity", name);
 		DBCursor cursor = m_collection.find(searchQuery);
 		if (cursor.count()==1) {
 			DBObject document = cursor.next();
-			MapEntity entity = getEntity(m_mongo, document);
+			MapEntity entity = getEntity(m_mongo, this, document);
 			return entity;
 		}
 		else {
 			m_logger.error("found " + cursor.count() + " entries for entity " + name);
+			cursor = m_collection.find();
+			while(cursor.hasNext()) {
+				DBObject doc = cursor.next();
+				MapEntity entity = getEntity(m_mongo, this, doc);
+				m_logger.log("Found "+entity.getName());
+			}
+		}
+		return null;
+	}
+
+	public MapEntity getEntity(Locality loc) {
+		if (loc == null) {
+			return null;
+		}
+		BasicDBObject searchQuery = new BasicDBObject("entity", loc.getName());
+		searchQuery.append("type", loc.getType().toString());
+		DBCursor cursor = m_collection.find(searchQuery);
+		if (cursor.count()==1) {
+			DBObject document = cursor.next();
+			MapEntity entity = getEntity(m_mongo, this, document);
+			return entity;
+		}
+		else {
+			m_logger.error("found " + cursor.count() + " entries for entity " + loc.getName());
 		}
 		return null;
 	}
@@ -121,11 +232,14 @@ public class MapEntity {
 	//  the border allows us to have ambiguous entries e.g. two towns in the same state with same name
 	//
 	public MapEntity getEntity(String name, MapBorder entityBorder) {
-		BasicDBObject searchQuery = new BasicDBObject("entity", m_name+"_"+name);
+		if (name == null) {
+			return null;
+		}
+		BasicDBObject searchQuery = new BasicDBObject("entity", name);
 		DBCursor cursor = m_collection.find(searchQuery);
 		if (cursor.hasNext()) {
 			DBObject document = cursor.next();
-			MapEntity entity = getEntity(m_mongo, document);
+			MapEntity entity = getEntity(m_mongo, this, document);
 			if (MapBorder.intersects(entity.getBorder(), entityBorder)) {
 				return entity;
 			}
@@ -133,7 +247,28 @@ public class MapEntity {
 		return null;
 	}
 
-	public static MapEntity getEntity(MongoInterface mongo, DBObject document) {
+	public MapEntity getEntity(Locality loc, MapBorder entityBorder) {
+		if (loc == null) {
+			return null;
+		}
+		BasicDBObject searchQuery = new BasicDBObject("entity", loc.getName());
+		searchQuery.append("type", loc.getType().toString());
+		DBCursor cursor = m_collection.find(searchQuery);
+		if (cursor.hasNext()) {
+			DBObject document = cursor.next();
+			MapEntity entity = getEntity(m_mongo, this, document);
+			if (entity.getBorder() == null || MapBorder.intersects(entity.getBorder(), entityBorder)) {
+				return entity;
+			}
+		}
+		return null;
+	}
+
+	public static MapEntity getEntity(MongoInterface mongo, MapEntity parent, DBObject document) {
+		if (document == null) {
+			return null;
+		}
+		Logger logger = new Logger(mongo.getLogger(), "getEntity", LoggingTag.MapDB);
 		Object idobj = document.get("_id");
 		Object nameObj = document.get("entity");
 		Object typeObj = document.get("type");
@@ -141,7 +276,8 @@ public class MapEntity {
 		String id = idobj == null ? null : idobj.toString();
 		String name = nameObj == null ? null : nameObj.toString();
 		MapEntityType type = typeObj == null ? null : MapEntityType.valueOf(typeObj.toString());
-		MapEntity entity = new MapEntity(mongo, idobj.toString(), nameObj.toString(), type);
+		logger.log("create entity with id "+id+" parent "+parent+" name "+name);
+		MapEntity entity = new MapEntity(mongo, id, parent, name, type);
 		if (borderObj != null) {
 			MapBorder border = MapBorder.getBorder(borderObj);
 			entity.setBorder(border);
@@ -155,7 +291,7 @@ public class MapEntity {
 		int n = 0;
 		while (cursor.hasNext()) {
 	    	DBObject document = cursor.next();
-	    	children.add(getEntity(m_mongo, document));
+	    	children.add(getEntity(m_mongo, this, document));
 	    }
 	    return children;
 	}
@@ -174,10 +310,10 @@ public class MapEntity {
 	    	if (borderObj != null) {
 	    		MapBorder childBorder = MapBorder.getBorder(borderObj);
 	    		if (MapBorder.intersects(bounds, childBorder)) {
-	    			matches.add(getEntity(m_mongo, document));
+	    			matches.add(getEntity(m_mongo, this, document));
 	    		}
 	    		else if (childBorder.contains(p)) {
-	    			matches.add(getEntity(m_mongo, document));
+	    			matches.add(getEntity(m_mongo, this, document));
 	    		}
 	    	}
 	    }
@@ -210,11 +346,14 @@ public class MapEntity {
 	}
 
 	public static StreetSegment getSegment(DBObject document) {
+		if (document == null) {
+			return null;
+		}
 		String id = document.get("_id") == null ? null : document.get("_id").toString();
 		String streetName = document.get("streetName") == null ? null : document.get("streetName").toString();
 		ParkingSchedule oddSched = document.get("scheduleOdd") == null ? null : new ParkingSchedule(document.get("scheduleOdd").toString());
 		ParkingSchedule evenSched = document.get("scheduleEven") == null ? null : new ParkingSchedule(document.get("scheduleEven").toString());
-		StreetSegment segment = new StreetSegment(id, streetName, evenSched, oddSched);
+		StreetSegment segment = new StreetSegment(id, streetName, evenSched, oddSched, true);
 		if (document.get("points") != null) {
 			segment.setPoints(toPosList((BasicDBList)document.get("points")));
 		}
@@ -234,6 +373,12 @@ public class MapEntity {
 		Object id = m_mongo.getNextID();	
 		BasicDBObject document = createSegmentEntry(id, segment, segBorder);
 		m_collection.insert(document);
+		if (m_border == null) {
+			m_border = new MapBorder();
+			m_border.setRegion(m_name);
+		}
+		m_border.addPoints(segBorder.getBorder());
+		m_parent.setBorder(m_name, m_border);
 		return true;
 	}
 

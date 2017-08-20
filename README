@@ -6,6 +6,8 @@
 Website
 --------
 
+http://parking.allowed.org:8080/parking/main 
+
 http://parking.allowed.org:8082/parking/main      => map interface
 http://parking.allowed.org:8082/parking/upload    => simple upload form
 
@@ -18,10 +20,22 @@ ports:
 You should not need to connect to the 74.116.186.192 as that is the public IP address that you receive. To configure your modem, you should go to http://192.168.1.1/ 
 
 The username is: admin
-The password is: eboxadmin
+The password is: e***m
+
+Add virtual servers under advanced settings NAT
+
+Note: may need to modify the windows firewall to allow connections from ports 8080 to 8082
+
+Instructions to setup multiple tomcat:
+
+https://tomcat.apache.org/tomcat-8.0-doc/windows-service-howto.html
 
 Database
 --------------
+
+to install mongodb as a windows service (run as admin):
+
+mongod --logpath c:\MongoDB\log\log.txt --install --serviceName MongoDB --dbpath c:\MongoDB
 
 > use admin
 switched to db admin
@@ -29,10 +43,13 @@ switched to db admin
 
 db.copyDatabase('demo', 'demo_test')
 
-db.signs.drop() 
+db.signs.drop()
+db["COLLECTION NAME"].drop();
 
 use temp
 db.runCommand( { dropDatabase: 1 } )
+
+db.signs.remove( { _id: 3150 } )
 
 JVM Memory
 ----------
@@ -40,5 +57,48 @@ JVM Memory
 tomcat8w //ES//instance3
 
 set max mem pool in Java tab
+
+Logging
+=======
+
+for tomcat logging, activate the required tag in webapps\parking\conf\tagMaps.txt
+
+Google static maps
+==================
+
+API key:
+
+AIzaSyDpYBCJkQtV4kwHwZL8sNrjvozogKcHnyI
+
+
+MapTool Algoritm
+================
+
+Note: algorithm is based on a set of cells that cover entire earth
+
+1. Cell Angle (depends on zoom level):
+
+   a. latitude angle = lenPixels * metersPerPixel(map center, level)  / radiusOfEarthMeters 
+   b. longitude angle = lenPixels * metersPerPixel(map center, level) / radiusOfEarthMeters
+
+2. Index of Primary Cell (cell covering center of display)
+
+   a. latitude index = (int)( center latitude / latitude cell angle)
+   b. latitude index = (int)( center longitude / longitude cell angle)
+
+3. Compute position of cells of the display
+
+   a. x = (int)((display width - cell width)/2.0 + (cell center longitude - display center longitude) * radiusOfEarthMeters / metersPerPixel(center, level) + 0.5);
+   b. y = (int)((display width - cell width)/2.0 - (cell center longitude - display center longitude) * radiusOfEarthMeters / metersPerPixel(center, level) + 0.5);
+
+4. Cell Size
+
+   a. cell width = longitude angle * radiusOfEarthMeters / metersPerPixel(center, level)
+   b. cell height = latitude angle * radiusOfEarthMeters / metersPerPixel(center, level) 
+
+4. Find cells that overlap display window i.e. visible
+
+
+
 
 

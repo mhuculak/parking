@@ -1,8 +1,0 @@
-apply plugin: 'spring-boot'
-
-dependencies {
-    compile project(':common')
-    compile 'org.mongodb:mongo-java-driver'
-    compile 'org.slf4j:slf4j-api:1.7.5'
-    compile 'javax.mail:javax.mail-api:1.5.5'  
-}

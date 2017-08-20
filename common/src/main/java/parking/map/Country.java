@@ -10,11 +10,17 @@ public enum Country {
 	CAN,
 	USA;	
 
-	public static final Map<String, Country> countryMap = new HashMap<String, Country>();
+	public static final Map<Country, String> countryMap = new HashMap<Country, String>();
+	public static final Map<String, Country> countryReverseMap = new HashMap<String, Country>();
 
 	static {
-		countryMap.put("Canada", CAN);
-		countryMap.put("United States", USA);
+		countryMap.put(CAN, "Canada");
+		countryMap.put(USA, "United States");
+	}
+
+	static {
+		countryReverseMap.put("Canada", CAN);
+		countryReverseMap.put("United States", USA);
 	}
 }
 

@@ -314,7 +314,7 @@ public class Sign {
 		return bestPosition;
 	}
 
-	public static List<StreetSegment> findStreetSegments(List<Sign> signs) {
+	public static List<StreetSegment> findStreetSegments(List<Sign> signs, Logger logger) {
 		List<StreetSegment> segments = new ArrayList<StreetSegment>();
 		Map<String, List<Sign>> streetMap = new HashMap<String, List<Sign>>();
 		Map<Sign, Address> addressMap = new HashMap<Sign, Address>();
@@ -334,7 +334,7 @@ public class Sign {
 			}
 		}
 		for (String address : streetMap.keySet()) {
-			List<StreetSegment> segs = findSegmentsFromStreet(address, streetMap.get(address), addressMap);
+			List<StreetSegment> segs = findSegmentsFromStreet(address, streetMap.get(address), addressMap, logger);
 			if (segs != null) {
 				segments.addAll(segs);
 			}
@@ -346,7 +346,8 @@ public class Sign {
 	}
 
 	public static List<StreetSegment> findSegmentsFromStreet(String streetName, List<Sign> signs, 
-																Map<Sign, Address> addressMap) {
+													Map<Sign, Address> addressMap, Logger logger) {
+		logger.log("found "+signs.size()+" on street "+streetName);
 		Map<Sign, ParkingSchedule> schedules = new HashMap<Sign, ParkingSchedule>();
 		List<SignAddress> signAddress = new ArrayList<SignAddress>();
 		for (Sign sign : signs) {
@@ -368,24 +369,35 @@ public class Sign {
 		StreetSegment currSegment = new StreetSegment(streetName);
 		segments.add(currSegment);
 		for (SignAddress sa : signAddress) {
-			ParkingSchedule schedule = schedules.get(sa.sign);
+			ParkingSchedule schedule = schedules.get(sa.sign);			
 			if (schedule != null) {
+				logger.log("Got sign at "+sa.streetNumber+" "+schedule.toString());
 				if (sa.isEven()) {
-					if (even == null || !schedule.equals(even)) {					
+					if (even == null || !schedule.toString().equals(even.toString())) {
+						if (even == null) {
+							logger.log("init even schedule with "+schedule.toString());
+						}					
+						else {
+							logger.log("even schedule changes from "+even.toString()+" to "+schedule.toString());
+						}
 						even = schedules.get(sa.sign);
 						if (currSegment.getScheduleEven() == null) {
+							logger.log("set even schedule to "+even.toString());
 							currSegment.setEven(even);
 						}
 						else {
-							if (currSegment.getScheduleOdd() == null) {						
+							if (currSegment.getScheduleOdd() == null) {
+								logger.log("odd schedule is missing from "+currSegment);					
 								missingOdd.add(currSegment);
 							}
 							currSegment = new StreetSegment(streetName);
 							currSegment.setEven(even);
 							segments.add(currSegment);
+							logger.log("created new segment "+currSegment);
 						}
 					}
 					if (missingEven.size() > 0) {
+						logger.log("Found "+missingEven.size()+" segments with missing even schedules");
 						for (StreetSegment seg : missingEven) {
 							seg.setEven(even);
 						}
@@ -393,21 +405,31 @@ public class Sign {
 					}
 				}
 				else {
-					if (odd == null || !schedule.equals(odd)) {
+					if (odd == null || !schedule.toString().equals(odd.toString())) {
+						if (odd == null) {
+							logger.log("init odd schedule with "+schedule.toString());
+						}					
+						else {
+							logger.log("odd schedule changes from "+odd.toString()+" to "+schedule.toString());
+						}
 						odd = schedules.get(sa.sign);
 						if (currSegment.getScheduleOdd() == null) {
+							logger.log("set odd schedule to "+odd.toString());
 							currSegment.setOdd(odd);
 						}
 						else {
-							if (currSegment.getScheduleEven() == null) {							
+							if (currSegment.getScheduleEven() == null) {	
+								logger.log("even schedule is missing from "+currSegment);						
 								missingEven.add(currSegment);
 							}
 							currSegment = new StreetSegment(streetName);
 							currSegment.setOdd(odd);
 							segments.add(currSegment);
+							logger.log("created new segment "+currSegment);
 						}
 					}
 					if (missingOdd.size() > 0) {
+						logger.log("Found "+missingOdd.size()+" segments with missing odd schedules");
 						for (StreetSegment seg : missingOdd) {
 							seg.setOdd(odd);
 						}
@@ -427,13 +449,31 @@ public class Sign {
 
 class SignAddress {
 	public String streetNumber;
+	public String streetNumber2;
 	public int value;
 	public Sign sign;
 
 	public SignAddress(Sign sign, String streetNumber) {
-		this.streetNumber = streetNumber;
-		value = Utils.parseInt(streetNumber);
+		streetNumber2 = null;
+		parse(streetNumber);
+		value = Utils.parseInt(this.streetNumber);
 		this.sign = sign;
+	}
+
+	public void parse(String num) {
+		streetNumber = num;
+		String[] range = num.split("-");
+		if (range.length == 1) {
+			streetNumber = num;
+		}
+		else if (range.length == 2) {
+			streetNumber = range[0];
+			streetNumber2 = range[1];
+		}
+		else {
+			streetNumber = range[0];
+			System.out.println("Unxpected street number format "+num);
+		}
 	}
 
 	public int getValue() {

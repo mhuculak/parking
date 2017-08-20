@@ -1,0 +1,12 @@
+apply plugin: 'spring-boot'
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'parking.display.MapTool'
+    }
+}
+
+dependencies {
+   compile project(':common-base')
+   compile project(':common')   
+}

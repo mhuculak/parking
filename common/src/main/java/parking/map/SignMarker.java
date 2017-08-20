@@ -8,6 +8,10 @@ public class SignMarker {
 	private Position position;
 	private String id;
 
+	public SignMarker() {
+
+	}
+
 	public SignMarker(String id, Position position) {
 		this.id = id;
 		this.position = position;
@@ -21,7 +25,7 @@ public class SignMarker {
 		return id;
 	}
 
-	public int getIDasInt() {
+	private int getIDasInt() {
 		return Integer.parseInt(id);
 	}
 }

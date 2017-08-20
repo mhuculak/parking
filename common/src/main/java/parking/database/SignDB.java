@@ -36,10 +36,12 @@ import java.util.ArrayList;
 class SignMarkerComparator implements Comparator<SignMarker> {
 	@Override
 	public int compare(SignMarker m1, SignMarker m2) {
-		if (m1.getIDasInt() > m2.getIDasInt()) {
+		int id1 = Integer.parseInt(m1.getID());
+		int id2	= Integer.parseInt(m2.getID());
+		if ( id1 > id2) {
 			return -1;
 		}
-		else if (m1.getIDasInt() < m2.getIDasInt()) {
+		else if (id1 < id2  ) {
 			return 1;
 		}
 		else {
@@ -397,7 +399,7 @@ public class SignDB {
 	    	}
 	    }
 	    if (signs.size() > 0) {
-	    	return Sign.findStreetSegments(signs);
+	    	return Sign.findStreetSegments(signs, m_logger);
 	    }
 		return null;
 	}

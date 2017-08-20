@@ -16,7 +16,7 @@ import parking.schedule.WeekDaySet;
 import parking.schedule.DateRange;
 import parking.security.WebLogin;
 import parking.security.User.Permission;
-
+import parking.util.ClientType;
 import parking.util.Logger;
 import parking.util.LoggingTag;
 
@@ -135,12 +135,17 @@ public class UploadSign extends HttpServlet {
          Sign sign = null;
          if (file != null) {
             if (postData.get("lat") != null && postData.get("lng") != null) {
-               sign = new Sign(file, new Position(postData.get("lat"), postData.get("lng")), logger);
+               Position p = new Position(postData.get("lat"), postData.get("lng"));
+               sign = new Sign(file, p, logger);
+                logger.log("Got sign "+sign.getID()+" at  "+p.toString());
             }     
             else {
                sign = new Sign(file, logger); // use position from Exif header if available
                if (sign.getPosition() == null) {
                   logger.log("Failed to get position from uploaded image");
+               }
+               else {
+                  logger.log("Got sign "+sign.getID()+" at  "+sign.getPosition().toString());
                }
             }
             sign = mongo.getSignDB().addSign(sign, file, user);

@@ -17,7 +17,7 @@ public enum MapEntityType {
 	static{
 
 		subType.put(Country, StateProvince);		
-		subType.put(StateProvince, City)		
+		subType.put(StateProvince, City);		
 		subType.put(City, Town);
 		subType.put(Town, Street);
 		subType.put(Street, StreetSegment);

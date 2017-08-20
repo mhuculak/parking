@@ -1,5 +1,8 @@
 package parking.parkingapp;
 
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import parking.map.Address;
 import parking.map.Position;
 import parking.map.Place;
@@ -18,16 +21,24 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.CameraUpdateFactory;
 
+import android.media.MediaScannerConnection;
+import android.os.Environment;
 import android.location.LocationListener;
+import android.telephony.TelephonyManager;
+import android.util.Base64;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.FrameLayout;
 import android.view.View;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
+// import android.support.v4.app.Fragment;
+import android.app.Fragment;
 
 import android.location.LocationManager;
 import android.location.Location;
@@ -40,6 +51,8 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.graphics.Bitmap;
 
 import org.json.JSONObject;
@@ -47,6 +60,8 @@ import org.json.JSONObject;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -55,7 +70,7 @@ import java.io.File;
 enum UImethod { getFrom, getUntil, getDestination, getCameraPermission, actionButton0, actionButton1, actionButton2}
 
 public class MapsActivity extends AppCompatActivity
-        implements OnMapReadyCallback, LocationListener {
+        implements OnMapReadyCallback, LocationListener, Register.CustomerRegistered {
 
     private GoogleMap mMap;
     private Marker phoneMarker;
@@ -69,6 +84,8 @@ public class MapsActivity extends AppCompatActivity
     private ParkingPeriod parkingPeriod;
     private LinearLayout endLayout;
     private LinearLayout webLayout;
+    private RelativeLayout mapLayout;
+    private FrameLayout registerLayout;
     private Place destinationPlace;
     private Place signPlace;
     private Place currentPlace;
@@ -88,9 +105,13 @@ public class MapsActivity extends AppCompatActivity
     private int networkPermission;
     private int internetPermission;
     private int storagePermission;
+    private int phonePermission;
     private Uri signPictureUri;
-    private User user;
+    private UserCredentials credentials;
+    private String phoneNumber;
+    private Register register;
     private Trajectory trajectory;
+    private List<Position> picturePoints;
     private final int defaultZoomLevel = 17;
     private final int defaultHoursToPark = 3;
     private final double parkingDistanceThresholdKm = 0.1;
@@ -101,17 +122,21 @@ public class MapsActivity extends AppCompatActivity
     private final int PERMISSIONS_REQUEST_INTERNET = 47;
     private final int PERMISSIONS_REQUEST_NETWORK = 46;
     private final int PERMISSIONS_REQUEST_STORAGE = 45;
+    private final int PERMISSIONS_PHONE = 44;
     private final int maxTrajectorySize = 20;
+    private final boolean useInternet = false;  // for data collection without an unlimited data plan
 
-/*
     private final String signUploadUrl = "http://parking.allowed.org:8082/parking/upload";
     private final String signUpdateUrl = "http://parking.allowed.org:8082/parking/upload/verify";
     private final String trajectoryUploadUrl = "http://parking.allowed.org:8082/parking/trajectory";
-*/
+    private final String registrationUrl = "http://parking.allowed.org:8082/parking/register";
+    private final String testUrl = "http://parking.allowed.org:8082/parking/test";
+/*
     private final String signUploadUrl = "http://parking.allowed.org:8081/parking/upload";
     private final String signUpdateUrl = "http://parking.allowed.org:8081/parking/upload/verify";
     private final String trajectoryUploadUrl = "http://parking.allowed.org:8081/parking/trajectory";
-
+    private final String registrationUrl = "http://parking.allowed.org:8081/parking/register";
+*/
     private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 1; // 1 meters
     private static final long MIN_TIME_BW_UPDATES = 1000; // 1 second
 
@@ -131,12 +156,12 @@ public class MapsActivity extends AppCompatActivity
         endLayout = (LinearLayout)findViewById(R.id.end_layout);
         pictureButton = (Button)findViewById(R.id.picture_button);
         errorMessage = (TextView)findViewById(R.id.error_message);
+        mapLayout = (RelativeLayout)findViewById(R.id.map_layout);
+        registerLayout = (FrameLayout)findViewById(R.id.register);
         appMode = ParkingAppMode.MOVING;
         SupportMapFragment mapFragment =
                 (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-//        user = new User("android");  // FIXME: use generic android user, need a user login page to validate credentials
-        user = new User("chris");
         displaySchedule = null;
         errorMap = new HashMap<UImethod, String>();
         trajectory = new Trajectory(maxTrajectorySize);
@@ -147,8 +172,20 @@ public class MapsActivity extends AppCompatActivity
         busy.setBackgroundColor(0x00000000);
         webLayout.addView(busy);
         bestAccuracy = -1.0;
+        picturePoints = null;
+        credentials = UserCredentials.getCredentials(this);
         requestPermissions();
-
+        if (!useInternet) {
+            String extStorageState = Environment.getExternalStorageState();
+            if (Environment.MEDIA_MOUNTED.equals(extStorageState)) {
+                Log.i(TAG, "external storage is available");
+            }
+            else {
+                String message = "Cannot save data to external storage";
+                Log.e(TAG, message);
+                setError(message);
+            }
+        }
         if (savedInstanceState == null) {
             Bundle extras = getIntent().getExtras();
             if (extras != null) {
@@ -158,7 +195,7 @@ public class MapsActivity extends AppCompatActivity
                 } catch (Exception ex) {
                     Log.e(TAG, "exception", ex);
                 }
-                if (verifiedSchedule != null) {
+                if (verifiedSchedule != null && useInternet) {
                     uploadSchedule(verifiedSchedule);
                 }
             }
@@ -173,28 +210,76 @@ public class MapsActivity extends AppCompatActivity
         if (locationPermission == PackageManager.PERMISSION_GRANTED) {
             setupLocation();
         }
+        if (phonePermission == PackageManager.PERMISSION_GRANTED) {
+            if (useInternet) {
+                TelephonyManager telephonyManager = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
+                phoneNumber = telephonyManager.getLine1Number();
+                Log.i(TAG, "phone number = "+phoneNumber);
+
+                if (credentials == null) {
+                    doRegister(credentials);
+                } else {
+
+                    credentials.getUser().setPhone(phoneNumber);
+                    checkCredentials(credentials);
+                }
+            }
+        }
+        if (storagePermission == PackageManager.PERMISSION_GRANTED) {
+            picCount = SignPictures.readPictureCount(getFilesDir());
+            Log.i(TAG, "picture count is "+picCount);
+        }
     }
+
+    private void doRegister(UserCredentials credentials) {
+        if (credentials == null) {
+            Log.i(TAG, "user must register because there are no credentials");
+        }
+        else {
+            Log.i(TAG, "user "+credentials.getUser().getUserName()+" must register because authorization failed");
+        }
+        FragmentManager fm = getFragmentManager();
+        FragmentTransaction ft = fm.beginTransaction();
+        ft.add(R.id.register,  Register.newInstance(phoneNumber, registrationUrl));
+        ft.commit();
+        mapLayout.setVisibility(View.INVISIBLE);
+    }
+
+    public void customerRegistered(User user) {
+        UserCredentials.setCredentials(this, user);
+        mapLayout.setVisibility(View.VISIBLE);
+        registerLayout.setVisibility(View.INVISIBLE);
+    }
+
     private void requestPermissions() {
-        cameraPermission = checkSelfPermission(Manifest.permission.CAMERA);
-        locationPermission = checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION);
-        networkPermission = checkSelfPermission(Manifest.permission.ACCESS_NETWORK_STATE);
-        internetPermission = checkSelfPermission(Manifest.permission.INTERNET);
-        storagePermission = checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+        cameraPermission = ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
+        locationPermission = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
+        storagePermission = ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        if (useInternet) {
+            networkPermission = checkSelfPermission(Manifest.permission.ACCESS_NETWORK_STATE);
+            internetPermission = checkSelfPermission(Manifest.permission.INTERNET);
+            phonePermission = checkSelfPermission(Manifest.permission.READ_PHONE_STATE);
+        }
         if (locationPermission != PackageManager.PERMISSION_GRANTED) {
             Log.i(TAG, "request permission for location");
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST_LOCATION);
         }
-        if (networkPermission != PackageManager.PERMISSION_GRANTED) {
+        if (networkPermission != PackageManager.PERMISSION_GRANTED && useInternet) {
             Log.i(TAG, "request permission for network");
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_NETWORK_STATE}, PERMISSIONS_REQUEST_NETWORK);
         }
-        if (internetPermission != PackageManager.PERMISSION_GRANTED) {
+        if (internetPermission != PackageManager.PERMISSION_GRANTED && useInternet) {
             Log.i(TAG, "request permission for internet");
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.INTERNET}, PERMISSIONS_REQUEST_INTERNET);
         }
         if (storagePermission != PackageManager.PERMISSION_GRANTED) {
             Log.i(TAG, "request permission for storage");
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSIONS_REQUEST_STORAGE);
+        }
+        if (phonePermission != PackageManager.PERMISSION_GRANTED && useInternet) {
+            Log.i(TAG, "request permission for phone number");
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_PHONE_STATE}, PERMISSIONS_PHONE);
         }
     }
 
@@ -326,7 +411,7 @@ public class MapsActivity extends AppCompatActivity
 
     public void uploadSchedule(SignSchedule schedule) {
         try {
-            UploadClient uploadClient = new UploadClient(schedule, this, user);
+            UploadClient uploadClient = new UploadClient(schedule, this, credentials.getUser());
             uploadClient.execute(signUpdateUrl);
             webLayout.setVisibility(View.VISIBLE);
         }
@@ -336,6 +421,12 @@ public class MapsActivity extends AppCompatActivity
     }
 
     public void uploadPicture() {
+        if (!useInternet) {
+            Log.i(TAG, "save picture count "+picCount);
+            MediaScannerConnection.scanFile(this, new String[] {signPictureUri.getPath()}, null, null);
+            SignPictures.saveLocationData(this, Environment.getExternalStorageDirectory(), picCount, picturePoints);
+            return;
+        }
         Log.i(TAG, "upload file "+signPictureUri.getPath());
         File imgFile = new File(signPictureUri.getPath());
         Log.i(TAG, "image size is " + imgFile.length() + " bytes");
@@ -351,7 +442,7 @@ public class MapsActivity extends AppCompatActivity
         }
 
         try {
-            UploadClient imageUpload = new UploadClient(imgFile, this, user);
+            UploadClient imageUpload = new UploadClient(imgFile, this, credentials.getUser());
             imageUpload.execute(signUploadUrl);
             webLayout.setVisibility(View.VISIBLE);
         }
@@ -373,7 +464,7 @@ public class MapsActivity extends AppCompatActivity
             autoSchedule = new SignSchedule(jObj);
 
             if (trajectory.size() > 0) {
-                UploadClient trajectoryUpload = new UploadClient(trajectory, autoSchedule.id, cameraStartTime, cameraEndTime, this, user);
+                UploadClient trajectoryUpload = new UploadClient(trajectory, autoSchedule.id, cameraStartTime, cameraEndTime, this, credentials.getUser());
                 trajectoryUpload.execute(trajectoryUploadUrl);
                 trajectory.allowLimit();
             }
@@ -386,18 +477,11 @@ public class MapsActivity extends AppCompatActivity
                 intent.putExtra("image", signPictureUri);
                 intent.putExtra("schedule", autoSchedule);
                 intent.putExtra("bestAccuracy", bestAccuracy);
-
-            //
-            //  sign place is used if schedule.place == null
-            //
-                if (signPlace != null) {
+               if (signPlace != null) {
                     Log.i(TAG, "pass sign place " + signPlace.shortAddress()+" to verifier");
                     intent.putExtra("place", signPlace);
                 }
-
-
                 startActivity(intent);
-
             }
         }
         catch (Exception ex) {
@@ -407,19 +491,49 @@ public class MapsActivity extends AppCompatActivity
 
     }
 
+    public void uploadConnectionFailure(String message, int httpResponseCode) {
+        setError(message);
+        if (httpResponseCode == 401) {
+            doRegister(credentials);
+        }
+    }
+
+
     public void takePicture() {
         Log.i(TAG, "take picture ");
         cameraStartTime = trajectory.getElapsedTime();
         trajectory.blockLimit();
         bestAccuracy = -1.0;
-        int perm = checkSelfPermission(Manifest.permission.CAMERA);
+        int perm = ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
         if (perm != PackageManager.PERMISSION_GRANTED) {
             Log.i(TAG, "can't take picture unless permission is granted...");
-            errorMessage.setText("Permission not granted to use camera");
+            setError("Permission not granted to use camera");
             return;
         }
         picCount++;
-        File filesDir = this.getApplicationContext().getExternalCacheDir();
+        picturePoints = new ArrayList<Position>();
+        picturePoints.add(currentPosition);
+        SignPictures.writePictureCount(getFilesDir(), picCount);
+        File filesDir = null;
+        if (useInternet) {
+            filesDir = this.getApplicationContext().getExternalCacheDir();
+        }
+        else {
+            final String locationtDir = "parking/images";
+            File rootDir = Environment.getExternalStorageDirectory();
+            filesDir = new File(rootDir+File.separator+locationtDir);
+            if (!filesDir.exists()) {
+                if (filesDir.mkdirs()) {
+                    Log.i(TAG, filesDir.getAbsolutePath() + " was created");
+                }
+                else {
+                    Log.e(TAG, "failed to create "+filesDir.getAbsolutePath());
+                    return;
+                }
+            }
+            Log.i(TAG,"Scan file "+filesDir.toString());
+
+        }
         String signPicFilename = "sign-pic"+picCount+".jpg";
         File newfile = new File(filesDir+File.separator+signPicFilename);
 
@@ -438,7 +552,7 @@ public class MapsActivity extends AppCompatActivity
         catch (SecurityException se)
         {
             Log.e(TAG, "Caught security exception "+se+" while creating "+signPicFilename);
-            errorMessage.setText("Permission not granted to use camera");
+            setError("Permission not granted to use camera");
         }
         catch (Exception ex)
         {
@@ -553,11 +667,15 @@ public class MapsActivity extends AppCompatActivity
         if (displaySchedule == null) {
             pictureButton.setVisibility(View.VISIBLE);
             String err = getResources().getString(R.string.schedule_unavailable);
-            errorMessage.setText(err);
-            errorMessage.setVisibility(View.VISIBLE);
+            setError(err);
             errorMap.put(UImethod.actionButton1, err);
             errorMap.put(UImethod.getCameraPermission, err);
         }
+    }
+
+    private void setError(String message) {
+        errorMessage.setText(message);
+        errorMessage.setVisibility(View.VISIBLE);
     }
 
     private boolean changeStateToParking() {
@@ -580,9 +698,7 @@ public class MapsActivity extends AppCompatActivity
                 error_message = "No period defined.";
                 errorMap.put(UImethod.actionButton2, error_message);
             }
-            errorMessage.setText(error_message);
-            errorMessage.setVisibility(View.VISIBLE);
-
+            setError(error_message);
             return false;
         }
     }
@@ -611,12 +727,17 @@ public class MapsActivity extends AppCompatActivity
         }
         currentPosition = new Position( lat, lng, accuracy);
         trajectory.add(currentPosition);
+        if (picturePoints != null) {
+            picturePoints.add(currentPosition);
+        }
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lng), defaultZoomLevel));
         Address currentAddress = Address.reverseGeocode( currentPosition);
         currentPlace = new Place(currentAddress, currentPosition);
         Log.i(PU_TAG, "current place is " + currentPlace.shortAddress());
         if (currentPosition != null) {
-            Log.i(PU_TAG, "address is " + currentAddress.toString());
+            if (currentAddress != null) {
+                Log.i(PU_TAG, "address is " + currentAddress.toString());
+            }
             if (destinationPlace != null) {
                 double distance = Position.getDistanceKm(destinationPlace.getPosition(), currentPosition);
                 if (distance < parkingDistanceThresholdKm) {
@@ -719,7 +840,7 @@ public class MapsActivity extends AppCompatActivity
             }
         }
         else if (requestCode == PERMISSIONS_REQUEST_NETWORK) {
-            Log.i(TAG, "Received response for internet permission request.");
+            Log.i(TAG, "Received response for network permission request.");
             if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 networkPermission = checkSelfPermission(Manifest.permission.ACCESS_NETWORK_STATE);
                 if ( networkPermission == PackageManager.PERMISSION_GRANTED) {
@@ -734,7 +855,7 @@ public class MapsActivity extends AppCompatActivity
             }
         }
         else if (requestCode == PERMISSIONS_REQUEST_STORAGE) {
-            Log.i(TAG, "Received response for internet permission request.");
+            Log.i(TAG, "Received response for storage permission request.");
             if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 storagePermission = checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE);
                 if ( storagePermission == PackageManager.PERMISSION_GRANTED) {
@@ -748,9 +869,40 @@ public class MapsActivity extends AppCompatActivity
                 Log.e(TAG, "Permission not granted for storage result = " + grantResults[0]);
             }
         }
+        else if (requestCode == PERMISSIONS_PHONE) {
+            Log.i(TAG, "Received response for phone permission request.");
+            if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                storagePermission = checkSelfPermission(Manifest.permission.READ_PHONE_STATE);
+                if ( storagePermission == PackageManager.PERMISSION_GRANTED) {
+                    Log.i(TAG,"phone permission is granted");
+                }
+                else {
+                    Log.e(TAG,"Failed to get phone access");
+                }
+            }
+            else {
+                Log.e(TAG, "Permission not granted for phone result = " + grantResults[0]);
+            }
+        }
         else {
             Log.i(TAG, "Received request for permission "+requestCode);
         }
     }
 
+    private void checkCredentials(UserCredentials credentials) {
+        Log.i(TAG, "testing credentials by fetching "+testUrl);
+        DownloadClient downloadClient = new DownloadClient(this, credentials.getUser());
+        downloadClient.execute(testUrl);
+    }
+
+    public void downloadResultAvailable(String downloadResponse) {
+        Log.i(TAG, "Credentials are good, nothing to do...");
+    }
+
+    public void downloadConnectionFailure(String errorMessage, int httpResponseCode) {
+        if (httpResponseCode == 401) {
+            Log.i(TAG, "server returned not authorized...user must register");
+            doRegister(credentials);
+        }
+    }
 }

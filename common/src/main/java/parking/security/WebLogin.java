@@ -3,7 +3,7 @@ package parking.security;
 import parking.database.MongoInterface;
 import parking.security.User.Permission;
 import parking.security.User;
-
+import parking.util.ClientType;
 import parking.util.Logger;
 import parking.util.LoggingTag;
 
@@ -101,6 +101,9 @@ public class WebLogin {
 		Logger logger = new Logger(request.getSession(), LoggingTag.Security, "WebLogin", "Authenticate");		
 		WebLogin login = new WebLogin(request);
 		String authorizationHeader = request.getHeader("Authorization");
+		String phone = request.getHeader("Phone");
+		String userAgent = request.getHeader("User-Agent");
+		ClientType client = userAgent == null ? null : ClientType.getClientType(userAgent);
   		if(authorizationHeader!=null) {
   			logger.log("Found Authorization header "+authorizationHeader);
   			String encodedStuff = authorizationHeader.substring(6);  			
@@ -112,12 +115,34 @@ public class WebLogin {
    			logger.log("extracted user = "+user2+" passwd = "+password2);   			
    			String db = request.getParameter("db");
    			MongoInterface mongo = MongoInterface.getInstance(db, request.getServerPort(), logger);
+   			boolean goodPhone = false;
+   			if (client != null) {
+   				if (client == ClientType.APP) {
+   					if (phone != null && mongo.getUserDB().checkPhone(user2, phone)) {
+   						logger.log("phone check successfull");
+   						goodPhone = true;
+   					}
+   					else {
+   						logger.log("authentication failed because phone app must supply correct phone number");
+   					}
+   				}
+   				else {
+   					goodPhone = true; // no phone check for browser as long as User-Agent is set
+   				}
+   			}
+   			else  {
+   				logger.log("authentication failed because no User-Agent");
+   			}
+   			boolean goodPassword = false;
    			if (mongo.getUserDB().checkPassword(user2, password2)) {
    				logger.log("password check successfull");
-   				login.setLoggedIn(user2);
+   				goodPassword = true;  				
    			}
    			else {
    				logger.log("password check failed");
+   			}
+   			if (goodPhone && goodPassword) {
+   				login.setLoggedIn(user2);
    			}
   		}
   		else {

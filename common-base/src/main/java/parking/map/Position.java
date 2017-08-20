@@ -75,14 +75,6 @@ public class Position implements Serializable {
 		geocoder = gc;
 	}
 
-	public String getLatitudeAsString() {
-		return Double.toString(latitude);
-	}
-
-	public String getLongitudeAsString() {
-		return Double.toString(longitude);
-	}
-
 	public double getLatitude() {
 		return latitude;
 	}
@@ -96,7 +88,7 @@ public class Position implements Serializable {
 	}
 
 	public String toString() {
-		return getLatitudeAsString() + "_" + getLongitudeAsString();
+		return Double.toString(latitude) + "_" + Double.toString(longitude);
 	}
 
 	public String shortString() {
@@ -187,14 +179,67 @@ public class Position implements Serializable {
 		}
 		return null;
 	}
+	/*
+	     FIXME: haversine formula more accurate but still uses mean radius
+
+	     var R = 6371e3; // metres
+    var φ1 = lat1.toRadians();
+    var φ2 = lat2.toRadians();
+    var Δφ = (lat2-lat1).toRadians();
+    var Δλ = (lon2-lon1).toRadians();
+
+    var a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+            Math.cos(φ1) * Math.cos(φ2) *
+            Math.sin(Δλ/2) * Math.sin(Δλ/2);
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+    var d = R * c;
+
+
+    According to the post at http://gis.stackexchange.com/questions/20200/how-do-you-compute-the-earths-radius-at-a-given-geodetic-latitude 
+    the formula you are looking for is: 
+
+     Rt= SQRT((((a^2cos(t))^2)+((b^2sin(t))^2))/(  ((acos(t))^2)+((b(sin(t))^2)))                 
+                 
+     Where                 
+           Rt = radius of earth at latitude t                 
+           a = semi major radius of earth         = 6,378,137 meters 
+           b= semi minor radius of earth         = 6,356,752.31420 meters 
+
+    */
 
 	public static double getDistanceKm(Position p1, Position p2) {
-		final double radiusOfEarthKm = 6371;
-		double dlat = Math.abs( p1.getLatitude() - p2.getLatitude());
-		double dlng = Math.abs( p1.getLongitude() - p2.getLongitude());
-		double angleDegrees = Math.sqrt(dlat*dlat + dlng*dlng);
-		double angleRadians = angleDegrees*Math.PI/180;
+//		final double radiusOfEarthKm = 6371;
+		double radiusOfEarthKm = (getEarthRadiusMeters(p1)+getEarthRadiusMeters(p2))/2000;
+		double lat1 = p1.getLatitude()*Math.PI/180;
+		double lat2 = p2.getLatitude()*Math.PI/180;
+		double dLat = lat2 - lat1;
+		double dLng = (p2.getLongitude() - p1.getLongitude())*Math.PI/180;
+		double a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng/2) * Math.sin(dLng/2);
+		double angleRadians = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+//		double dlat = Math.abs( p1.getLatitude() - p2.getLatitude());
+//		double dlng = Math.abs( p1.getLongitude() - p2.getLongitude());
+//		double angleDegrees = Math.sqrt(dlat*dlat + dlng*dlng);
+//		double angleRadians = angleDegrees*Math.PI/180;
 		return angleRadians * radiusOfEarthKm;
+	}
+
+	public static double getEarthRadiusMeters(Position p) {
+		final double semiMajorRadiusMeters = 6378137;
+		final double semiMinorRadiusMeters = 6356752;
+		double latRadians = p.getLatitude()*Math.PI/180;
+		double a = semiMajorRadiusMeters;
+		double b = semiMinorRadiusMeters;
+		double acos = a*Math.cos(latRadians);
+		double bsin = b*Math.sin(latRadians);
+		return Math.sqrt((a*a*acos*acos + b*b*bsin*bsin)/(acos*acos + bsin*bsin));
+	}
+
+	// p2 = p1
+	public static Position delta(Position p2, Position p1) {
+		double lng1 = p1.getLongitude() < 0 ? 360 + p1.getLongitude() : p1.getLongitude();
+		double lng2 = p2.getLongitude() < 0 ? 360 + p2.getLongitude() : p2.getLongitude();
+		return new Position( p2.getLatitude() - p1.getLatitude(), lng2 - lng1);
 	}
 
 }

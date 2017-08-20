@@ -137,6 +137,8 @@ function getSignDetails(sign) {
     selectedId = sign.id;
     console.log("get details for " + sign.id);
     httpGetAsync("http://"+server+":"+port+"/parking/main/signs?id="+sign.id, displayDetails);
+    var thumbUrl = "http://"+server+":"+port+"/parking/main/signs?id="+sign.id+"&action=thumbnail&size=200";
+    httpGetFileAsync(thumbUrl, displayThumb);
 }
 
 function displayDetails(data) {
@@ -148,6 +150,12 @@ function displayDetails(data) {
     });
 
     infowindow.open(map, selectedMarker);
+}
+
+function displayThumb(data) {
+    var urlCreator = window.URL || window.webkitURL;
+    var imageUrl = urlCreator.createObjectURL(this.response); // response ?
+    document.querySelector("#image").src = imageUrl;
 }
 
 function editSign() {
@@ -222,6 +230,17 @@ function httpGetAsync(theUrl, callback)
         }
     }
     xmlHttp.open("GET", theUrl, true); // true for asynchronous 
+    xmlHttp.send(null);
+}
+
+function httpGetFileAsync(theUrl, callback)
+{
+    var xmlHttp = new XMLHttpRequest();
+    
+    xmlHttp.open("GET", theUrl, true); // true for asynchronous 
+    xmlHttp.withCredentials = true;
+    xmlHttp.responseType = "blob";
+    xmlHttp.onload = callback;
     xmlHttp.send(null);
 }
 

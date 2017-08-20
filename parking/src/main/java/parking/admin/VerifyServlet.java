@@ -10,7 +10,7 @@ import parking.map.Address;
 import parking.map.Trajectory;
 import parking.map.Position;
 import parking.map.MapInit;
-
+import parking.util.ClientType;
 import parking.util.Logger;
 import parking.util.LoggingTag;
 
@@ -124,6 +124,9 @@ public class VerifyServlet extends HttpServlet {
   }
 
   private ParkingSchedule addVerifiedScheduleFromBrowser(Sign sign, Map<String, String> postData, HttpServletResponse response) throws IOException {
+      for (String key : postData.keySet()) {
+          logger.log(key+" = "+postData.get(key));
+      }
       ParkingSchedule verifiedSchedule = new ParkingSchedule(postData);
       sign.setParkingSchedule(verifiedSchedule);
       if (postData.get("street") != null && postData.get("streetNumber") != null) {

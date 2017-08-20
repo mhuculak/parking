@@ -2,6 +2,8 @@ include 'common'       // used by parking & signtool
 include 'common-base'  // used by commmon and android
 include 'parking'
 include 'signtool'
+include 'maptool'
 include 'db-setup'
+include 'import-tool'
 include 'address-test'
 include 'android'

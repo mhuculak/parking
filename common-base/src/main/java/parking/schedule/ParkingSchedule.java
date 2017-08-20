@@ -131,6 +131,7 @@ public class ParkingSchedule {
 		String startWeekDay = postData.get("startDay");
 		String endWeekDay = postData.get("endDay");
 		if (startWeekDay != null && endWeekDay != null) {
+			System.out.println("set weekdays: "+startWeekDay+" to "+endWeekDay);
 			if (startWeekDay.length() > 0 || endWeekDay.length() > 0) {
 				weekDays = new WeekDaySet( startWeekDay, endWeekDay);
 //				m_logger.log("Got week days "+weekDays.toString());
@@ -143,8 +144,12 @@ public class ParkingSchedule {
                 String name = "day"+i;
                 String day = postData.get(name);
                 if (day != null) {
+                	System.out.println("add "+name+" = "+day);
  //               	m_logger.log("Add "+name+" = "+day);
                 	weekDays.add(day);
+                }
+                else {
+                	System.out.println(name+" not set on form");
                 }
             }
             if (weekDays.size() == 0) {

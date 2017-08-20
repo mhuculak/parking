@@ -59,7 +59,7 @@ public class MapServlet extends HttpServlet {
 		out.println("<!DOCTYPE html>");
 		out.println("<html>");
 		out.println("<head>");
-		out.println("<style type=\"text/css\"> #map{ width:700px; height: 500px; }</style>");
+		out.println("<style type=\"text/css\"> #map{ width:1000px; height: 800px; }</style>");
 		out.println("<script type=\"text/javascript\" src=\"https://maps.googleapis.com/maps/api/js?key=AIzaSyDni-ZQemF7eA1P-A76acHMF2tREyFM3HI\"></script>");
 		
 		out.println("<body>");
@@ -72,6 +72,7 @@ public class MapServlet extends HttpServlet {
 		out.println("<h2>Important Note: be a as precise as possible selecting the sign location on the map. Zoom in if necessary</h2>");	
 		out.println("<script type=\"text/javascript\" src=\"js/map.js\"></script>");
 		out.println("<div id=\"verificationForm\"></div>");
+		out.println("<img id=\"image\">");
 		out.println("</body>");
 		out.println("</html>");
 	}

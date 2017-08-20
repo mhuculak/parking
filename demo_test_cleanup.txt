@@ -1,5 +1,0 @@
-read C:\Users\mike\java-dev\parking\tagMaps.txt
-Found 29 signs 676 total pictures, 65 unique for demo_test
-Found 28 missing 0 for demo_test
-Found 88 signs 150 total pictures, 65 unique for demo_test
-Found 87 missing 0 for demo_test

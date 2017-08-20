@@ -15,16 +15,54 @@ public class StreetSegment {
 	private ParkingSchedule scheduleOdd;
 	private ParkingSchedule scheduleEven;
 	public boolean saved;
+	public boolean published;
 
 	public StreetSegment(String streetName) {
 		this.name = streetName;
 		saved = false;
+		published = false;
 	}
 
-	public StreetSegment(String id, String streetName, ParkingSchedule even, ParkingSchedule odd) {
+	public StreetSegment(StreetSegment seg) {
+		this.id = seg.id;
+		this.name = seg.name;
+		this.saved = seg.saved;
+		this.published = seg.published;
+		if (seg.points != null) {
+			for (Position p : seg.points) {
+				addPoint(p);
+			}
+		}
+		if (seg.signs != null) {
+			for (SimpleSign s : seg.signs) {
+				addSign(s);
+			}
+		}
+		if (seg.corners != null) {
+			for (Position p : seg.corners) {
+				addCorner(p);
+			}
+		}
+//
+//      TODO:
+//		
+//		if (scheduleOdd != null) {
+//			this.scheduleOdd = new ParkingSchedule(scheduleOdd);
+//		}
+//		if (scheduleEven != null) {
+//			this.scheduleEven = new ParkingSchedule(scheduleEven);
+//		}
+		
+		this.scheduleOdd = seg.scheduleOdd;
+		this.scheduleEven = seg.scheduleEven;
+
+	}
+
+	public StreetSegment(String id, String streetName, ParkingSchedule even, ParkingSchedule odd, boolean published) {
 		this.id = id;
 		this.name = streetName;
 		saved = false;
+		this.published = published;
 	}
 
 	public void addPoint(Position p) {
@@ -40,6 +78,13 @@ public class StreetSegment {
 		}
 		SimpleSign simple = new SimpleSign(id, p, sched.toString());
 		signs.add(simple);
+	}
+
+	private void addSign(SimpleSign sign) {
+		if (signs == null) {
+			signs = new ArrayList<SimpleSign>();
+		}
+		signs.add(sign);
 	}
 
 	public void addCorner(Position p) {
@@ -83,6 +128,10 @@ public class StreetSegment {
 
 	public ParkingSchedule getScheduleOdd() {
 		return scheduleOdd;
+	}
+
+	public boolean isPublished() {
+		return published;
 	}
 
 	//

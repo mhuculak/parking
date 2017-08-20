@@ -159,6 +159,13 @@ public class SegmentServlet extends HttpServlet {
 						else {
 							logger.log("no segments found in the sign DB");
 						}								
+					}
+					else {
+						logger.log("edit DB contains "+segments.size()+" segments");
+					}
+					List<StreetSegment> published = mongo.getMapDB().search(bounds.getCenter(), bounds);
+					if (published != null) {
+						segments.addAll(published);
 					}					
 					if (segments != null && segments.size() > 0) {
 						logger.log("returning "+segments.size()+" to client");
